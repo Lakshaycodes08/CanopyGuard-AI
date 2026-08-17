@@ -1,0 +1,17 @@
+{
+  "version": 1,
+  "skills": {
+    "firecrawl-research-papers": {
+      "source": "firecrawl/firecrawl-workflows",
+      "sourceType": "github",
+      "skillPath": "skills/firecrawl-research-papers/SKILL.md",
+      "computedHash": "2a9a6c62cb2861f1812b8610ab0a6a62b348508e1c22f92d6eddeb6924c9b5ab"
+    },
+    "research-paper-writer": {
+      "source": "ailabs-393/ai-labs-claude-skills",
+      "sourceType": "github",
+      "skillPath": "packages/skills/research-paper-writer/SKILL.md",
+      "computedHash": "d91e792b4946cc65014786e0032e8a63e0eaee17cd3c2fc5bc392d6fcb3a1cd6"
+    }
+  }
+}

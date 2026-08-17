@@ -1,0 +1,20 @@
+paper:
+  working_title: "CanopyGuard-AI: Vegetation Risk Forecasting and Maintenance Prioritization Near Power-Line Corridors"
+  target_type: journal
+  preferred_scope: international
+  citation_style: numeric
+
+claims:
+  log_path: reports/claims_log.md
+  require_source_for_constants: true
+
+text_hygiene:
+  ascii_preferred: true
+  disallow_em_dash: true
+  disallow_smart_quotes: true
+  disallow_invisible_unicode: true
+
+integrity:
+  disclose_ai_assistance: true
+  do_not_hide_provenance: true
+

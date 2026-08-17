@@ -1,0 +1,13 @@
+scheduling:
+  horizon_months: 12
+  budget_units: 100
+  objective: maximize_risk_reduction
+
+constraints:
+  max_segments_per_month: 25
+  require_contiguous_work_blocks: false
+
+baselines:
+  - highest_risk_first
+  - random_priority
+

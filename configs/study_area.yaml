@@ -1,0 +1,19 @@
+study_area:
+  name: example_study_area
+  crs: EPSG:4326
+  bbox:
+    west: -77.20
+    south: 38.70
+    east: -76.80
+    north: 39.10
+
+dates:
+  start: "2020-01-01"
+  end: "2025-12-31"
+
+splits:
+  train_end: "2023-12-31"
+  validation_start: "2024-01-01"
+  validation_end: "2024-12-31"
+  test_start: "2025-01-01"
+

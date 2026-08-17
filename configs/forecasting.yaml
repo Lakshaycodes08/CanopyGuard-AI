@@ -1,0 +1,20 @@
+seed: 42
+
+target:
+  name: canopy_height
+  unit: meters
+
+baseline:
+  name: seasonal_naive
+  lookback_months: 12
+
+model:
+  name: gradient_boosting
+  horizon_months: 12
+
+evaluation:
+  metrics:
+    - mae
+    - rmse
+  time_split_required: true
+
