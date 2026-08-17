@@ -1,0 +1,75 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  checks:
+    name: Python, DVC, and audit checks
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v6
+
+      - name: Create conda environment
+        uses: conda-incubator/setup-miniconda@v4
+        with:
+          miniforge-version: latest
+          activate-environment: canopyguard-ai
+          environment-file: environment.yml
+          channels: conda-forge
+          channel-priority: strict
+
+      - name: Show environment
+        run: |
+          conda info
+          conda list
+          python --version
+
+      - name: Lint
+        run: |
+          python -m ruff check .
+
+      - name: Format check
+        run: |
+          python -m ruff format --check .
+
+      - name: Text hygiene
+        run: |
+          python scripts/check_text_hygiene.py
+
+      - name: Tests
+        run: |
+          python -m pytest
+
+      - name: Dependency consistency
+        run: |
+          python -m pip check
+
+      - name: Bytecode compile check
+        run: |
+          python -m compileall -q src tests scripts
+
+      - name: DVC metadata check
+        run: |
+          dvc status
+
+      - name: NPM audit guardrail
+        run: |
+          npm audit

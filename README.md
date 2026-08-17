@@ -1,5 +1,7 @@
 # CanopyGuard-AI
 
+[![CI](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml)
+
 CanopyGuard-AI predicts where vegetation near power lines is likely to become risky, then helps prioritize trimming using satellite data, LiDAR validation, machine learning, risk scoring, and optimization.
 
 The project is built as a reproducible research pipeline, not an application. Each stage reads files from disk and writes documented outputs that can be rerun independently.
@@ -93,6 +95,21 @@ Run:
 ```powershell
 python scripts/check_text_hygiene.py
 ```
+
+
+## Teammate setup
+
+New contributors should follow `CONTRIBUTING.md`. The short version is:
+
+```powershell
+git clone https://github.com/Lakshaycodes08/CanopyGuard-AI.git
+cd CanopyGuard-AI
+conda env create -f environment.yml
+conda activate canopyguard-ai
+.\scripts\check.ps1
+```
+
+The expected empty data folders are tracked with `.gitkeep` files, so a fresh clone includes `data/raw`, `data/interim`, and `data/processed`.
 
 ## Repository layout
 
