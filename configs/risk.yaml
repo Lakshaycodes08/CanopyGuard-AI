@@ -1,0 +1,13 @@
+risk_score:
+  description: "Research prioritization score only. Not a regulatory clearance."
+  clearance_threshold_m: 3.0
+  growth_buffer_m: 1.0
+  weights:
+    clearance: 0.55
+    growth: 0.25
+    uncertainty: 0.20
+
+classes:
+  low: 0.33
+  medium: 0.66
+

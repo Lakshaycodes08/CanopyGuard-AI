@@ -1,0 +1,69 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+dist/
+build/
+*.egg-info/
+
+# Environments
+.venv/
+venv/
+.env
+.env.*
+!.env.example
+
+# DVC local cache and runtime state
+.dvc/cache/
+.dvc/tmp/
+
+# Root data workspace. Keep only directory placeholders in git.
+/data/*
+!/data/raw/
+!/data/interim/
+!/data/processed/
+!/data/raw/.gitkeep
+!/data/interim/.gitkeep
+!/data/processed/.gitkeep
+
+# Generated outputs
+reports/figures/*
+!reports/figures/.gitkeep
+paper/build/
+paper/*.aux
+paper/*.bbl
+paper/*.blg
+paper/*.fls
+paper/*.fdb_latexmk
+paper/*.log
+paper/*.out
+paper/*.synctex.gz
+
+# Geospatial and model artifacts
+*.tif
+*.tiff
+*.laz
+*.las
+*.parquet
+*.geoparquet
+*.gpkg
+*.shp
+*.dbf
+*.shx
+*.pt
+*.pth
+*.ckpt
+
+# Node tooling guardrail
+node_modules/
+npm-debug.log*
+
+# OS and editor
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
