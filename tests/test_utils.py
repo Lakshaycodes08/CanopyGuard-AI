@@ -1,8 +1,20 @@
+import random
 from datetime import date
 
+import numpy as np
 import pytest
 
-from canopyguard.utils import validate_time_split
+from canopyguard.utils import set_seeds, validate_time_split
+
+
+def test_set_seeds_repeats_random_sequences() -> None:
+    set_seeds(42)
+    first = (random.random(), np.random.random())
+
+    set_seeds(42)
+    second = (random.random(), np.random.random())
+
+    assert first == second
 
 
 def test_validate_time_split_accepts_future_test_dates() -> None:
