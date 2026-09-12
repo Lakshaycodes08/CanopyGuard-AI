@@ -1,19 +1,31 @@
 study_area:
-  name: example_study_area
+  name: northern_sonoma_candidate
+  status: confirmed
   crs: EPSG:4326
   bbox:
-    west: -77.20
-    south: 38.70
-    east: -76.80
-    north: 39.10
+    west: -122.90
+    south: 38.475
+    east: -122.74
+    north: 38.82
+  corridor:
+    source: California Energy Commission
+    reference_feature_id: 671
+    owner: PG&E
+    status: operational
+    type: overhead
+    voltage_kv:
+      - 60
+      - 115
+      - 230
+    intersecting_feature_count: 41
+    feasibility_buffer_m: 100
 
 dates:
-  start: "2020-01-01"
-  end: "2025-12-31"
+  start: "2017-01-01"
+  end: "2022-12-31"
 
 splits:
-  train_end: "2023-12-31"
-  validation_start: "2024-01-01"
-  validation_end: "2024-12-31"
-  test_start: "2025-01-01"
-
+  train_end: "2020-12-31"
+  validation_start: "2021-01-01"
+  validation_end: "2021-12-31"
+  test_start: "2022-01-01"
