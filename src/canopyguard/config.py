@@ -14,7 +14,10 @@ def load_config(path: str | Path) -> dict[str, Any]:
         raise FileNotFoundError(msg)
 
     with config_path.open("r", encoding="utf-8") as file:
-        data = yaml.safe_load(file) or {}
+        data = yaml.safe_load(file)
+
+    if data is None:
+        return {}
 
     if not isinstance(data, dict):
         msg = f"Config must contain a YAML mapping: {config_path}"

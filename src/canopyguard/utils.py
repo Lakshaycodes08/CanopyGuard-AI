@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 import random
 from collections.abc import Sequence
 from datetime import date
@@ -12,7 +11,6 @@ def set_seeds(seed: int) -> None:
     """Seed common random number generators used in experiments."""
     random.seed(seed)
     np.random.seed(seed)
-    os.environ["PYTHONHASHSEED"] = str(seed)
 
     try:
         import torch

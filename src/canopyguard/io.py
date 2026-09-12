@@ -19,7 +19,12 @@ def project_root(start: str | Path | None = None) -> Path:
 
 def data_path(*parts: str, root: str | Path | None = None) -> Path:
     """Build a path inside the local data directory."""
-    return project_root(root) / "data" / Path(*parts)
+    data_directory = (project_root(root) / "data").resolve()
+    path = (data_directory / Path(*parts)).resolve()
+    if not path.is_relative_to(data_directory):
+        msg = f"Data path must stay inside {data_directory}: {path}"
+        raise ValueError(msg)
+    return path
 
 
 def ensure_parent(path: str | Path) -> Path:
