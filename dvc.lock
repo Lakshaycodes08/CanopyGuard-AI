@@ -1,0 +1,34 @@
+schema: '2.0'
+stages:
+  sentinel2_manifest:
+    cmd: python scripts/ingest_sentinel2.py
+    deps:
+    - path: configs/ingestion.yaml
+      hash: md5
+      md5: 919e4885b63f143a2f8920fc42b290c8
+      size: 967
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: scripts/ingest_sentinel2.py
+      hash: md5
+      md5: d6655d9120f99f8b9364863faeb03d52
+      size: 806
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/data/sentinel2.py
+      hash: md5
+      md5: ca643e9a1715f2a9716052ef4291fce3
+      size: 5466
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: ab7b17eb0ad191b37b379072d90e5aef
+      size: 1130
+    outs:
+    - path: data/interim/sentinel2/mgrs-10seh/scene_manifest.json
+      hash: md5
+      md5: b651514000186ef1bdafed9b20e94178
+      size: 1244248

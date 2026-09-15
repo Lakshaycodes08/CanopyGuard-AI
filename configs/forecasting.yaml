@@ -1,20 +1,62 @@
 seed: 42
 
-target:
-  name: canopy_height
-  unit: meters
-
-baseline:
-  name: seasonal_naive
-  lookback_months: 12
-
-model:
-  name: gradient_boosting
+task:
+  name: one_year_ahead_canopy_height
+  input_window: previous_calendar_year
   horizon_months: 12
 
+target:
+  name: canopy_height
+  source: GEDI02_A_V2
+  metric: rh98
+  unit: meters
+
+validation_truth:
+  source: sonoma_repeat_lidar
+  epochs:
+    - 2013
+    - 2022
+  use_as_model_feature: false
+
+baselines:
+  - training_median
+  - vegetation_class_median
+  - snapshot_random_forest
+  - lidar_2013_persistence
+
+model:
+  candidates:
+    - temporal_random_forest
+    - temporal_hist_gradient_boosting
+  selection_metric: mae
+
+ablations:
+  - without_temporal_history
+  - without_disturbance_screen
+  - without_growth_prior_on_eligible_subset
+
+spatial_validation:
+  method: blocked
+  block_size_selection: training_residual_autocorrelation
+  candidate_block_sizes_m:
+    - 1000
+    - 2000
+    - 5000
+
 evaluation:
+  primary_metric: mae
   metrics:
     - mae
     - rmse
+    - bias
+    - r2
+  report_by:
+    - height_class
+    - vegetation_class
+    - disturbance_status
   time_split_required: true
-
+  spatial_split_required: true
+  uncertainty:
+    method: spatial_block_bootstrap
+    confidence_level: 0.95
+    resamples: 1000

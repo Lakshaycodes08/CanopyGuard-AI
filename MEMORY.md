@@ -1,6 +1,6 @@
 # CanopyGuard-AI project memory
 
-Last updated: 2026-09-12
+Last updated: 2026-09-15
 
 ## Purpose
 
@@ -14,16 +14,38 @@ scientific claims here.
 
 ## Current status
 
-- Active phase: Phase 1 is ready to begin.
+- Active phase: Phase 1, data-foundation work.
 - Completed phase: Phase 0.
 - Phase 0 decision: GO.
+- Phase 1 literature review: `reports/literature_review.md` contains a verified
+  15-study core matrix and a provisional, explicitly falsifiable gap. It is not
+  yet a systematic review.
+- Phase 1 growth and disturbance protocol: three mapped alliances have cited,
+  age-dependent growth evidence; the independent disturbance screen combines
+  CAL FIRE, MTBS, annual Landsat change, and visual audit.
+- First ingestion target: Sentinel-2 MGRS tile 10SEH, which contains reference
+  corridor feature 671. The config-driven, DVC-recorded STAC stage retained 458
+  Level-2A items across 2017-2022 with all 11 required assets.
+- Pre-data research design: `reports/research_design.md` locks the primary
+  question, hypotheses, time and spatial splits, baselines, ablations, metrics,
+  and falsification criteria before model results exist.
+- Pre-access compute plan: `reports/hpc_readiness.md` requests at least 300 GiB
+  of shared persistent plus scratch capacity and lists the exact NSUT scheduler,
+  GPU, storage, network, and quota details still needed.
+- Offline cube foundation: metadata-driven reflectance scaling, monthly
+  clear-pixel compositing, clear-observation counts, and a storage estimator are
+  implemented with small synthetic tests.
+- Beginner technical handoff: `docs/PROJECT_FROM_SCRATCH.md` explains the data,
+  geospatial concepts, ML design, completed work, quality gates, compute plan,
+  team roles, and full post-access workflow from first principles.
 - Target: complete the minimum publishable study and manuscript submission
   package by 2026-10-31. Journal acceptance is not controlled by the project
   and may occur later.
 - Research goal: produce a defensible journal publication, with the software
   serving the experiments and evidence.
-- Immediate next action: begin the structured Phase 1 literature review and
-  pilot data ingestion in parallel.
+- Immediate next action: obtain the NSUT access details recorded in
+  `reports/hpc_readiness.md`, configure shared storage and DVC, then build the
+  masked 10 m tile-10SEH cube and report clear-observation counts.
 
 ## Research direction
 
@@ -33,9 +55,9 @@ LiDAR validation can support future vegetation-risk prioritization near
 transmission corridors and improve maintenance scheduling over simple
 baselines.
 
-This wording is provisional. Phase 1 must lock the research question, novelty
-gap, hypotheses, baselines, and evaluation protocol after reviewing the recent
-literature.
+The research question and evaluation protocol are predeclared. The novelty gap
+remains provisional and must be narrowed if the systematic search finds an
+earlier equivalent evidence chain.
 
 The risk score is a research prioritization aid. It is not a regulatory
 clearance, engineering survey, or safety certification.
@@ -92,17 +114,17 @@ keep its stated scientific role.
 - Google Earth Engine: confirmed, noncommercial Community Tier.
 - OpenTopography: confirmed registered academic user with data access.
 - Environment specification: `environment.yml`.
-- Automated tests: 21 passed on 2026-09-12.
+- Automated tests: 35 passed on 2026-09-15 after the cube and split additions;
+  Ruff and text-hygiene checks also passed.
 - Fixed seeds and chronological split validation: implemented.
-- DVC: initialized, but `dvc.yaml` has no real stages and no remote is selected.
+- DVC: the `sentinel2_manifest` stage and lockfile are active; no remote is
+  selected.
 - Real data must remain out of Git and be tracked through DVC.
 
 ## Not completed
 
-- Phase 1 literature comparison and defensible novelty gap
-- Final research question and hypotheses
-- Cited ecological growth-rate table
-- Real data ingestion modules
+- Systematic literature search and final defensible novelty statement
+- Raster asset ingestion and masked one-tile cube
 - Pixel-level Sentinel-2 cloud masking and clear-observation counts
 - LiDAR quality control and analysis-ready alignment
 - Disturbance-screened comparison samples
@@ -128,6 +150,13 @@ every future diff before committing it.
 | 2026-09-12 | Use the refined northern Sonoma box | The earlier small candidate lacked a mapped fire event for the planned independent check. |
 | 2026-09-12 | Use CEC lines as primary corridor context | The current California source was directly verifiable; the handbook's HIFLD plan is retained only as background. |
 | 2026-09-12 | Keep LiDAR as validation truth | Independent validation is required for a defensible paper and must not leak into ordinary model features. |
+| 2026-09-14 | Narrow the provisional novelty claim | Prior work already covers LiDAR growth forecasting, satellite corridor risk, temporal Sentinel-2/GEDI height mapping, and trimming optimization separately. The defensible candidate is the open evidence chain joining free time series, independent repeat-LiDAR validation, ecological-prior ablation, and constrained scheduling. This remains provisional until the Phase 1 review is complete. |
+| 2026-09-15 | Use age-aware growth evidence only as a weak prior | Published height growth varies strongly with species, age, site, and competition. A universal annual-growth constant would not be defensible. |
+| 2026-09-15 | Select MGRS tile 10SEH for the first cube | The already-checked reference corridor feature 671 falls in this tile, allowing the first data cube to stay tied to verified corridor vegetation. |
+| 2026-09-15 | Keep disturbance screening independent | CAL FIRE, MTBS, and Landsat trajectory evidence will define stable and challenge subsets without treating Sentinel-2 forecast inputs as unquestioned truth. |
+| 2026-09-15 | Lock the pre-data research design | Declaring hypotheses, baselines, splits, metrics, and falsification rules before training reduces result-driven methodological changes. |
+| 2026-09-15 | Start with CPU baselines | Median, persistence, Random Forest, and histogram gradient boosting must establish value before any heavy or GPU model is justified. |
+| 2026-09-15 | Move data work to shared NSUT infrastructure | The estimated raw and working footprint is unsuitable for routine laptop use; shared storage also gives teammates one reproducible data location. |
 
 ## Update rule
 

@@ -29,3 +29,4 @@ splits:
   validation_start: "2021-01-01"
   validation_end: "2021-12-31"
   test_start: "2022-01-01"
+  test_end: "2022-12-31"

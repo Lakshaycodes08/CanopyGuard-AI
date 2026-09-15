@@ -1,0 +1,50 @@
+sentinel2:
+  stac_url: https://stac.dataspace.copernicus.eu/v1
+  collection: sentinel-2-l2a
+  tile_code: MGRS-10SEH
+  max_tile_cloud_percent: 20
+  page_size: 100
+  request_timeout_seconds: 60
+  output_manifest: interim/sentinel2/mgrs-10seh/scene_manifest.json
+  target_crs: EPSG:32610
+  target_resolution_m: 10
+  input_nodata_value: 0
+  reflectance_resampling: bilinear
+  categorical_resampling: nearest
+  assets:
+    - B02_10m
+    - B03_10m
+    - B04_10m
+    - B08_10m
+    - B05_20m
+    - B06_20m
+    - B07_20m
+    - B8A_20m
+    - B11_20m
+    - B12_20m
+    - SCL_20m
+  scl_excluded_classes:
+    - 0
+    - 1
+    - 2
+    - 3
+    - 7
+    - 8
+    - 9
+    - 10
+    - 11
+
+cube:
+  frequency: monthly
+  reducer: median
+  output: interim/sentinel2/mgrs-10seh/monthly_cube.zarr
+  dimensions:
+    - time
+    - band
+    - y
+    - x
+  reflectance_dtype: float32
+  clear_count_dtype: uint16
+  nodata: "NaN"
+  derive_bounds_from_study_area: true
+  snap_bounds_to_target_grid: true
