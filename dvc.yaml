@@ -1,2 +1,12 @@
-stages: {}
-
+stages:
+  sentinel2_manifest:
+    cmd: python scripts/ingest_sentinel2.py
+    deps:
+      - configs/ingestion.yaml
+      - configs/study_area.yaml
+      - scripts/ingest_sentinel2.py
+      - src/canopyguard/config.py
+      - src/canopyguard/data/sentinel2.py
+      - src/canopyguard/io.py
+    outs:
+      - data/interim/sentinel2/mgrs-10seh/scene_manifest.json

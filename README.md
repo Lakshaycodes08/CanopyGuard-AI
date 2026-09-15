@@ -2,32 +2,42 @@
 
 [![CI](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml)
 
-CanopyGuard-AI predicts where vegetation near power lines is likely to become risky, then helps prioritize trimming using satellite data, LiDAR validation, machine learning, risk scoring, and optimization.
+CanopyGuard-AI tests whether open satellite time series can forecast canopy
+height well enough to improve vegetation-risk prioritization and maintenance
+scheduling near power-line corridors.
 
 The project is built as a reproducible research pipeline, not an application. Each stage reads files from disk and writes documented outputs that can be rerun independently.
 
+New to the project, remote sensing, or machine learning? Start with
+[`docs/PROJECT_FROM_SCRATCH.md`](docs/PROJECT_FROM_SCRATCH.md).
+
 ## Research goal
 
-The goal is a defensible journal paper. An international journal is preferred if the validation is strong enough. The current manuscript direction is:
+The goal is a defensible journal paper. The predeclared research question,
+hypotheses, baselines, and evaluation rules are in
+[`reports/research_design.md`](reports/research_design.md). The current
+manuscript direction is:
 
 > Data-driven vegetation risk forecasting and maintenance prioritization near power-line corridors using satellite time series, LiDAR validation, and optimization.
 
 ## Data roles
 
-- HIFLD: corridor context only.
+- California Energy Commission transmission lines: approximate corridor
+  context only.
 - Sentinel-2: temporal signal.
 - GEDI: sparse canopy reference.
-- LiDAR 3DEP: validation truth.
+- Sonoma County 2013 and 2022 LiDAR-derived canopy products: independent
+  validation truth.
 
 LiDAR should stay out of model features unless a specific experiment explicitly justifies otherwise. It is the main independent validation source.
 
 ## Pipeline
 
 ```text
-HIFLD corridor context
+CEC corridor context
 Sentinel-2 time series       -> features -> forecasting -> risk -> scheduling -> figures
 GEDI sparse reference
-LiDAR validation truth       -> evaluation
+Repeat Sonoma LiDAR truth    -> independent evaluation
 ```
 
 Every arrow is a file under `data/interim` or `data/processed`. Root data directories are present in git with `.gitkeep` files, but real data is ignored by git and should be tracked with DVC.
@@ -61,11 +71,16 @@ make check
 npm audit
 ```
 
-`make data`, `make features`, `make forecast`, `make risk`, and `make schedule` are placeholders until the first real data source and study area are selected.
+The confirmed study area is northern Sonoma County. The first DVC stage records
+the Sentinel-2 tile-10SEH catalogue manifest. Raster download and cube assembly
+will run on shared NSUT infrastructure after access is confirmed.
 
 ## DVC
 
-DVC is initialized in this repository. The remote is intentionally not configured yet because storage has not been chosen.
+DVC is initialized in this repository. The remote is intentionally not
+configured yet because the NSUT storage target and scheduler details are
+pending. The access checklist and capacity estimate are in
+[`reports/hpc_readiness.md`](reports/hpc_readiness.md).
 
 After choosing storage, configure it with a command such as:
 
