@@ -162,7 +162,9 @@ keep its stated scientific role.
 - NASA Earthdata: confirmed.
 - Google Earth Engine: confirmed, noncommercial Community Tier.
 - OpenTopography: confirmed registered academic user with data access.
-- Environment specification: `environment.yml`.
+- Environment specification: `pyproject.toml`, installed into a virtual
+  environment. `environment-lidar.yml` is a separate conda environment for
+  the PDAL step only.
 - Automated tests: 35 passed on 2026-09-15 after the cube and split additions;
   Ruff and text-hygiene checks also passed.
 - Fixed seeds and chronological split validation: implemented.

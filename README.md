@@ -51,20 +51,35 @@ Every arrow is a file under `data/interim` or `data/processed`. Root data direct
 
 ## Dependency strategy
 
-Two conda environments. `environment.yml` is the working environment: data
-assembly, modelling, evaluation, figures and tests. It runs on a laptop and
-has no point-cloud dependency.
+The working environment is a plain virtual environment. Every dependency in
+it ships a wheel, so no compiler and no conda are required.
 
-`environment-lidar.yml` is used only for the step that turns LiDAR point
-clouds into canopy height rasters. It carries PDAL and GDAL. That step reads
-USGS 3DEP cloud-optimised point clouds over HTTPS by bounding box, so no
-point-cloud file is downloaded, and it is normally run on a hosted notebook
-rather than a laptop. Its outputs are small rasters consumed by the working
-environment.
+```bash
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+make check
+```
 
-```powershell
-conda env create -f environment.yml
-conda activate canopyguard-ai
+`python -m venv` and `pip` work identically if uv is not installed.
+`environment.yml` is a thin conda wrapper around the same install for anyone
+who prefers conda.
+
+Optional extras: `.[models]` adds SciPy, scikit-learn and LightGBM for the
+modelling stage. LightGBM needs an OpenMP runtime on macOS, so install that
+extra only when the modelling stage begins.
+
+`environment-lidar.yml` is separate and carries PDAL and GDAL. It is used
+only for the step that turns LiDAR point clouds into canopy height rasters.
+That step reads USGS 3DEP cloud-optimised point clouds over HTTPS by bounding
+box, so no point-cloud file is downloaded, and it normally runs on a hosted
+notebook rather than a laptop. Its outputs are small rasters consumed by the
+working environment.
+
+```bash
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 python -m pytest
 ```
 
@@ -72,20 +87,13 @@ Do not add a second dependency source unless there is a concrete reason. A local
 
 ## Checks
 
-On Windows:
-
-```powershell
-conda activate canopyguard-ai
-.\scripts\check.ps1
-npm audit
-```
-
-On systems with Make:
-
 ```bash
+source .venv/bin/activate
 make check
 npm audit
 ```
+
+On Windows without Make, `scripts/check.ps1` runs the same steps.
 
 The confirmed study area is northern Sonoma County. The first DVC stage records
 the Sentinel-2 tile-10SEH catalogue manifest. Processing is scoped to a
@@ -101,7 +109,7 @@ pending. The access checklist and capacity estimate are in
 
 After choosing storage, configure it with a command such as:
 
-```powershell
+```bash
 dvc remote add -d storage <remote-url>
 ```
 
@@ -124,7 +132,7 @@ Project prose should stay plain ASCII unless a technical term requires otherwise
 
 Run:
 
-```powershell
+```bash
 python scripts/check_text_hygiene.py
 ```
 
@@ -133,12 +141,13 @@ python scripts/check_text_hygiene.py
 
 New contributors should follow `CONTRIBUTING.md`. The short version is:
 
-```powershell
+```bash
 git clone https://github.com/Lakshaycodes08/CanopyGuard-AI.git
 cd CanopyGuard-AI
-conda env create -f environment.yml
-conda activate canopyguard-ai
-.\scripts\check.ps1
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+make check
 ```
 
 The expected empty data folders are tracked with `.gitkeep` files, so a fresh clone includes `data/raw`, `data/interim`, and `data/processed`.

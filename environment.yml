@@ -3,26 +3,6 @@ channels:
   - conda-forge
 dependencies:
   - python=3.11
-  - pip=24.3.1
-  - numpy=2.2.1
-  - pandas=2.2.3
-  - pyyaml=6.0.2
-  - scipy
-  - scikit-learn
-  - lightgbm
-  - rasterio
-  - pyproj
-  - geopandas
-  - shapely
-  - pyogrio
-  - scikit-gstat
-  - xarray
-  - matplotlib
-  - tqdm
-  - pytest=9.1.1
-  - ruff=0.16.3
-  - pre-commit=4.0.1
-  - dvc=3.58.0
-  - pathspec<1
+  - pip
   - pip:
-      - -e .
+      - -e .[dev]
