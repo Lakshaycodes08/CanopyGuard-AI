@@ -1,0 +1,12 @@
+name: canopyguard-lidar
+channels:
+  - conda-forge
+dependencies:
+  - python=3.11
+  - numpy=2.2.1
+  - pyyaml=6.0.2
+  - pdal
+  - python-pdal
+  - gdal
+  - rasterio
+  - pyproj

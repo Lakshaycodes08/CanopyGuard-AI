@@ -59,9 +59,13 @@ scientific claims here.
 - Pre-data research design: `reports/research_design.md` locks the primary
   question, hypotheses, time and spatial splits, baselines, ablations, metrics,
   and falsification criteria before model results exist.
-- Compute: CPU only for every required result. Work is scoped to a corridor
-  buffer plus a stratified tile sample, roughly 64 km2, with a working
-  footprint under 40 GiB. Shared cluster capacity is no longer a dependency.
+- Compute: CPU only for every required result. Two environments.
+  `environment.yml` runs data assembly, modelling, evaluation, figures and
+  tests on a laptop. `environment-lidar.yml` carries PDAL and GDAL and is used
+  only for the LiDAR-to-raster step, normally on a hosted notebook. That step
+  reads USGS 3DEP cloud-optimised point clouds by bounding box over HTTPS, so
+  no point-cloud file is downloaded. Optical composites are built in Google
+  Earth Engine and exported. Working footprint on the laptop is a few GiB.
   `reports/hpc_readiness.md` is retained as the record of the earlier estimate.
 - Compositing foundation: metadata-driven reflectance scaling, clear-pixel
   compositing, clear-observation counts, and a storage estimator are
@@ -73,13 +77,14 @@ scientific claims here.
   Scope is gated on measurement, not on a calendar.
 - Research goal: produce a defensible journal publication, with the software
   serving the experiments and evidence.
-- Immediate next action: create the conda environment, run
-  `scripts/screen_epochs.py`, probe 2022 and 2023 coverage with
-  `scripts/fetch_lidar.py`, fetch the point clouds over their intersection,
-  build matched canopy height models, co-register per tile, then run
-  `scripts/measure_noise_floor.py` for the G1 numbers. The noise floor is
-  measured before the study-area fetch, so a failure costs one download. The
-  full-area dense Sentinel-2 cube is cancelled.
+- Immediate next action: create the working environment and confirm the test
+  suite runs. The epoch screen and the 2022 and 2023 coverage probes are done
+  and recorded in `reports/lidar_epoch_screen.md`. Next is the notebook that
+  reads 3DEP point clouds by bounding box over the calibration intersection,
+  writes matched canopy height rasters, co-registers per tile, and produces
+  the noise floor. That measurement precedes the study-area work, so a
+  failure costs one notebook run. The full-area dense Sentinel-2 cube is
+  cancelled.
 
 ## Research direction
 
@@ -172,6 +177,8 @@ keep its stated scientific role.
   models. The code exists; no data has been processed
 - Per-tile co-registration run and the measured noise floor
 - `scripts/build_chm.py` and `scripts/coregister_chm.py` entrypoints
+- Notebook driving the LiDAR-to-raster step in the lidar environment
+- Earth Engine scripts for the Sentinel-2 and Landsat composites
 - Detectability surface across aggregation scale and temporal baseline
 - Per-alliance height-increment model and measured growth rates
 - Sentinel-2 and Landsat seasonal composites, texture, terrain, fire screen

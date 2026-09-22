@@ -51,7 +51,16 @@ Every arrow is a file under `data/interim` or `data/processed`. Root data direct
 
 ## Dependency strategy
 
-`environment.yml` is the canonical environment file. Use conda because the project will need geospatial packages such as GDAL, PDAL, rasterio, and related compiled dependencies.
+Two conda environments. `environment.yml` is the working environment: data
+assembly, modelling, evaluation, figures and tests. It runs on a laptop and
+has no point-cloud dependency.
+
+`environment-lidar.yml` is used only for the step that turns LiDAR point
+clouds into canopy height rasters. It carries PDAL and GDAL. That step reads
+USGS 3DEP cloud-optimised point clouds over HTTPS by bounding box, so no
+point-cloud file is downloaded, and it is normally run on a hosted notebook
+rather than a laptop. Its outputs are small rasters consumed by the working
+environment.
 
 ```powershell
 conda env create -f environment.yml

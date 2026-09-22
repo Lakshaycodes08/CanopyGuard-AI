@@ -104,6 +104,13 @@ not spectral value, is what carries information above saturation.
 - Bounding box: west -122.90, south 38.475, east -122.74, north 38.82.
 - Processing scope: a 60 m corridor buffer plus 40 stratified 1 km tiles,
   roughly 64 km2. Not the full 533 km2 box.
+- Point clouds are read by bounding box from USGS 3DEP cloud-optimised point
+  clouds on AWS. No point-cloud file is downloaded. The LiDAR-to-raster step
+  runs in the `canopyguard-lidar` environment on a hosted notebook; every
+  other step runs in the working environment on a laptop.
+- Optical composites are built server side in Google Earth Engine and
+  exported as rasters. The STAC path in `configs/ingestion.yaml` is the
+  fallback for contributors without Earth Engine.
 - Aggregation ladder: 10, 20, 30, 50, 100, 200, 500, 1000, 2000, 5000 m.
 - Temporal baselines: 1 year (2022 to 2023), 9 years (2013 to 2022), 10 years
   (2013 to 2023).
