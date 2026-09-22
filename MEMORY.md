@@ -44,9 +44,19 @@ scientific claims here.
 - LiDAR truth pipeline implemented and tested in `src/canopyguard/lidar/`:
   raster operations, Nuth and Kaab co-registration, epoch admission and
   decimation, PDAL pipeline construction, scale ladder and differencing,
-  footprint and coverage probing. PDAL is imported in one function, so the
-  rest is tested without it. 186 tests pass. No epoch has been fetched or
-  processed yet.
+  footprint and coverage probing, Entwine access, tiling and the calibration
+  plan. PDAL is imported in one function, so the rest is tested without it.
+  225 tests pass. No epoch has been processed yet.
+- Point clouds are read by bounding box from the public 3DEP Entwine
+  resources at `usgs-lidar-public`. Both noise-floor epochs are confirmed
+  present: `CA_NorthernCA_1_B22` holds 95,945,998,233 points and
+  `CA_NorthCoastRanges_2_B23` holds 186,415,389,199, both indexed in
+  EPSG:3857. Return density computed from those counts is 21.5 and 21.3 per
+  square metre, matching the catalogue. The 8.16 per square metre quoted in
+  the 2023 acquisition specification is pulse density from a 0.35 m nominal
+  pulse spacing, a different quantity that must not be mixed with the first.
+- `notebooks/01_noise_floor.ipynb` runs the LiDAR step end to end in the
+  lidar environment and prints the gate result.
 - Phase 1 literature review: `reports/literature_review.md` contains a verified
   15-study core matrix and a provisional, explicitly falsifiable gap. It is not
   yet a systematic review.
@@ -178,8 +188,6 @@ keep its stated scientific role.
 - LiDAR epoch screen run, point-cloud fetch, and generated canopy height
   models. The code exists; no data has been processed
 - Per-tile co-registration run and the measured noise floor
-- `scripts/build_chm.py` and `scripts/coregister_chm.py` entrypoints
-- Notebook driving the LiDAR-to-raster step in the lidar environment
 - Earth Engine scripts for the Sentinel-2 and Landsat composites
 - Detectability surface across aggregation scale and temporal baseline
 - Per-alliance height-increment model and measured growth rates

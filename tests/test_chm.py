@@ -13,6 +13,7 @@ from canopyguard.lidar.chm import (
     height_threshold_stage,
     pit_free_combine,
     raster_stage,
+    reader_stage,
     scan_angle_stage,
 )
 
@@ -77,7 +78,7 @@ def test_height_threshold_stage_is_open_ended():
 
 
 def test_terrain_pipeline_writes_both_surfaces_after_ground_classification():
-    built = build_terrain_pipeline("in.laz", "dtm.tif", "dsm.tif", CONFIG)
+    built = build_terrain_pipeline(reader_stage("in.laz"), "dtm.tif", "dsm.tif", CONFIG)
     pipeline = built["pipeline"]
     types = [stage["type"] for stage in pipeline]
     assert types[0] == "readers.las"
@@ -86,7 +87,8 @@ def test_terrain_pipeline_writes_both_surfaces_after_ground_classification():
 
 
 def test_layer_pipeline_thresholds_before_rasterising():
-    pipeline = build_layer_pipeline("in.laz", "l.tif", 10.0, CONFIG)["pipeline"]
+    reader = reader_stage("in.laz")
+    pipeline = build_layer_pipeline(reader, "l.tif", 10.0, CONFIG)["pipeline"]
     limits = [s.get("limits") for s in pipeline if s["type"] == "filters.range"]
     assert "HeightAboveGround[10.0:]" in limits
     assert pipeline[-1]["dimension"] == "HeightAboveGround"
@@ -94,8 +96,12 @@ def test_layer_pipeline_thresholds_before_rasterising():
 
 def test_every_epoch_gets_an_identical_pipeline_shape():
     """Differing stages between epochs would appear as canopy change."""
-    first = build_layer_pipeline("a.laz", "a.tif", 5.0, CONFIG)["pipeline"]
-    second = build_layer_pipeline("b.laz", "b.tif", 5.0, CONFIG)["pipeline"]
+    first = build_layer_pipeline(reader_stage("a.laz"), "a.tif", 5.0, CONFIG)[
+        "pipeline"
+    ]
+    second = build_layer_pipeline(reader_stage("b.laz"), "b.tif", 5.0, CONFIG)[
+        "pipeline"
+    ]
     assert [s["type"] for s in first] == [s["type"] for s in second]
 
 

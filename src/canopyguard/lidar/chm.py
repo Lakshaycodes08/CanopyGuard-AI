@@ -92,10 +92,10 @@ def height_threshold_stage(minimum_m: float) -> dict[str, Any]:
     return {"type": "filters.range", "limits": f"HeightAboveGround[{minimum_m}:]"}
 
 
-def _preamble(input_path: str, config: dict[str, Any]) -> list[dict[str, Any]]:
+def _preamble(reader: dict[str, Any], config: dict[str, Any]) -> list[dict[str, Any]]:
     harmonization = config["harmonization"]
     return [
-        reader_stage(input_path),
+        dict(reader),
         reprojection_stage(harmonization["target_crs"]),
         class_filter_stage(harmonization["drop_classes"]),
         scan_angle_stage(harmonization["max_scan_angle_deg"]),
@@ -104,11 +104,11 @@ def _preamble(input_path: str, config: dict[str, Any]) -> list[dict[str, Any]]:
 
 
 def build_terrain_pipeline(
-    input_path: str, dtm_path: str, dsm_path: str, config: dict[str, Any]
+    reader: dict[str, Any], dtm_path: str, dsm_path: str, config: dict[str, Any]
 ) -> dict[str, Any]:
     """Pipeline producing the ground surface and the top-of-return surface."""
     chm = config["chm"]
-    stages = _preamble(input_path, config)
+    stages = _preamble(reader, config)
     stages.append(ground_stage(chm["smrf"]))
     stages.append(raster_stage(dsm_path, chm["dsm_output_type"], chm["resolution_m"]))
     stages.append({"type": "filters.range", "limits": "Classification[2:2]"})
@@ -117,11 +117,11 @@ def build_terrain_pipeline(
 
 
 def build_layer_pipeline(
-    input_path: str, layer_path: str, threshold_m: float, config: dict[str, Any]
+    reader: dict[str, Any], layer_path: str, threshold_m: float, config: dict[str, Any]
 ) -> dict[str, Any]:
     """Pipeline producing one pit-free canopy layer."""
     chm = config["chm"]
-    stages = _preamble(input_path, config)
+    stages = _preamble(reader, config)
     stages.append(ground_stage(chm["smrf"]))
     stages.append(hag_stage(chm["height_above_ground"]))
     stages.append(height_threshold_stage(threshold_m))
