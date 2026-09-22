@@ -7,16 +7,30 @@ dependencies:
   - numpy=2.2.1
   - pandas=2.2.3
   - pyyaml=6.0.2
+  - scipy
   - scikit-learn
+  - lightgbm
   - rasterio
   - pyproj
+  - gdal
+  - pdal
+  - python-pdal
+  - geopandas
+  - shapely
+  - pyogrio
+  - scikit-gstat
   - xarray
   - zarr
   - dask
+  - pystac-client
+  - odc-stac
+  - matplotlib
+  - tqdm
   - pytest=9.1.1
   - ruff=0.16.3
   - pre-commit=4.0.1
   - dvc=3.58.0
   - pathspec<1
   - pip:
+      - planetary-computer
       - -e .

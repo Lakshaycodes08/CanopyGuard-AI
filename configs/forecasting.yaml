@@ -1,62 +1,129 @@
 seed: 42
 
 task:
-  name: one_year_ahead_canopy_height
-  input_window: previous_calendar_year
-  horizon_months: 12
+  name: canopy_height_change_from_optical_time_series
+  target: delta_h
+  definition: airborne_lidar_chm_difference
+  epoch_pairs:
+    - ["2022", "2023"]
+    - ["2013", "2022"]
+    - ["2013", "2023"]
+  primary_pair: ["2013", "2022"]
+  noise_floor_pair: ["2022", "2023"]
+  working_scale_m: 100
 
-target:
-  name: canopy_height
-  source: GEDI02_A_V2
-  metric: rh98
-  unit: meters
-
-validation_truth:
-  source: sonoma_repeat_lidar
-  epochs:
-    - 2013
-    - 2022
+truth:
+  source: sonoma_repeat_airborne_lidar
   use_as_model_feature: false
+  isolation_enforced_by: tests/test_truth_isolation.py
 
-baselines:
-  - training_median
-  - vegetation_class_median
-  - snapshot_random_forest
-  - lidar_2013_persistence
+gedi:
+  role: independent_cross_check
+  use_as_training_target: false
+  filters:
+    quality_flag: 1
+    degrade_flag: 0
+    min_sensitivity_conifer: 0.95
+    min_sensitivity_other: 0.90
+    sensitivity_exceeds_canopy_cover: true
+    min_detected_modes: 1
+    full_power_beams_only: true
+    night_only: true
+    max_slope_deg: 30.0
+    height_range_m: [2.0, 90.0]
+    max_elevation_residual_m: 25.0
 
-model:
-  candidates:
-    - temporal_random_forest
-    - temporal_hist_gradient_boosting
-  selection_metric: mae
+stage1_growth_model:
+  form: gada
+  base_function: chapman_richards
+  fit_on: stable_cells_only
+  stratify_by: vegetation_alliance
+  pool_to_physiognomic_group_below_n: 500
+  site_modifier_candidates: [heat_load, tpi_450, elevation_m, slope_deg]
+  site_modifier_admission: cross_validated_improvement_under_r2_folds
+  loss: soft_l1
+  anchor: ring_median
+  ring_excludes_center: true
+
+stage2_residual_model:
+  target: delta_h_minus_stage1
+  families: [ridge, lightgbm]
+  capacity_ceiling:
+    max_depth: 4
+    num_leaves: 15
+    n_estimators: 400
+    learning_rate: 0.03
+    min_data_in_leaf: 200
+    feature_fraction: 0.6
+  heads:
+    loss_event:
+      objective: binary
+      threshold: negative_lod95
+    magnitude:
+      objective: quantile
+      quantiles: [0.05, 0.25, 0.50, 0.75, 0.95]
+
+ladder:
+  - id: E1
+    model: global_mean_and_median
+  - id: E2
+    model: start_height_ring_isotonic
+  - id: E3
+    model: stage1_gada
+  - id: E4
+    model: ridge_on_stage2_residual
+  - id: E5
+    model: lightgbm_on_stage2_residual
+  - id: E6
+    model: quantile_heads_with_conformal
+  - id: E7
+    model: scale_sweep
+  - id: E8
+    model: product_benchmark
+  - id: E9
+    model: span_ranking
+  - id: E10
+    model: patch_cnn
+    optional: true
+    requires_gpu: true
 
 ablations:
-  - without_temporal_history
-  - without_disturbance_screen
-  - without_growth_prior_on_eligible_subset
+  - id: A1
+    name: unburned_subset
+  - id: A2
+    name: fire_severity_control
+  - id: A3
+    name: species_residualized
+  - id: A4
+    name: terrain_only_baseline
+  - id: A5
+    name: topographic_correction_off
+  - id: A6
+    name: single_relative_orbit
+  - id: A7
+    name: cv_regime_comparison
+  - id: A8
+    name: ring_versus_center_anchor
+  - id: A9
+    name: anchor_free_stage2
+  - id: A10
+    name: temporal_shuffle
+    blocking: true
+  - id: A11
+    name: sentinel2_only_versus_with_landsat
+  - id: A12
+    name: coregistration_shift_sensitivity
+  - id: A13
+    name: density_decimation_on_off
+  - id: A14
+    name: sham_features
+    blocking: true
 
-spatial_validation:
-  method: blocked
-  block_size_selection: training_residual_autocorrelation
-  candidate_block_sizes_m:
-    - 1000
-    - 2000
-    - 5000
-
-evaluation:
-  primary_metric: mae
-  metrics:
-    - mae
-    - rmse
-    - bias
-    - r2
-  report_by:
-    - height_class
-    - vegetation_class
-    - disturbance_status
-  time_split_required: true
-  spatial_split_required: true
-  uncertainty:
-    method: spatial_block_bootstrap
-    confidence_level: 0.95
-    resamples: 1000
+growth_rate_measurement:
+  source_pair: ["2022", "2023"]
+  stratify_by: [vegetation_alliance, start_height_decile, slope_band]
+  standard_error_unit: spatial_block
+  triangulation:
+    - one_year_times_nine
+    - nine_year_increment
+    - gada_curve_prediction

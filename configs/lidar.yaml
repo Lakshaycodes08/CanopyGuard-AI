@@ -1,0 +1,98 @@
+epochs:
+  - name: "2013"
+    dataset: USGS_LPC_CA_Sonoma_A2_A3_A4_2013
+    collection: OT.092014.2871.1
+    start: "2013-09-28"
+    end: "2013-11-26"
+    nominal_density_pts_m2: 13.73
+    vertical_datum: NAVD88
+    geoid: GEOID12A
+    role: long_baseline_start
+    admitted: null
+  - name: "2022"
+    dataset: CA_NorthernCA_1_B22
+    start: "2022-09-13"
+    end: "2022-11-11"
+    nominal_density_pts_m2: 21.51
+    vertical_datum: NAVD88
+    geoid: GEOID18
+    role: reference
+    admitted: null
+  - name: "2023"
+    dataset: CA_NorthCoastRanges_2_B23
+    start: "2023-09-16"
+    end: "2023-12-15"
+    nominal_density_pts_m2: 21.32
+    vertical_datum: NAVD88
+    geoid: GEOID18
+    role: noise_floor_pair
+    admitted: null
+  - name: "2007"
+    dataset: EarthScope_Northern_California
+    collection: OT.052008.32610.1
+    start: "2007-03-21"
+    end: "2007-04-17"
+    nominal_density_pts_m2: null
+    vertical_datum: null
+    geoid: null
+    role: optional_long_baseline
+    admitted: false
+    exclusion_reason: >
+      Spring acquisition. Deciduous canopy is not comparable with the autumn
+      epochs. Admissible for conifer alliances only if the screen passes.
+
+reference_epoch: "2022"
+
+admission_screen:
+  min_density_pts_m2: 8.0
+  max_scan_angle_deg: 15.0
+  min_area_retained_after_clip: 0.80
+  leaf_on_months: [9, 10, 11, 12]
+  require_ground_classification: true
+  require_declared_vertical_datum: true
+
+harmonization:
+  target_crs: EPSG:6339
+  target_vertical: NAVD88
+  decimate_to_sparsest_admitted: true
+  decimation_method: poisson_disk
+  drop_classes: [7, 9, 12, 18]
+  drop_withheld: true
+  drop_overlap: true
+
+chm:
+  resolution_m: 1.0
+  ground_algorithm: smrf
+  smrf:
+    scalar: 1.25
+    slope: 0.15
+    threshold: 0.5
+    window: 18.0
+  height_above_ground: hag_delaunay
+  dtm_output_type: idw
+  dsm_output_type: max
+  pit_free_layers_m: [0, 2, 5, 10, 15, 20, 25, 30]
+  clamp_min_m: 0.0
+  clamp_max_m: 120.0
+
+coregistration:
+  tile_size_m: 1000
+  stable_surface_max_slope_deg: 5.0
+  stable_classes: [2, 6]
+  max_iterations: 30
+  convergence_tolerance_m: 0.01
+  max_accepted_shift_m: 5.0
+
+aggregation:
+  scales_m: [10, 20, 30, 50, 100, 200, 500, 1000, 2000, 5000]
+  statistic: mean
+  secondary_statistic: p95
+  min_valid_fraction: 0.5
+
+tiers:
+  corridor_buffer_m: 60
+  sample_tile_size_m: 1000
+  sample_tile_count: 40
+  stratify_by: [vegetation_group, slope_band, burn_state]
+  slope_bands_deg: [[0, 15], [15, 30], [30, 90]]
+  seed: 42

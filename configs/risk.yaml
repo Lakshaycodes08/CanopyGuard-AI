@@ -1,13 +1,17 @@
-risk_score:
+priority_score:
   description: "Research prioritization score only. Not a regulatory clearance."
-  clearance_threshold_m: 3.0
-  growth_buffer_m: 1.0
-  weights:
-    clearance: 0.55
-    growth: 0.25
-    uncertainty: 0.20
+  basis: predicted_canopy_height_change
+  rank_on: q95
+  loss_event_threshold: negative_lod95
 
-classes:
-  low: 0.33
-  medium: 0.66
+strata:
+  height_class_bounds_m: [0, 10, 20, 30, 40, 50]
+  slope_bands_deg: [[0, 15], [15, 30], [30, 90]]
+  disturbance_states: [stable, disturbed, uncertain]
 
+clearance_reference:
+  description: "Recorded for context. Never used to declare compliance."
+  go95_rule35_case14_22_to_300kv_m: 1.22
+  prc4293_72_to_110kv_m: 1.83
+  prc4293_above_110kv_m: 3.05
+  nerc_fac003_applies_at_or_above_kv: 200

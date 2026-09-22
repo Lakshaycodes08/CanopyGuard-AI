@@ -2,9 +2,10 @@
 
 [![CI](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml)
 
-CanopyGuard-AI tests whether open satellite time series can forecast canopy
-height well enough to improve vegetation-risk prioritization and maintenance
-scheduling near power-line corridors.
+CanopyGuard-AI measures the spatial scale and temporal baseline at which open
+satellite time series recover airborne-LiDAR-measured canopy height change,
+and tests whether that signal supports maintenance prioritization on
+transmission corridor spans.
 
 The project is built as a reproducible research pipeline, not an application. Each stage reads files from disk and writes documented outputs that can be rerun independently.
 
@@ -18,26 +19,32 @@ hypotheses, baselines, and evaluation rules are in
 [`reports/research_design.md`](reports/research_design.md). The current
 manuscript direction is:
 
-> Data-driven vegetation risk forecasting and maintenance prioritization near power-line corridors using satellite time series, LiDAR validation, and optimization.
+> Detectability limits of open optical time series for canopy height change, benchmarked against repeat airborne LiDAR in power-line corridors.
 
 ## Data roles
 
-- California Energy Commission transmission lines: approximate corridor
-  context only.
-- Sentinel-2: temporal signal.
-- GEDI: sparse canopy reference.
-- Sonoma County 2013 and 2022 LiDAR-derived canopy products: independent
-  validation truth.
+- Sonoma County 2013, 2022 and 2023 airborne LiDAR: target and independent
+  truth. The 2022 and 2023 pair is one year apart and measures the detection
+  noise floor.
+- Sentinel-2 from 2017 and Landsat 8 from 2013: temporal predictors.
+- USGS 3DEP: terrain predictors and site quality.
+- Sonoma vegetation map: alliance stratification.
+- GEDI: independent cross-check, not a training target.
+- California Energy Commission transmission lines: span construction and
+  aggregation context only.
 
-LiDAR should stay out of model features unless a specific experiment explicitly justifies otherwise. It is the main independent validation source.
+LiDAR never enters model features. `tests/test_truth_isolation.py` fails the
+build if a feature or model module imports the LiDAR package or references a
+truth path.
 
 ## Pipeline
 
 ```text
-CEC corridor context
-Sentinel-2 time series       -> features -> forecasting -> risk -> scheduling -> figures
-GEDI sparse reference
-Repeat Sonoma LiDAR truth    -> independent evaluation
+LiDAR epochs -> matched CHMs -> co-registration -> noise floor -> truth
+Sentinel-2 + Landsat + terrain -> composites -> texture -> features
+truth + features -> growth model -> residual model -> detectability surface
+                                                   -> product benchmark
+                                                   -> span ranking -> figures
 ```
 
 Every arrow is a file under `data/interim` or `data/processed`. Root data directories are present in git with `.gitkeep` files, but real data is ignored by git and should be tracked with DVC.
@@ -72,8 +79,9 @@ npm audit
 ```
 
 The confirmed study area is northern Sonoma County. The first DVC stage records
-the Sentinel-2 tile-10SEH catalogue manifest. Raster download and cube assembly
-will run on shared NSUT infrastructure after access is confirmed.
+the Sentinel-2 tile-10SEH catalogue manifest. Processing is scoped to a
+corridor buffer plus a stratified tile sample, roughly 64 km2, and every
+required result runs on CPU.
 
 ## DVC
 

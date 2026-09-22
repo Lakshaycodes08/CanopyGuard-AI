@@ -1,0 +1,19 @@
+{
+  "backfill_note": "Sidecar reconstructed 2026-09-22 from the manifest and a deterministic rebuild of the search URL. Regenerated on the next ingest run.",
+  "backfilled": true,
+  "bbox_wgs84": [
+    -122.9,
+    38.475,
+    -122.74,
+    38.82
+  ],
+  "config_sha256": "f0bcae3ea91bab75be9bb191b5dd74437d6ff5994226ed425c9474592eae2fef",
+  "crs": "EPSG:4326",
+  "fetch_utc": "2026-09-22T12:32:11.118305+00:00",
+  "git_commit": "unknown",
+  "http_status": null,
+  "row_count": 458,
+  "script_name": "scripts/ingest_sentinel2.py",
+  "sha256": "125d2b6261949f21aebcaa227e3bc4b006bf0a7b2bc6081cb82f2fa09cb574cd",
+  "source_url": "https://stac.dataspace.copernicus.eu/v1/search?collections=sentinel-2-l2a&datetime=2017-01-01T00%3A00%3A00Z%2F2022-12-31T23%3A59%3A59Z&bbox=-122.9%2C38.475%2C-122.74%2C38.82&filter=eo%3Acloud_cover+%3C%3D+20+AND+grid%3Acode+%3D+%27MGRS-10SEH%27&limit=100"
+}
