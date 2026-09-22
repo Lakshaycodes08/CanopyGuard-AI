@@ -40,7 +40,13 @@ scientific claims here.
   truth path.
 - Evaluation core implemented and tested in `src/canopyguard/evaluation/`:
   metrics, paired spatial block bootstrap, variogram-driven blocking, and the
-  detectability surface. 104 tests pass.
+  detectability surface.
+- LiDAR truth pipeline implemented and tested in `src/canopyguard/lidar/`:
+  raster operations, Nuth and Kaab co-registration, epoch admission and
+  decimation, PDAL pipeline construction, scale ladder and differencing,
+  footprint and coverage probing. PDAL is imported in one function, so the
+  rest is tested without it. 186 tests pass. No epoch has been fetched or
+  processed yet.
 - Phase 1 literature review: `reports/literature_review.md` contains a verified
   15-study core matrix and a provisional, explicitly falsifiable gap. It is not
   yet a systematic review.
@@ -67,12 +73,13 @@ scientific claims here.
   Scope is gated on measurement, not on a calendar.
 - Research goal: produce a defensible journal publication, with the software
   serving the experiments and evidence.
-- Immediate next action: implement `scripts/screen_epochs.py` and the
-  `src/canopyguard/lidar` package, fetch the 2013, 2022 and 2023 point clouds
-  over the corridor buffer and the stratified tile sample, generate matched
-  canopy height models with one identical pipeline, co-register per tile, and
-  measure the noise floor from the 2022 to 2023 pair. The full-area dense
-  Sentinel-2 cube is cancelled.
+- Immediate next action: create the conda environment, run
+  `scripts/screen_epochs.py`, probe 2022 and 2023 coverage with
+  `scripts/fetch_lidar.py`, fetch the point clouds over their intersection,
+  build matched canopy height models, co-register per tile, then run
+  `scripts/measure_noise_floor.py` for the G1 numbers. The noise floor is
+  measured before the study-area fetch, so a failure costs one download. The
+  full-area dense Sentinel-2 cube is cancelled.
 
 ## Research direction
 
@@ -161,8 +168,10 @@ keep its stated scientific role.
 ## Not completed
 
 - Systematic literature search and final defensible novelty statement
-- LiDAR epoch screen, point-cloud fetch, and matched canopy height models
-- Per-tile co-registration and the measured noise floor
+- LiDAR epoch screen run, point-cloud fetch, and generated canopy height
+  models. The code exists; no data has been processed
+- Per-tile co-registration run and the measured noise floor
+- `scripts/build_chm.py` and `scripts/coregister_chm.py` entrypoints
 - Detectability surface across aggregation scale and temporal baseline
 - Per-alliance height-increment model and measured growth rates
 - Sentinel-2 and Landsat seasonal composites, texture, terrain, fire screen

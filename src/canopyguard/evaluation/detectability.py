@@ -114,3 +114,32 @@ def smallest_resolving_scale(
     """Smallest aggregation scale whose signal-to-noise reaches the threshold."""
     resolving = [row["scale_m"] for row in rows if row["snr"] >= min_snr]
     return float(min(resolving)) if resolving else float("nan")
+
+
+def noise_floor_table(
+    delta_by_scale: dict[float, ArrayLike], base_scale_m: float
+) -> list[dict[str, float]]:
+    """Measured error standard deviation and detection limit at each scale."""
+    rows = []
+    for scale in sorted(delta_by_scale):
+        values = _finite(delta_by_scale[scale])
+        sigma = noise_sigma(values, robust=True)
+        rows.append(
+            {
+                "scale_m": float(scale),
+                "cells": float(values.size),
+                "mean_m": float(np.mean(values)),
+                "sigma_m": sigma,
+                "sigma_plain_m": noise_sigma(values, robust=False),
+                "lod95_m": lod95(sigma),
+            }
+        )
+    decay = decay_exponent(
+        [row["scale_m"] for row in rows],
+        [row["sigma_m"] for row in rows],
+        base_scale_m,
+    )
+    for row in rows:
+        row["decay_exponent"] = decay["exponent"]
+        row["decay_r2"] = decay["r2"]
+    return rows

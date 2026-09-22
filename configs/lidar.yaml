@@ -58,7 +58,6 @@ noise_floor:
 
 admission_screen:
   min_density_pts_m2: 8.0
-  max_scan_angle_deg: 15.0
   min_area_retained_after_clip: 0.80
   leaf_on_months: [9, 10, 11, 12]
   require_ground_classification: true
@@ -67,8 +66,13 @@ admission_screen:
 harmonization:
   target_crs: EPSG:6339
   target_vertical: NAVD88
+  max_scan_angle_deg: 15.0
   decimate_to_sparsest_admitted: true
   decimation_method: poisson_disk
+  sample_radius_m: null
+  sample_radius_note: >
+    Derived at run time from the sparsest admitted epoch density. Left null in
+    the config so it cannot drift from the epochs actually admitted.
   drop_classes: [7, 9, 12, 18]
   drop_withheld: true
   drop_overlap: true
@@ -89,9 +93,15 @@ chm:
   clamp_max_m: 120.0
 
 coregistration:
+  method: nuth_kaab
+  surface: dtm
+  reference_epoch: "2022"
   tile_size_m: 1000
-  stable_surface_max_slope_deg: 5.0
-  stable_classes: [2, 6]
+  min_slope_deg: 5.0
+  max_slope_deg: 45.0
+  slope_band_note: >
+    Flat ground carries no horizontal information and very steep ground is
+    noisy. The solver is fitted on the bare-earth surface inside this band.
   max_iterations: 30
   convergence_tolerance_m: 0.01
   max_accepted_shift_m: 5.0

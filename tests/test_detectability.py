@@ -8,6 +8,7 @@ from canopyguard.evaluation.detectability import (
     detectable_fraction,
     lod95,
     minimum_detectable_baseline,
+    noise_floor_table,
     noise_sigma,
     normalised_mad,
     smallest_resolving_scale,
@@ -97,3 +98,25 @@ def test_smallest_resolving_scale_picks_the_first_scale_clearing_snr_one():
     ]
     assert smallest_resolving_scale(rows) == 500.0
     assert np.isnan(smallest_resolving_scale(rows, min_snr=9.0))
+
+
+def test_noise_floor_table_reports_every_scale_and_the_decay():
+    rng = np.random.default_rng(7)
+    base = 10.0
+    scales = [10.0, 20.0, 50.0, 100.0]
+    ladder = {}
+    for scale in scales:
+        cells = (scale / base) ** 2
+        ladder[scale] = rng.normal(scale=3.0 * cells**-0.25, size=4000)
+
+    rows = noise_floor_table(ladder, base_scale_m=base)
+    assert [row["scale_m"] for row in rows] == scales
+    assert rows[0]["sigma_m"] > rows[-1]["sigma_m"]
+    assert rows[0]["lod95_m"] == pytest.approx(1.96 * rows[0]["sigma_m"])
+    assert rows[0]["decay_exponent"] == pytest.approx(0.25, abs=0.05)
+
+
+def test_noise_floor_table_carries_the_same_decay_to_every_row():
+    ladder = {s: np.random.default_rng(1).normal(size=500) for s in (10.0, 20.0, 40.0)}
+    rows = noise_floor_table(ladder, base_scale_m=10.0)
+    assert len({row["decay_exponent"] for row in rows}) == 1
