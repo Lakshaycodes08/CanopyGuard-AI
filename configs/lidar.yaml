@@ -54,7 +54,9 @@ noise_floor:
   may_extend_outside_study_bbox: true
   stratify_to_match: [vegetation_group, slope_band, canopy_height_class]
   min_stable_cells_per_stratum: 2000
-  verified_intersection: null
+  verified_intersection: [-123.39, 38.79, -122.36, 38.93]
+  verified_intersection_km2: 1388
+  verified_on: 2026-09-23
 
 admission_screen:
   min_density_pts_m2: 8.0
