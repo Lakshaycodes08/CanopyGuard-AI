@@ -27,6 +27,11 @@ epochs:
     geoid: GEOID18
     role: noise_floor_pair
     admitted: null
+    study_bbox_coverage: partial
+    coverage_note: >
+      Catalogue probes return this dataset for the study bbox north of about
+      38.78 and not at 38.48 to 38.55 or 38.62 to 38.69. Its overall bounds
+      enclose the study area but its work units do not.
   - name: "2007"
     dataset: EarthScope_Northern_California
     collection: OT.052008.32610.1
@@ -42,6 +47,14 @@ epochs:
       epochs. Admissible for conifer alliances only if the screen passes.
 
 reference_epoch: "2022"
+
+noise_floor:
+  epoch_pair: ["2022", "2023"]
+  calibration_area: intersection_of_epoch_footprints
+  may_extend_outside_study_bbox: true
+  stratify_to_match: [vegetation_group, slope_band, canopy_height_class]
+  min_stable_cells_per_stratum: 2000
+  verified_intersection: null
 
 admission_screen:
   min_density_pts_m2: 8.0

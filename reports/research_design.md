@@ -77,6 +77,15 @@ LoD95(s)   = 1.96 * sigma_n(s)
 This replaces literature estimates of the limit of detection with a
 site-measured value. It is computed before any model is fitted.
 
+The 2023 acquisition covers only the northern part of the study bounding box.
+The noise floor is therefore calibrated on the full intersection of the 2022
+and 2023 footprints, which extends beyond the study area, and is stratified by
+vegetation group, slope band and canopy height class to match the composition
+of the study area. Measurement error is a property of the sensors and terrain,
+not of the study boundary, so calibrating outside the boundary is valid
+provided the strata match. Stratum coverage is verified before the measurement
+is accepted.
+
 ## Hypotheses
 
 ### H1: error decay

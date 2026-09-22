@@ -24,9 +24,11 @@ scientific claims here.
   `reports/research_design.md`.
 - LiDAR epochs confirmed by OpenTopography catalogue query against the study
   bbox: 2007, 2011 partial, 2013, 2022, 2023. The 2022 and 2023 pair is one
-  year apart at comparable point density and measures the detection noise
-  floor empirically. The 2018 NoCAL Wildfires acquisition does not cover this
-  bbox.
+  year apart at 21.51 and 21.32 points per square metre and measures the
+  detection noise floor empirically. 2023 covers only the northern part of the
+  study bbox, so the noise floor is calibrated on the full 2022 and 2023
+  intersection and stratified to match the study area. The 2018 NoCAL
+  Wildfires acquisition does not cover this bbox.
 - Seven synthetic parquet files found in `data/interim` on 2026-09-22 and
   moved to `data/QUARANTINE_2026-09-22`. Their coordinates lay about 4,000 km
   from the study area and they were not produced by any script in this
