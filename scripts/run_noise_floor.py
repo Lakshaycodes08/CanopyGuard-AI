@@ -208,6 +208,11 @@ def _report(result: dict, epochs: tuple[str, str]) -> None:
             f"{row['sigma_relative_error']:>7.1%}  {'yes' if row['admitted'] else 'no'}"
         )
     print(f"\nstable cells {result['stable_fraction']:.1%}")
+    gate = result["gate"]
+    print(
+        f"sigma at reference {gate['reference_sigma_m']:.3f} m "
+        f"({gate['reference_source']})"
+    )
     print(
         f"\ndecay exponent {result['rows'][0]['decay_exponent']:.3f} "
         f"over {result['rows'][0]['decay_scales']:.0f} scales"

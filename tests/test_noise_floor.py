@@ -218,10 +218,26 @@ def test_gate_ignores_a_scale_the_sample_cannot_support():
     assert result["passed"]
 
 
-def test_gate_fails_when_the_reference_scale_is_not_admitted():
+def test_gate_fails_when_the_reference_scale_cannot_be_reached():
     measured = [{"scale_m": 10.0, "sigma_m": 0.3, "mean_m": 0.3, "admitted": True}]
     result = evaluate_gate(measured, shift(), GATE)
-    assert not result["checks"]["reference_scale_admitted"]
+    assert not result["checks"]["reference_sigma_available"]
+    assert not result["passed"]
+
+
+def test_gate_extrapolates_an_unsupported_reference_scale():
+    decay = {"decay_coefficient": 1.0, "decay_exponent": 0.25,
+             "decay_base_scale_m": 1.0, "admitted": True, "mean_m": 0.0}
+    measured = [
+        {**decay, "scale_m": 10.0, "sigma_m": 0.32},
+        {**decay, "scale_m": 20.0, "sigma_m": 0.22},
+        {**decay, "scale_m": 50.0, "sigma_m": 0.14},
+        {**decay, "scale_m": 100.0, "sigma_m": 0.5, "admitted": False},
+    ]
+    result = evaluate_gate(measured, shift(), GATE)
+    assert result["reference_source"] == "extrapolated"
+    assert result["reference_sigma_m"] == pytest.approx(0.1)
+    assert result["passed"]
 
 
 def test_gate_needs_an_admitted_scale():

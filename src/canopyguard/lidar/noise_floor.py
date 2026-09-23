@@ -164,7 +164,9 @@ def evaluate_gate(
     """Apply the gate conditions to the scales the sample can support.
 
     Spread may rise between adjacent scales by no more than twice the combined
-    relative standard error of the two estimates.
+    relative standard error of the two estimates. A reference scale the sample
+    cannot support is taken from the decay fit over at least three admitted
+    scales and reported as extrapolated.
     """
     admitted = [row for row in rows if row.get("admitted", True)]
     if not admitted:
@@ -177,6 +179,7 @@ def evaluate_gate(
     high = thresholds["max_mean_one_year_change_m"]
     reference = thresholds["sigma_reference_scale_m"]
     errors = [row.get("sigma_relative_error", 0.0) for row in admitted]
+    reference_sigma, reference_source = reference_spread(admitted, reference)
 
     checks = {
         "mean_one_year_change_in_range": bool(low <= finest["mean_m"] <= high),
@@ -190,10 +193,9 @@ def evaluate_gate(
         "coregistration_converged": bool(shift["converged"]),
         "shift_below_limit": bool(shift["magnitude_m"] < thresholds["max_shift_m"]),
         "sigma_at_reference_below_limit": bool(
-            by_scale.get(reference, {}).get("sigma_m", float("inf"))
-            < thresholds["max_sigma_at_reference_m"]
+            reference_sigma < thresholds["max_sigma_at_reference_m"]
         ),
-        "reference_scale_admitted": bool(reference in by_scale),
+        "reference_sigma_available": bool(np.isfinite(reference_sigma)),
     }
     return {
         "checks": checks,
@@ -201,7 +203,28 @@ def evaluate_gate(
         "shift_m": shift["magnitude_m"],
         "tiles": shift["tiles"],
         "admitted_scales": [row["scale_m"] for row in admitted],
+        "reference_sigma_m": reference_sigma,
+        "reference_source": reference_source,
     }
+
+
+def reference_spread(
+    admitted: list[dict[str, float]], reference_m: float
+) -> tuple[float, str]:
+    """Spread at the reference scale, measured where admitted, else extrapolated."""
+    for row in admitted:
+        if row["scale_m"] == reference_m:
+            return float(row["sigma_m"]), "measured"
+    if len(admitted) < 3:
+        return float("inf"), "unavailable"
+    row = admitted[0]
+    coefficient = float(row.get("decay_coefficient", float("nan")))
+    exponent = float(row.get("decay_exponent", float("nan")))
+    base = float(row.get("decay_base_scale_m", float("nan")))
+    if not all(np.isfinite([coefficient, exponent, base])) or base <= 0:
+        return float("inf"), "unavailable"
+    cells = (float(reference_m) / base) ** 2
+    return float(coefficient * cells**-exponent), "extrapolated"
 
 
 def _load_pairs(

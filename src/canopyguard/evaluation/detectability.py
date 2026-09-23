@@ -154,9 +154,11 @@ def noise_floor_table(
             base_scale_m,
         )
         if len(admitted) >= 3
-        else {"exponent": float("nan"), "r2": float("nan")}
+        else {"coefficient": float("nan"), "exponent": float("nan"), "r2": float("nan")}
     )
     for row in rows:
+        row["decay_coefficient"] = decay["coefficient"]
+        row["decay_base_scale_m"] = float(base_scale_m)
         row["decay_exponent"] = decay["exponent"]
         row["decay_r2"] = decay["r2"]
         row["decay_scales"] = float(len(admitted))

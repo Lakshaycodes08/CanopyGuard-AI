@@ -85,6 +85,10 @@ noise_floor:
       be separated, so a mean inside the detection limit is accepted.
     max_shift_m: 1.5
     sigma_reference_scale_m: 100
+    reference_note: >
+      Where the sample cannot admit the reference scale, its spread is taken
+      from the decay fit over at least three admitted scales and reported as
+      extrapolated.
     max_sigma_at_reference_m: 2.0
 
 admission_screen:
