@@ -13,6 +13,7 @@ from canopyguard.lidar.change import (
     disturbance,
     disturbed_mask,
     loss_mask,
+    terrain_agreement,
     pair_epochs,
     surface_table,
 )
@@ -133,3 +134,16 @@ def test_surface_table_uses_the_measured_floor():
     assert table[0]["canopy"]["admitted"] is True
     assert table[1]["all"]["admitted"] is False
     assert table[1]["canopy"]["cells"] == 0.0
+
+
+def test_terrain_agreement_exposes_a_unit_fault():
+    metres = np.array([[100.0, 200.0], [300.0, np.nan]])
+    check = terrain_agreement([(metres * 3.2808333, metres)])
+    assert check["cells"] == 3.0
+    assert check["ratio"] == pytest.approx(3.2808333)
+    assert check["median_abs_difference_m"] > 100.0
+
+
+def test_terrain_agreement_needs_a_shared_cell():
+    with pytest.raises(ValueError, match="No terrain cell"):
+        terrain_agreement([(np.array([[np.nan]]), np.array([[1.0]]))])

@@ -197,15 +197,24 @@ def reader_stages(reader: Reader) -> list[dict[str, Any]]:
 
     An acquisition published as several resources is read one resource at a
     time, and the merge joins them before any filter sees a point, so every
-    later stage treats the epoch as one cloud.
+    later stage treats the epoch as one cloud. Non-reader stages supplied with
+    the readers, such as a unit conversion, follow the merge.
     """
-    readers = [reader] if isinstance(reader, dict) else list(reader)
+    given = [reader] if isinstance(reader, dict) else list(reader)
+    readers = [dict(s) for s in given if str(s["type"]).startswith("readers.")]
+    others = [dict(s) for s in given if not str(s["type"]).startswith("readers.")]
     if not readers:
         raise ValueError("At least one reader is required")
-    stages = [dict(stage) for stage in readers]
-    if len(stages) > 1:
-        stages.append({"type": "filters.merge"})
-    return stages
+    if len(readers) > 1:
+        readers.append({"type": "filters.merge"})
+    return readers + others
+
+
+def vertical_scale_stage(factor: float) -> dict[str, Any]:
+    """Convert elevations to metres for a resource stored in another unit."""
+    if not factor > 0:
+        raise ValueError("Vertical scale must be positive")
+    return {"type": "filters.assign", "value": f"Z = Z * {float(factor)!r}"}
 
 
 def _preamble(

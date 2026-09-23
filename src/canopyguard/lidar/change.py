@@ -121,6 +121,30 @@ def canopy_stratum(
     return apply_mask(first, keep), apply_mask(second, keep)
 
 
+def terrain_agreement(
+    pairs: list[tuple[ArrayLike, ArrayLike]],
+) -> dict[str, float]:
+    """Pooled agreement of two terrain surfaces on cells valid in both."""
+    firsts, seconds = [], []
+    for first, second in pairs:
+        top, bottom, valid = _pair_grids(first, second)
+        firsts.append(top[valid])
+        seconds.append(bottom[valid])
+    a = np.concatenate(firsts) if firsts else np.array([])
+    b = np.concatenate(seconds) if seconds else np.array([])
+    if a.size == 0:
+        raise ValueError("No terrain cell is valid in both epochs")
+    first_median = float(np.median(a))
+    second_median = float(np.median(b))
+    return {
+        "cells": float(a.size),
+        "median_first_m": first_median,
+        "median_second_m": second_median,
+        "ratio": first_median / second_median if second_median else float("nan"),
+        "median_abs_difference_m": float(np.median(np.abs(b - a))),
+    }
+
+
 def bare_floor(change: ArrayLike, bare: ArrayLike) -> dict[str, float]:
     """Location and spread of the change on cells bare in both epochs.
 
@@ -257,6 +281,16 @@ def measure_pair(
     if not loaded:
         raise ValueError("No tile passed admission")
 
+    check = terrain_agreement([tile["terrain"] for tile in loaded])
+    if check["median_abs_difference_m"] > float(rules["max_terrain_difference_m"]):
+        raise ValueError(
+            "Terrain of the two epochs disagrees before co-registration: "
+            f"median elevation {check['median_first_m']:.2f} and "
+            f"{check['median_second_m']:.2f} m, ratio {check['ratio']:.4f}, "
+            f"median absolute difference {check['median_abs_difference_m']:.2f} m. "
+            "A ratio near 3.2808 indicates elevations stored in feet."
+        )
+
     shift = align_pooled(
         [tile["terrain"] for tile in loaded],
         resolution,
@@ -325,6 +359,7 @@ def measure_pair(
     return {
         "pair": list(epochs),
         "baseline_years": years,
+        "terrain_check": check,
         "shift": shift,
         "tiles": verdicts,
         "heights": heights,

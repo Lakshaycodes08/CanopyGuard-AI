@@ -74,6 +74,7 @@ def _signature(plan: dict, config: dict) -> str:
     material = {
         "boxes": [tile["box"] for tile in plan["tiles"]],
         "grids": [tile["grid"] for tile in plan["tiles"]],
+        "readers": [tile["readers"] for tile in plan["tiles"]],
         "harmonization": config["harmonization"],
         "chm": config["chm"],
     }

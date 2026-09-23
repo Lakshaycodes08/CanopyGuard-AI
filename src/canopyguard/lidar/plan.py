@@ -5,6 +5,7 @@ from __future__ import annotations
 import math
 from typing import Any
 
+from canopyguard.lidar.chm import vertical_scale_stage
 from canopyguard.lidar.ept import reader_stage
 from canopyguard.lidar.footprint import intersect
 from canopyguard.lidar.grid import tile_grid_geometry
@@ -242,6 +243,15 @@ def change_tiles(
     )
 
 
+def epoch_unit_stages(lidar_config: dict[str, Any], name: str) -> list[dict[str, Any]]:
+    """Unit conversion for an epoch whose elevations are not stored in metres."""
+    for epoch in lidar_config["epochs"]:
+        if str(epoch["name"]) == str(name):
+            factor = float(epoch.get("z_to_metres", 1.0))
+            return [] if factor == 1.0 else [vertical_scale_stage(factor)]
+    raise ValueError(f"No epoch named: {name}")
+
+
 def change_plan(
     lidar_config: dict[str, Any],
     study_box: Box,
@@ -294,6 +304,7 @@ def change_plan(
                         reader_stage(name, tile)
                         for name in tile_resources(tile, by_epoch[epoch])
                     ]
+                    + epoch_unit_stages(lidar_config, epoch)
                     for epoch in sorted(by_epoch)
                 },
             }

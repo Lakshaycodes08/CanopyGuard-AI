@@ -18,6 +18,7 @@ from canopyguard.lidar.chm import (
     raster_stage,
     reader_stage,
     reader_stages,
+    vertical_scale_stage,
     return_guard_stage,
     scan_angle_stage,
     stats_stage,
@@ -346,3 +347,12 @@ def test_a_single_reader_is_not_merged():
 def test_reader_stages_require_a_reader():
     with pytest.raises(ValueError, match="At least one reader"):
         reader_stages([])
+
+
+def test_unit_conversion_follows_the_merge():
+    readers = [reader_stage("a.laz"), reader_stage("b.laz"), vertical_scale_stage(0.3)]
+    order = types_of(reader_stages(readers))
+    assert order == ["readers.las", "readers.las", "filters.merge", "filters.assign"]
+    assert vertical_scale_stage(0.3048)["value"] == "Z = Z * 0.3048"
+    with pytest.raises(ValueError, match="must be positive"):
+        vertical_scale_stage(0.0)

@@ -125,6 +125,7 @@ change:
   canopy_min_height_m: 2.0
   bare_max_height_m: 1.0
   disturbance_limit_m: 3.0
+  max_terrain_difference_m: 2.0
   change_note: >
     Long-baseline pairs are measured inside the study box, where both epochs
     cover the ground in full. The 2013 acquisition is served as three
@@ -133,7 +134,10 @@ change:
     2022-2023 floor is an upper bound measured on a different pair. Cells
     changing by more than the disturbance limit are reported; those losing
     more than it are left out of the canopy stratum, while growth beyond it is
-    kept as signal.
+    kept as signal. Before co-registration the two terrain surfaces must agree
+    to within the terrain limit in median absolute difference; a failure there
+    is a unit or datum fault, not a shift. An epoch stored in another vertical
+    unit carries `z_to_metres`.
 
 admission_screen:
   min_density_pts_m2: 8.0

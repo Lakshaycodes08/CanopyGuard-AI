@@ -8,6 +8,7 @@ from canopyguard.lidar.plan import (
     calibration_plan,
     calibration_tiles,
     change_plan,
+    epoch_unit_stages,
     change_tiles,
     dispersion_grid_side,
     epoch_datasets,
@@ -283,3 +284,11 @@ def test_change_plan_is_deterministic(lidar_config, resource_boxes):
     assert [tile["box"] for tile in first["tiles"]] == [
         tile["box"] for tile in second["tiles"]
     ]
+
+
+def test_epoch_unit_stages_convert_only_declared_epochs():
+    config = {"epochs": [{"name": "2013", "z_to_metres": 0.3048}, {"name": "2022"}]}
+    assert epoch_unit_stages(config, "2013")[0]["type"] == "filters.assign"
+    assert epoch_unit_stages(config, "2022") == []
+    with pytest.raises(ValueError, match="No epoch named"):
+        epoch_unit_stages(config, "2030")
