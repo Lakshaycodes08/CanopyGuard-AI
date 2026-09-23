@@ -9,6 +9,7 @@ from canopyguard.lidar.difference import (
     apply_mask,
     difference,
     difference_ladder,
+    remove_bias,
     scale_factor,
     summarise,
 )
@@ -85,3 +86,14 @@ def test_summarise_ignores_no_data():
     assert summarise(np.array([1.0, np.nan, 3.0]))["cells"] == 2
     with pytest.raises(ValueError, match="no valid cells"):
         summarise(np.array([np.nan, np.nan]))
+
+
+def test_remove_bias_subtracts_the_pair_specific_offset():
+    delta = np.array([-0.08, 0.0, 1.0])
+    result = remove_bias(delta, -0.08)
+    assert result == pytest.approx([0.0, 0.08, 1.08])
+
+
+def test_remove_bias_rejects_a_non_finite_bias():
+    with pytest.raises(ValueError, match="finite"):
+        remove_bias(np.array([1.0]), float("nan"))

@@ -40,6 +40,26 @@ def lod95(sigma: float) -> float:
     return float(LOD95_Z * sigma)
 
 
+def lod95_at(scale_m: float, measured: dict[str, object]) -> float:
+    """Limit of detection at a scale, from a `noise_floor.measured` config block.
+
+    An admitted scale, one present in `measured["lod95_m"]`, returns the
+    value measured there directly. Any other scale is extrapolated with the
+    power law sigma(scale) = sigma_reference_m * (scale / 100) ** (-2 * b),
+    anchored at the 100 m reference scale, where b is `decay_exponent`. This
+    matches the sigma = a * N ** -b fit in `decay_exponent`, where
+    N = (scale / base_scale) ** 2 and a equals sigma_reference_m at N = 1.
+    """
+    table = measured["lod95_m"]
+    for key, value in table.items():
+        if float(key) == float(scale_m):
+            return float(value)
+    sigma_reference = float(measured["sigma_reference_m"])
+    exponent = float(measured["decay_exponent"])
+    sigma = sigma_reference * (float(scale_m) / 100.0) ** (-2.0 * exponent)
+    return lod95(sigma)
+
+
 def decay_exponent(
     scales_m: ArrayLike, sigmas: ArrayLike, base_scale_m: float
 ) -> dict[str, float]:

@@ -7,6 +7,7 @@ from canopyguard.evaluation.detectability import (
     decay_exponent,
     detectable_fraction,
     lod95,
+    lod95_at,
     minimum_detectable_baseline,
     noise_floor_table,
     noise_sigma,
@@ -158,3 +159,23 @@ def test_both_spread_estimates_are_reported():
     rows = noise_floor_table({10.0: generator.normal(0, 1, 2000)}, base_scale_m=10.0)
     assert rows[0]["sigma_m"] == pytest.approx(1.0, abs=0.1)
     assert rows[0]["sigma_plain_m"] == pytest.approx(1.0, abs=0.1)
+
+
+def test_lod95_at_returns_the_measured_value_for_an_admitted_scale():
+    measured = {
+        "lod95_m": {10: 0.235, 20: 0.210, 30: 0.199, 50: 0.199},
+        "sigma_reference_m": 0.092,
+        "decay_exponent": 0.054,
+    }
+    assert lod95_at(30, measured) == pytest.approx(0.199)
+
+
+def test_lod95_at_extrapolates_for_an_unadmitted_scale():
+    measured = {
+        "lod95_m": {10: 0.235, 20: 0.210, 30: 0.199, 50: 0.199},
+        "sigma_reference_m": 0.092,
+        "decay_exponent": 0.054,
+    }
+    assert lod95_at(100, measured) == pytest.approx(lod95(0.092))
+    expected_200 = lod95(0.092 * (200.0 / 100.0) ** (-2.0 * 0.054))
+    assert lod95_at(200, measured) == pytest.approx(expected_200)

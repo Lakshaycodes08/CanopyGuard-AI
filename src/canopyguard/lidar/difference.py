@@ -85,6 +85,18 @@ def apply_mask(delta: ArrayLike, keep: ArrayLike) -> NDArray[np.float64]:
     return np.where(selected, values, np.nan)
 
 
+def remove_bias(delta: ArrayLike, bias_m: float) -> NDArray[np.float64]:
+    """Subtract a pair-specific systematic bias from a change grid.
+
+    The bias is measured on the noise-floor pair and is not a property of
+    the sensors in general, so it is removed before a difference is
+    compared against the limit of detection.
+    """
+    if not np.isfinite(bias_m):
+        raise ValueError("Bias must be finite")
+    return np.asarray(delta, dtype=np.float64) - bias_m
+
+
 def summarise(delta: ArrayLike) -> dict[str, float]:
     """Location and spread of a change grid over its valid cells."""
     values = np.asarray(delta, dtype=np.float64).ravel()

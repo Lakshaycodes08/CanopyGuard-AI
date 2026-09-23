@@ -90,6 +90,30 @@ noise_floor:
       from the decay fit over at least three admitted scales and reported as
       extrapolated.
     max_sigma_at_reference_m: 2.0
+  measured:
+    run_date: "2026-09-24"
+    tiles_admitted: 52
+    stable_fraction: 0.936
+    bias_m: -0.08
+    sigma_m:
+      10: 0.120
+      20: 0.107
+      30: 0.101
+      50: 0.102
+    lod95_m:
+      10: 0.235
+      20: 0.210
+      30: 0.199
+      50: 0.199
+    sigma_reference_m: 0.092
+    sigma_reference_source: extrapolated
+    decay_exponent: 0.054
+    measured_note: >
+      Values come from the 2022-2023 pair on stable cells and are an upper
+      bound for interior coverage, since the seam is the worst geometry of
+      either acquisition. bias_m is specific to this pair and is removed
+      from pair differences with lidar.difference.remove_bias before
+      comparison against the limit of detection.
 
 admission_screen:
   min_density_pts_m2: 8.0
