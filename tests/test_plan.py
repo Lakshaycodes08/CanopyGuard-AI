@@ -129,7 +129,7 @@ def test_plan_uses_the_sparsest_epoch_for_the_sampling_radius(
     lidar_config, footprints
 ):
     plan = calibration_plan(lidar_config, 25, footprints)
-    assert plan["sample_radius_m"] == pytest.approx(0.2699, abs=1e-3)
+    assert plan["sample_radius_m"] == pytest.approx(0.2258, abs=1e-3)
 
 
 def test_plan_spreads_tiles_across_the_co_coverage(lidar_config, footprints):

@@ -7,6 +7,7 @@ from canopyguard.lidar.coreg import (
     accept,
     align,
     align_pooled,
+    apply_horizontal_shift,
     apply_shift,
     estimate_pooled_shift,
     estimate_shift,
@@ -139,3 +140,14 @@ def test_pooled_alignment_needs_usable_cells():
     flat = np.zeros((40, 40))
     with pytest.raises(ValueError, match="Too few usable cells"):
         estimate_pooled_shift([(flat, flat + 1.0)], RESOLUTION)
+
+
+def test_horizontal_shift_leaves_the_vertical_datum_alone():
+    """A canopy height grid is a difference taken inside one epoch, so its
+    datum has already cancelled and the terrain offset must not reach it."""
+    grid = rough_terrain(size=40, seed=21)
+    shift = {"dx_m": 0.0, "dy_m": 0.0, "dz_m": 2.5}
+    horizontal = apply_horizontal_shift(grid, shift, RESOLUTION)
+    vertical = apply_shift(grid, shift, RESOLUTION)
+    assert np.nanmax(np.abs(horizontal - grid)) < 1e-9
+    assert np.nanmean(vertical - horizontal) == pytest.approx(-2.5)

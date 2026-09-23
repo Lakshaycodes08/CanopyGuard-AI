@@ -66,8 +66,11 @@ def test_decimation_target_rejects_a_target_below_the_floor():
 
 
 def test_poisson_radius_matches_the_requested_density():
-    assert poisson_radius(4.0) == pytest.approx(0.5)
-    assert poisson_radius(13.73) == pytest.approx(1.0 / np.sqrt(13.73))
+    """Greedy exclusion sampling saturates near 0.70 over r squared, so the
+    plain inverse square root leaves the result about 1.4 times sparser."""
+    assert poisson_radius(0.70) == pytest.approx(1.0)
+    assert poisson_radius(13.73) == pytest.approx(np.sqrt(0.70 / 13.73))
+    assert poisson_radius(13.73) < 1.0 / np.sqrt(13.73)
 
 
 def test_scan_angle_mask_keeps_the_shared_band():
@@ -129,8 +132,10 @@ def test_config_exclusion_overrides_a_passing_screen():
 
 
 def test_sample_radius_uses_the_sparsest_admitted_epoch():
+    """Every epoch is thinned to the density the sparsest admitted one can
+    supply, so the measurement runs at the density the comparison runs at."""
     from canopyguard.lidar.harmonize import sample_radius_for, screen_epochs
 
     results = screen_epochs(LIDAR_CONFIG)
     radius = sample_radius_for(LIDAR_CONFIG, results)
-    assert radius == pytest.approx(1.0 / np.sqrt(13.73))
+    assert radius == pytest.approx(np.sqrt(0.70 / 13.73))

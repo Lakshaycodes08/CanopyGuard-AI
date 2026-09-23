@@ -120,3 +120,41 @@ def test_noise_floor_table_carries_the_same_decay_to_every_row():
     ladder = {s: np.random.default_rng(1).normal(size=500) for s in (10.0, 20.0, 40.0)}
     rows = noise_floor_table(ladder, base_scale_m=10.0)
     assert len({row["decay_exponent"] for row in rows}) == 1
+
+
+def test_a_scale_below_the_cell_minimum_is_reported_but_not_admitted():
+    """A spread from a handful of cells carries no information, so it does
+    not enter the gate or the decay fit."""
+    generator = np.random.default_rng(3)
+    ladder = {
+        10.0: generator.normal(0.0, 1.0, 4000),
+        20.0: generator.normal(0.0, 0.7, 1000),
+        50.0: generator.normal(0.0, 0.5, 400),
+        200.0: generator.normal(0.0, 3.0, 4),
+    }
+    rows = noise_floor_table(ladder, base_scale_m=10.0, min_cells=200)
+    admitted = {row["scale_m"]: row["admitted"] for row in rows}
+    assert admitted == {10.0: True, 20.0: True, 50.0: True, 200.0: False}
+    assert rows[0]["decay_scales"] == 3.0
+    assert rows[0]["decay_exponent"] > 0.0
+
+
+def test_decay_is_not_fitted_below_three_admitted_scales():
+    generator = np.random.default_rng(4)
+    ladder = {10.0: generator.normal(0.0, 1.0, 400), 20.0: generator.normal(0, 1, 4)}
+    rows = noise_floor_table(ladder, base_scale_m=10.0, min_cells=200)
+    assert np.isnan(rows[0]["decay_exponent"])
+
+
+def test_relative_error_falls_with_the_cell_count():
+    generator = np.random.default_rng(5)
+    ladder = {10.0: generator.normal(0, 1, 5000), 20.0: generator.normal(0, 1, 50)}
+    rows = noise_floor_table(ladder, base_scale_m=10.0)
+    assert rows[0]["sigma_relative_error"] < rows[1]["sigma_relative_error"]
+
+
+def test_both_spread_estimates_are_reported():
+    generator = np.random.default_rng(6)
+    rows = noise_floor_table({10.0: generator.normal(0, 1, 2000)}, base_scale_m=10.0)
+    assert rows[0]["sigma_m"] == pytest.approx(1.0, abs=0.1)
+    assert rows[0]["sigma_plain_m"] == pytest.approx(1.0, abs=0.1)

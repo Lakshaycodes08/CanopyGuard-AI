@@ -172,9 +172,20 @@ def align(
 def apply_shift(
     moving: ArrayLike, shift: dict[str, float], resolution: float
 ) -> NDArray[np.float64]:
-    """Correct a moving grid by the negative of an estimated offset."""
-    corrected = shift_bilinear(moving, -shift["dx_m"], -shift["dy_m"], resolution)
-    return corrected - shift["dz_m"]
+    """Correct a moving elevation grid by the negative of an estimated offset."""
+    return apply_horizontal_shift(moving, shift, resolution) - shift["dz_m"]
+
+
+def apply_horizontal_shift(
+    moving: ArrayLike, shift: dict[str, float], resolution: float
+) -> NDArray[np.float64]:
+    """Correct a moving grid horizontally only.
+
+    A canopy height grid is a surface minus a terrain measured inside one
+    epoch, so the vertical datum has already cancelled. Applying the terrain
+    vertical offset to it would put the datum back in.
+    """
+    return shift_bilinear(moving, -shift["dx_m"], -shift["dy_m"], resolution)
 
 
 def residual_rmse(reference: ArrayLike, moving: ArrayLike, resolution: float) -> float:

@@ -4,9 +4,11 @@ import numpy as np
 import pytest
 
 from canopyguard.lidar.noise_floor import (
+    admit_tile,
     canopy_height,
     complete_tiles,
     evaluate_gate,
+    height_summary,
     pool_ladder,
     surface_paths,
     tile_stem,
@@ -125,3 +127,74 @@ def test_gate_fails_when_sigma_rises_with_scale():
 def test_gate_needs_a_measured_scale():
     with pytest.raises(ValueError, match="at least one measured scale"):
         evaluate_gate([], shift(), GATE)
+
+
+ADMISSION = {"min_valid_fraction": 0.5, "min_coverage_agreement": 0.8}
+
+
+def surface(valid_cells: int, size: int = 100):
+    grid = np.full(size, np.nan)
+    grid[:valid_cells] = 10.0
+    return grid.reshape(10, 10)
+
+
+def test_a_tile_both_epochs_cover_is_admitted():
+    verdict = admit_tile(surface(90), surface(85), ADMISSION)
+    assert verdict["admitted"]
+    assert verdict["coverage_agreement"] == pytest.approx(85 / 90)
+
+
+def test_an_empty_epoch_is_rejected():
+    """The raster writer produces a file even when no point reaches it, so a
+    tile outside one acquisition looks built."""
+    verdict = admit_tile(surface(90), surface(0), ADMISSION)
+    assert not verdict["admitted"]
+    assert verdict["reason"] == "coverage below the minimum"
+
+
+def test_epochs_that_disagree_on_coverage_are_rejected():
+    """A tenth of the returns in one epoch lowers the surface maximum in that
+    epoch alone, which reads as canopy loss."""
+    verdict = admit_tile(surface(95), surface(55), ADMISSION)
+    assert not verdict["admitted"]
+    assert verdict["reason"] == "epoch coverages disagree"
+
+
+def test_mismatched_grids_are_rejected():
+    assert not admit_tile(np.zeros((4, 4)), np.zeros((5, 5)), ADMISSION)["admitted"]
+
+
+def test_height_summary_describes_what_the_tile_carries():
+    heights = np.array([[0.5, 1.0, 3.0, 8.0, 12.0, np.nan]])
+    summary = height_summary(heights)
+    assert summary["cells"] == 5.0
+    assert summary["median_m"] == pytest.approx(3.0)
+    assert summary["above_2m"] == pytest.approx(0.6)
+    assert summary["above_10m"] == pytest.approx(0.2)
+
+
+def test_height_summary_of_an_empty_tile():
+    assert height_summary(np.full((3, 3), np.nan)) == {"cells": 0.0}
+
+
+def test_gate_ignores_a_scale_the_sample_cannot_support():
+    measured = rows(1.2) + [
+        {"scale_m": 200.0, "sigma_m": 9.0, "mean_m": -3.0, "admitted": False}
+    ]
+    for row in measured[:2]:
+        row["admitted"] = True
+    result = evaluate_gate(measured, shift(), GATE)
+    assert result["admitted_scales"] == [10.0, 100.0]
+    assert result["passed"]
+
+
+def test_gate_fails_when_the_reference_scale_is_not_admitted():
+    measured = [{"scale_m": 10.0, "sigma_m": 0.3, "mean_m": 0.3, "admitted": True}]
+    result = evaluate_gate(measured, shift(), GATE)
+    assert not result["checks"]["reference_scale_admitted"]
+
+
+def test_gate_needs_an_admitted_scale():
+    with pytest.raises(ValueError, match="at least one measured scale"):
+        evaluate_gate([{"scale_m": 10.0, "sigma_m": 1.0, "mean_m": 0.0,
+                        "admitted": False}], shift(), GATE)

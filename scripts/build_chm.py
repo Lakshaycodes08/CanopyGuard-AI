@@ -52,7 +52,7 @@ def _build_tile(reader, epoch: str, index: int, grid, config) -> None:
         grid,
         config,
     )
-    print(f"{stem} terrain points: {run_pipeline(terrain)}")
+    print(f"{stem} ground points: {run_pipeline(terrain)['points']}")
     for threshold in config["chm"]["pit_free_layers_m"]:
         layer = build_layer_pipeline(
             reader,

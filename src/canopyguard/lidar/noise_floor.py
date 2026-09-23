@@ -9,7 +9,12 @@ import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
 from canopyguard.evaluation.detectability import noise_floor_table
-from canopyguard.lidar.coreg import align_pooled, apply_shift, residual_rmse
+from canopyguard.lidar.coreg import (
+    align_pooled,
+    apply_horizontal_shift,
+    apply_shift,
+    residual_rmse,
+)
 from canopyguard.lidar.difference import difference_ladder
 
 
@@ -26,6 +31,27 @@ def canopy_height(
     height = top - ground
     outside = (height < chm["clamp_min_m"]) | (height > chm["clamp_max_m"])
     return np.where(outside, np.nan, height)
+
+
+def height_summary(height: ArrayLike) -> dict[str, float]:
+    """Canopy height distribution of one tile.
+
+    A measurement made where nothing is standing is a measurement of bare
+    ground, whatever the pipeline is called, so the height the sample carries
+    is reported alongside the spread of its change.
+    """
+    values = np.asarray(height, dtype=np.float64).ravel()
+    values = values[np.isfinite(values)]
+    if values.size == 0:
+        return {"cells": 0.0}
+    return {
+        "cells": float(values.size),
+        "median_m": float(np.median(values)),
+        "p95_m": float(np.percentile(values, 95)),
+        "above_2m": float(np.mean(values > 2.0)),
+        "above_5m": float(np.mean(values > 5.0)),
+        "above_10m": float(np.mean(values > 10.0)),
+    }
 
 
 def tile_stem(epoch: str, index: int) -> str:
@@ -60,6 +86,39 @@ def complete_tiles(
     return ready
 
 
+def admit_tile(
+    first: ArrayLike, second: ArrayLike, rules: dict[str, Any]
+) -> dict[str, Any]:
+    """Decide whether a tile's two surfaces can be differenced.
+
+    The raster writer produces a file even when no point reaches it, so a tile
+    outside one acquisition looks built. A tile inside both can still carry a
+    tenth of the returns in one epoch, which biases the surface maximum
+    downward in that epoch alone, so the two coverages are compared as well as
+    counted.
+    """
+    top = np.asarray(first, dtype=np.float64)
+    bottom = np.asarray(second, dtype=np.float64)
+    if top.shape != bottom.shape:
+        return {"admitted": False, "reason": "grids differ"}
+
+    counts = (int(np.isfinite(top).sum()), int(np.isfinite(bottom).sum()))
+    fraction = min(counts) / float(top.size)
+    agreement = min(counts) / max(counts) if max(counts) else 0.0
+    result = {
+        "valid_cells": [float(value) for value in counts],
+        "valid_fraction": float(fraction),
+        "coverage_agreement": float(agreement),
+        "admitted": True,
+        "reason": "",
+    }
+    if fraction < rules["min_valid_fraction"]:
+        result.update(admitted=False, reason="coverage below the minimum")
+    elif agreement < rules["min_coverage_agreement"]:
+        result.update(admitted=False, reason="epoch coverages disagree")
+    return result
+
+
 def pool_ladder(
     deltas: list[dict[float, NDArray[np.float64]]],
 ) -> dict[float, NDArray[np.float64]]:
@@ -79,12 +138,13 @@ def evaluate_gate(
     shift: dict[str, float],
     thresholds: dict[str, Any],
 ) -> dict[str, Any]:
-    """Apply the gate conditions to a measured noise floor."""
-    if not rows:
+    """Apply the gate conditions to the scales the sample can support."""
+    admitted = [row for row in rows if row.get("admitted", True)]
+    if not admitted:
         raise ValueError("Gate needs at least one measured scale")
 
-    by_scale = {row["scale_m"]: row for row in rows}
-    sigmas = [row["sigma_m"] for row in rows]
+    by_scale = {row["scale_m"]: row for row in admitted}
+    sigmas = [row["sigma_m"] for row in admitted]
     finest = by_scale[min(by_scale)]
     low, high = thresholds["mean_one_year_change_m"]
     reference = thresholds["sigma_reference_scale_m"]
@@ -103,23 +163,29 @@ def evaluate_gate(
             by_scale.get(reference, {}).get("sigma_m", float("inf"))
             < thresholds["max_sigma_at_reference_m"]
         ),
+        "reference_scale_admitted": bool(reference in by_scale),
     }
     return {
         "checks": checks,
         "passed": all(checks.values()),
         "shift_m": shift["magnitude_m"],
         "tiles": shift["tiles"],
+        "admitted_scales": [row["scale_m"] for row in admitted],
     }
 
 
 def _load_pairs(
-    plan: dict[str, Any], out_dir: str | Path, epochs: tuple[str, str]
-) -> list[dict[str, Any]]:
-    """Read both surfaces of both epochs for every tile that has all four."""
+    plan: dict[str, Any],
+    out_dir: str | Path,
+    epochs: tuple[str, str],
+    rules: dict[str, Any],
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    """Read both surfaces of both epochs and admit the tiles worth using."""
     from canopyguard.lidar.gridio import read_grid
 
     start, end = epochs
-    loaded = []
+    loaded: list[dict[str, Any]] = []
+    verdicts: list[dict[str, Any]] = []
     for index in complete_tiles(plan, out_dir, epochs):
         first = surface_paths(out_dir, start, index)
         second = surface_paths(out_dir, end, index)
@@ -127,8 +193,17 @@ def _load_pairs(
         surface_a, _ = read_grid(first["dsm"])
         terrain_b, _ = read_grid(second["dtm"])
         surface_b, _ = read_grid(second["dsm"])
+
+        verdict = {"tile": float(index)}
         shapes = {grid.shape for grid in (terrain_a, surface_a, terrain_b, surface_b)}
         if len(shapes) != 1:
+            verdict.update(admitted=False, reason="grids differ")
+            verdicts.append(verdict)
+            continue
+
+        verdict.update(admit_tile(surface_a, surface_b, rules))
+        verdicts.append(verdict)
+        if not verdict["admitted"]:
             continue
         loaded.append(
             {
@@ -139,7 +214,7 @@ def _load_pairs(
                 "surface": (surface_a, surface_b),
             }
         )
-    return loaded
+    return loaded, verdicts
 
 
 def measure(
@@ -159,9 +234,11 @@ def measure(
     aggregation = config["aggregation"]
     epochs = tuple(config["noise_floor"]["epoch_pair"])
 
-    loaded = _load_pairs(plan, out_dir, epochs)
+    loaded, verdicts = _load_pairs(
+        plan, out_dir, epochs, config["noise_floor"]["tile_admission"]
+    )
     if not loaded:
-        raise ValueError("No tile has all four surfaces on a common grid")
+        raise ValueError("No tile passed admission")
 
     shift = align_pooled(
         [tile["terrain"] for tile in loaded],
@@ -172,7 +249,7 @@ def measure(
         settings["convergence_tolerance_m"],
     )
 
-    residuals: list[dict[str, float]] = []
+    heights: list[dict[str, Any]] = []
     deltas: list[dict[float, NDArray[np.float64]]] = []
     for tile in loaded:
         terrain_a, terrain_b = tile["terrain"]
@@ -180,14 +257,16 @@ def measure(
         first, second = tile["paths"]
 
         height_a = canopy_height(surface_a, terrain_a, config)
-        height_b = apply_shift(
+        height_b = apply_horizontal_shift(
             canopy_height(surface_b, terrain_b, config), shift, resolution
         )
         write_grid(first["chm"], height_a, tile["profile"])
         write_grid(second["chm"], height_b, tile["profile"])
-        residuals.append(
+        heights.append(
             {
                 "tile": float(tile["index"]),
+                epochs[0]: height_summary(height_a),
+                epochs[1]: height_summary(height_b),
                 "rmse_before_m": residual_rmse(terrain_a, terrain_b, resolution),
                 "rmse_after_m": residual_rmse(
                     terrain_a, apply_shift(terrain_b, shift, resolution), resolution
@@ -204,10 +283,15 @@ def measure(
             )
         )
 
-    rows = noise_floor_table(pool_ladder(deltas), base_scale_m=resolution)
+    rows = noise_floor_table(
+        pool_ladder(deltas),
+        base_scale_m=resolution,
+        min_cells=int(aggregation["min_cells_per_scale"]),
+    )
     return {
         "rows": rows,
         "shift": shift,
-        "residuals": residuals,
+        "tiles": verdicts,
+        "heights": heights,
         "gate": evaluate_gate(rows, shift, config["noise_floor"]["gate"]),
     }

@@ -35,9 +35,11 @@ def main() -> int:
     )
     print(f"drawn {plan['tile_count']} tiles, {plan['sample_area_km2']:.1f} km2")
     print(f"sampling radius {plan['sample_radius_m']:.4f} m")
+    print("\ntile epoch      retained          ground   ground%   scan angle")
 
+    previous = _build_log(out)
     build_log = [
-        _build(tile, epoch, reader, out, config)
+        _build(tile, epoch, reader, out, config, previous)
         for tile in plan["tiles"]
         for epoch, reader in sorted(tile["readers"].items())
     ]
@@ -49,7 +51,7 @@ def main() -> int:
     (out / "noise_floor.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
     )
-    _report(result)
+    _report(result, tuple(config["noise_floor"]["epoch_pair"]))
     return 0 if result["gate"]["passed"] else 1
 
 
@@ -85,27 +87,83 @@ def _footprints(config, out: Path) -> dict[str, list]:
     return footprints
 
 
-def _build(tile, epoch: str, reader, out: Path, config) -> dict:
+def _build_log(out: Path) -> dict[tuple[int, str], dict]:
+    """Recorded outcome of a previous build, keyed by tile and epoch."""
+    log = out / "build_log.json"
+    if not log.exists():
+        return {}
+    return {
+        (int(entry["tile"]), str(entry["epoch"])): entry
+        for entry in json.loads(log.read_text(encoding="utf-8"))
+    }
+
+
+def _build(tile, epoch: str, reader, out: Path, config, previous: dict) -> dict:
+    """Build one epoch of one tile, or report the recorded previous result.
+
+    A tile that produced no point still leaves a raster on disk, so the cache
+    test is the recorded point count rather than the presence of a file.
+    """
     paths = surface_paths(out, epoch, tile["index"])
-    built = (paths[kind] for kind in ("dtm", "dsm"))
-    if all(path.exists() and path.stat().st_size for path in built):
-        print(f"tile {tile['index']:>4} {epoch} cached")
-        return {"tile": tile["index"], "epoch": epoch, "points": -1, "note": "cached"}
+    done = previous.get((tile["index"], epoch))
+    built = all(path.exists() and path.stat().st_size for path in
+                (paths["dtm"], paths["dsm"]))
+    if built and done and done.get("ground_points", 0) > 0:
+        print(f"{tile['index']:>4} {epoch}  cached")
+        return done
 
     pipeline = build_terrain_pipeline(
         reader, str(paths["dtm"]), str(paths["dsm"]), tile["grid"], config
     )
+    entry = {"tile": tile["index"], "epoch": epoch, "note": ""}
     try:
-        points = run_pipeline(pipeline)
-        note = ""
+        outcome = run_pipeline(pipeline)
+        stats = outcome["stats"]
+        retained = int(stats.get("Z", {}).get("count", 0))
+        angle = stats.get("ScanAngleRank", {})
+        entry.update(
+            ground_points=outcome["points"],
+            retained_points=retained,
+            ground_fraction=outcome["points"] / retained if retained else 0.0,
+            scan_angle_min=angle.get("minimum"),
+            scan_angle_max=angle.get("maximum"),
+            gps_time=stats.get("GpsTime", {}),
+        )
     except (RuntimeError, OSError) as error:
-        points, note = 0, str(error)[:200]
-    print(f"tile {tile['index']:>4} {epoch} points {points:>12,} {note}")
-    return {"tile": tile["index"], "epoch": epoch, "points": points, "note": note}
+        entry.update(ground_points=0, retained_points=0, note=str(error)[:160])
+
+    angle_span = (
+        f"{entry.get('scan_angle_min', 0):+.1f} to {entry.get('scan_angle_max', 0):+.1f}"
+        if entry.get("scan_angle_max") is not None
+        else ""
+    )
+    print(
+        f"{tile['index']:>4} {epoch}  {entry['retained_points']:>12,} "
+        f"{entry['ground_points']:>14,}  {entry.get('ground_fraction', 0):>7.1%}   "
+        f"{angle_span} {entry['note']}"
+    )
+    return entry
 
 
-def _report(result: dict) -> None:
+def _report(result: dict, epochs: tuple[str, str]) -> None:
     shift = result["shift"]
+    admitted = [tile for tile in result["tiles"] if tile["admitted"]]
+    print(f"\ntiles admitted {len(admitted)} of {len(result['tiles'])}")
+    for tile in result["tiles"]:
+        if not tile["admitted"]:
+            print(f"  tile {tile['tile']:>4.0f} rejected: {tile['reason']}")
+
+    print("\ntile   median_h    p95_h   above2m   above5m  above10m")
+    for entry in result["heights"]:
+        summary = entry[epochs[0]]
+        if not summary.get("cells"):
+            continue
+        print(
+            f"{entry['tile']:>4.0f} {summary['median_m']:>10.2f} "
+            f"{summary['p95_m']:>8.2f} {summary['above_2m']:>9.1%} "
+            f"{summary['above_5m']:>9.1%} {summary['above_10m']:>9.1%}"
+        )
+
     print(
         f"\nshift dx {shift['dx_m']:+.3f} dy {shift['dy_m']:+.3f} "
         f"dz {shift['dz_m']:+.3f} over {shift['tiles']:.0f} tiles, "
@@ -114,13 +172,19 @@ def _report(result: dict) -> None:
     print(
         f"terrain rmse {shift['rmse_before_m']:.3f} -> {shift['rmse_after_m']:.3f} m"
     )
-    print("\nscale_m    sigma   lod95    mean        cells")
+
+    print("\nscale_m    nmad       sd   lod95    mean        cells  rel_err  used")
     for row in result["rows"]:
         print(
-            f"{row['scale_m']:>7.0f} {row['sigma_m']:>8.3f} {row['lod95_m']:>7.3f} "
-            f"{row['mean_m']:>+7.3f} {row['cells']:>12,.0f}"
+            f"{row['scale_m']:>7.0f} {row['sigma_m']:>7.3f} "
+            f"{row['sigma_plain_m']:>8.3f} {row['lod95_m']:>7.3f} "
+            f"{row['mean_m']:>+7.3f} {row['cells']:>12,.0f} "
+            f"{row['sigma_relative_error']:>7.1%}  {'yes' if row['admitted'] else 'no'}"
         )
-    print(f"\ndecay exponent {result['rows'][0]['decay_exponent']:.3f}")
+    print(
+        f"\ndecay exponent {result['rows'][0]['decay_exponent']:.3f} "
+        f"over {result['rows'][0]['decay_scales']:.0f} scales"
+    )
     for name, passed in result["gate"]["checks"].items():
         print(f"{'PASS' if passed else 'FAIL'}  {name}")
     print(f"\nGATE {'PASS' if result['gate']['passed'] else 'FAIL'}")

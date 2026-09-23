@@ -117,9 +117,18 @@ def smallest_resolving_scale(
 
 
 def noise_floor_table(
-    delta_by_scale: dict[float, ArrayLike], base_scale_m: float
+    delta_by_scale: dict[float, ArrayLike],
+    base_scale_m: float,
+    min_cells: int = 0,
 ) -> list[dict[str, float]]:
-    """Measured error standard deviation and detection limit at each scale."""
+    """Measured error spread and detection limit at each aggregation scale.
+
+    A scale whose cell count falls below `min_cells` is measured and reported
+    but marked not admitted. The relative standard error of a spread estimate
+    from n values is of order 1 / sqrt(2n), so a handful of cells gives a
+    figure that carries no information, and the decay fit is taken over the
+    admitted scales only.
+    """
     rows = []
     for scale in sorted(delta_by_scale):
         values = _finite(delta_by_scale[scale])
@@ -128,18 +137,27 @@ def noise_floor_table(
             {
                 "scale_m": float(scale),
                 "cells": float(values.size),
+                "admitted": bool(values.size >= min_cells),
                 "mean_m": float(np.mean(values)),
                 "sigma_m": sigma,
                 "sigma_plain_m": noise_sigma(values, robust=False),
                 "lod95_m": lod95(sigma),
+                "sigma_relative_error": float(1.0 / np.sqrt(2.0 * values.size)),
             }
         )
-    decay = decay_exponent(
-        [row["scale_m"] for row in rows],
-        [row["sigma_m"] for row in rows],
-        base_scale_m,
+
+    admitted = [row for row in rows if row["admitted"]]
+    decay = (
+        decay_exponent(
+            [row["scale_m"] for row in admitted],
+            [row["sigma_m"] for row in admitted],
+            base_scale_m,
+        )
+        if len(admitted) >= 3
+        else {"exponent": float("nan"), "r2": float("nan")}
     )
     for row in rows:
         row["decay_exponent"] = decay["exponent"]
         row["decay_r2"] = decay["r2"]
+        row["decay_scales"] = float(len(admitted))
     return rows

@@ -54,11 +54,23 @@ noise_floor:
   search_box: [-123.40, 38.10, -122.30, 38.90]
   coverage_source: ept_source_manifest
   coverage_note: >
-    The two work units abut rather than overlap. Their delivery tile grids are
-    offset by half a tile, so co-coverage is a seam at most 645 m wide and
-    about 51 km2 in total. Tiles are derived from the source manifests at run
-    time rather than from a bounding box, because a box drawn around the seam
-    contains mostly single-epoch ground.
+    The two work units abut rather than overlap. Their 1 km delivery tile
+    grids are offset by about half a tile, so co-coverage is a seam at most
+    507 m wide and about 51 km2 in total. Tiles are derived from the source
+    manifests at run time rather than from a bounding box, because a box drawn
+    around the seam contains mostly single-epoch ground. A manifest bound is
+    the box of a delivered file's points, not its flown polygon, so the seam
+    figure is an upper bound and tile admission is checked again on the built
+    surfaces.
+  tile_admission:
+    min_valid_fraction: 0.5
+    min_coverage_agreement: 0.8
+    admission_note: >
+      The raster writer produces a file even when no point reaches it, so a
+      tile outside one acquisition looks built. A tile inside both can still
+      carry a tenth of the returns in one epoch, which lowers the surface
+      maximum in that epoch alone, so the two coverages are compared as well
+      as counted.
   gate:
     mean_one_year_change_m: [0.0, 1.5]
     max_shift_m: 1.5
@@ -83,8 +95,14 @@ harmonization:
     Derived at run time from the sparsest admitted epoch density. Left null in
     the config so it cannot drift from the epochs actually admitted.
   drop_classes: [7, 9, 12, 18]
-  drop_withheld: true
-  drop_overlap: true
+  drop_class_flags: true
+  drop_class_flags_note: >
+    Withheld and overlap are bits of the classification flags byte in the
+    point format these acquisitions use, not classification values, so a
+    filter on Classification does not reach them. Overlap returns are the
+    edge-of-swath returns of an adjacent strip, and two acquisitions do not
+    overlap in the same places.
+  stats_dimensions: [Z, ScanAngleRank, GpsTime, NumberOfReturns]
 
 chm:
   resolution_m: 1.0
@@ -129,13 +147,20 @@ coregistration:
 aggregation:
   scales_m: [10, 20, 30, 50, 100, 200]
   statistic: mean
-  secondary_statistic: p95
   min_valid_fraction: 0.5
+  min_cells_per_scale: 200
+  min_cells_note: >
+    The relative standard error of a spread estimate from n values is of order
+    one over the square root of twice n, so 200 cells give about 5 percent. A
+    scale below the minimum is measured and reported but does not enter the
+    gate or the decay fit.
   ladder_note: >
     A scale wider than the calibration tile cannot be measured. The widest
     co-covered square the epoch pair admits is about 500 m and there is one of
     them, so the ladder stops at 200 m and coarser scales are extrapolated
-    from the fitted decay exponent and reported as extrapolated.
+    from the fitted decay exponent and reported as extrapolated. A 250 m tile
+    yields one cell at 200 m, so that scale needs the sample to carry at least
+    min_cells_per_scale tiles before it says anything.
 
 tiers:
   corridor_buffer_m: 60
@@ -145,6 +170,10 @@ tiers:
   tile_size_note: >
     Set by the width of the co-coverage seam. No 750 m or 1000 m square lies
     wholly inside both acquisitions anywhere in the search box.
+  sample_radius_note: >
+    The thinning target is the sparsest admitted epoch, which is 2013 and is
+    not in the noise-floor pair. The floor is measured at the density the
+    production comparison runs at, not at the density the pair could support.
   stratify_by: [vegetation_group, slope_band, burn_state]
   slope_bands_deg: [[0, 15], [15, 30], [30, 90]]
   seed: 42

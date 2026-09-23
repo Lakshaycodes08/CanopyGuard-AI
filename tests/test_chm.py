@@ -9,6 +9,7 @@ from canopyguard.lidar.chm import (
     class_filter_stage,
     crop_stage,
     decimation_stage,
+    flag_filter_stage,
     ground_only_stage,
     ground_stage,
     hag_stage,
@@ -18,7 +19,9 @@ from canopyguard.lidar.chm import (
     reader_stage,
     return_guard_stage,
     scan_angle_stage,
+    stats_stage,
 )
+from canopyguard.lidar.chm import pipeline_stats
 
 CONFIG = {
     "harmonization": {
@@ -26,6 +29,8 @@ CONFIG = {
         "drop_classes": [7, 9, 12, 18],
         "max_scan_angle_deg": 15.0,
         "sample_radius_m": 0.27,
+        "drop_class_flags": True,
+        "stats_dimensions": ["Z", "ScanAngleRank"],
     },
     "chm": {
         "resolution_m": 1.0,
@@ -240,3 +245,70 @@ def test_pit_free_combine_clamps_impossible_heights():
 def test_pit_free_combine_rejects_an_empty_stack():
     with pytest.raises(ValueError, match="At least one layer"):
         pit_free_combine([], 0.0, 120.0)
+
+
+def test_flag_filter_drops_withheld_and_overlap():
+    """Withheld and overlap are bits of the classification flags byte, not
+    classification values, so a filter on Classification misses them."""
+    stage = flag_filter_stage()
+    assert stage["type"] == "filters.expression"
+    assert stage["expression"] == "ClassFlags == 0 || ClassFlags == 2"
+
+
+def test_flag_filter_runs_before_reprojection():
+    pipeline = build_terrain_pipeline(
+        reader_stage("in.laz"), "dtm.tif", "dsm.tif", GRID, CONFIG
+    )["pipeline"]
+    expressions = [stage.get("expression") for stage in pipeline]
+    flags = expressions.index("ClassFlags == 0 || ClassFlags == 2")
+    assert flags < types_of(pipeline).index("filters.reprojection")
+
+
+def test_flag_filter_is_optional():
+    config = {**CONFIG, "harmonization": {**CONFIG["harmonization"]}}
+    config["harmonization"]["drop_class_flags"] = False
+    pipeline = build_terrain_pipeline(
+        reader_stage("in.laz"), "dtm.tif", "dsm.tif", GRID, config
+    )["pipeline"]
+    assert "ClassFlags == 0 || ClassFlags == 2" not in [
+        stage.get("expression") for stage in pipeline
+    ]
+
+
+def test_stats_stage_names_its_dimensions():
+    assert stats_stage(["Z", "GpsTime"])["dimensions"] == "Z,GpsTime"
+    with pytest.raises(ValueError, match="At least one dimension"):
+        stats_stage([])
+
+
+def test_statistics_are_recorded_on_the_retained_points():
+    """The pipeline ends on the ground surface, so its own count is ground
+    returns and the retained count has to come from earlier."""
+    pipeline = build_terrain_pipeline(
+        reader_stage("in.laz"), "dtm.tif", "dsm.tif", GRID, CONFIG
+    )["pipeline"]
+    order = types_of(pipeline)
+    assert order.index("filters.stats") < order.index("filters.smrf")
+    assert order.index("filters.sample") < order.index("filters.stats")
+
+
+def test_pipeline_stats_reads_the_statistics_node():
+    metadata = {
+        "metadata": {
+            "filters.stats": {
+                "statistic": [
+                    {"name": "Z", "count": 100, "minimum": 1.0, "maximum": 9.0,
+                     "average": 5.0},
+                    {"name": "ScanAngleRank", "count": 100, "minimum": -14.0,
+                     "maximum": 13.0, "average": 0.2},
+                ]
+            }
+        }
+    }
+    stats = pipeline_stats(metadata)
+    assert stats["Z"]["count"] == 100.0
+    assert stats["ScanAngleRank"]["minimum"] == -14.0
+
+
+def test_pipeline_stats_tolerates_a_missing_node():
+    assert pipeline_stats({"metadata": {}}) == {}

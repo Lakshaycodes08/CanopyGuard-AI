@@ -38,6 +38,32 @@ def return_guard_stage() -> dict[str, Any]:
     }
 
 
+def flag_filter_stage() -> dict[str, Any]:
+    """Drop withheld, overlap and synthetic returns.
+
+    In the point format these acquisitions use, withheld and overlap are bits
+    of the classification flags byte, not a classification value, so a filter
+    on Classification does not reach them. Bit 0 is synthetic, bit 1 is key
+    point, bit 2 is withheld and bit 3 is overlap, so the returns to keep are
+    the ones whose flags byte is zero or carries the key point bit alone.
+
+    Overlap returns are the edge-of-swath returns of an adjacent strip. Two
+    acquisitions do not overlap in the same places, so leaving them in puts a
+    strip-geometry difference straight into the measured change.
+    """
+    return {
+        "type": "filters.expression",
+        "expression": "ClassFlags == 0 || ClassFlags == 2",
+    }
+
+
+def stats_stage(dimensions: list[str]) -> dict[str, Any]:
+    """Record per-dimension statistics at this point in the pipeline."""
+    if not dimensions:
+        raise ValueError("At least one dimension is required")
+    return {"type": "filters.stats", "dimensions": ",".join(dimensions)}
+
+
 def reprojection_stage(target_crs: str) -> dict[str, Any]:
     """Reproject to the common working frame."""
     return {"type": "filters.reprojection", "out_srs": target_crs}
@@ -166,16 +192,19 @@ def _preamble(
     reader: dict[str, Any], grid: dict[str, Any], config: dict[str, Any]
 ) -> list[dict[str, Any]]:
     harmonization = config["harmonization"]
-    return [
-        dict(reader),
-        return_guard_stage(),
+    stages = [dict(reader), return_guard_stage()]
+    if harmonization.get("drop_class_flags", True):
+        stages.append(flag_filter_stage())
+    stages += [
         reprojection_stage(harmonization["target_crs"]),
         class_filter_stage(harmonization["drop_classes"]),
         scan_angle_stage(harmonization["max_scan_angle_deg"]),
         crop_stage(grid_box(grid)),
         decimation_stage(harmonization["sample_radius_m"]),
+        stats_stage(harmonization["stats_dimensions"]),
         ground_stage(config["chm"]["smrf"]),
     ]
+    return stages
 
 
 def build_terrain_pipeline(
@@ -242,8 +271,13 @@ def pit_free_combine(
     return np.where(outside, np.nan, combined)
 
 
-def run_pipeline(pipeline: dict[str, Any]) -> int:
-    """Execute a PDAL pipeline and return the point count.
+def run_pipeline(pipeline: dict[str, Any]) -> dict[str, Any]:
+    """Execute a PDAL pipeline and return its point count and statistics.
+
+    The count is the number of points leaving the last stage. The terrain
+    pipeline ends on the ground surface, so that count is ground returns, and
+    the count of everything retained is taken from the statistics stage
+    instead.
 
     This is the only function in the package that requires PDAL.
     """
@@ -252,4 +286,21 @@ def run_pipeline(pipeline: dict[str, Any]) -> int:
     import pdal
 
     executed = pdal.Pipeline(json.dumps(pipeline))
-    return int(executed.execute())
+    points = int(executed.execute())
+    return {"points": points, "stats": pipeline_stats(json.loads(executed.metadata))}
+
+
+def pipeline_stats(metadata: dict[str, Any]) -> dict[str, dict[str, float]]:
+    """Per-dimension statistics recorded by the statistics stage."""
+    node = metadata.get("metadata", metadata).get("filters.stats", {})
+    if isinstance(node, list):
+        node = node[0] if node else {}
+    return {
+        entry["name"]: {
+            key: float(entry[key])
+            for key in ("count", "minimum", "maximum", "average")
+            if key in entry
+        }
+        for entry in node.get("statistic", [])
+        if "name" in entry
+    }

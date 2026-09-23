@@ -53,11 +53,20 @@ def decimation_target(densities: list[float], floor_pts_m2: float) -> float:
     return float(target)
 
 
+JAMMING_COEFFICIENT = 0.70
+
+
 def poisson_radius(target_density_pts_m2: float) -> float:
-    """Poisson-disk radius giving the requested mean point density."""
+    """Exclusion radius giving the requested mean point density.
+
+    The thinning filter keeps a point when no already-kept point lies within
+    the radius, which is random sequential adsorption of hard disks. That
+    saturates near 0.70 / r squared rather than 1 / r squared, so the plain
+    inverse square root leaves the result about 1.4 times sparser than asked.
+    """
     if target_density_pts_m2 <= 0:
         raise ValueError("Target density must be positive")
-    return float(1.0 / np.sqrt(target_density_pts_m2))
+    return float(np.sqrt(JAMMING_COEFFICIENT / target_density_pts_m2))
 
 
 def scan_angle_mask(angles_deg: ArrayLike, max_abs_deg: float) -> NDArray[np.bool_]:
