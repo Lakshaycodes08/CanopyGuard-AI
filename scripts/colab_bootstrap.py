@@ -16,6 +16,8 @@ RUN_TESTS = os.environ.get("RUN_TESTS", "1") != "0"
 WORK = Path(os.environ.get("WORK", "/content/CanopyGuard-AI"))
 ENV_PREFIX = Path(os.environ.get("ENV_PREFIX", "/content/lidar-env"))
 OUT = Path(os.environ.get("OUT", "/content/truth"))
+SCRIPT = os.environ.get("SCRIPT", "run_noise_floor.py")
+PAIR = os.environ.get("PAIR", "")
 MAMBA_URL = "https://micro.mamba.pm/api/micromamba/linux-64/latest"
 MAMBA = Path("/content/bin/micromamba")
 PROJ_DATA = ENV_PREFIX / "share" / "proj"
@@ -163,7 +165,8 @@ def ensure_test_packages(python: str) -> None:
 
 def main() -> int:
     print(
-        f"branch {BRANCH}\ntiles {TILES}\nworkers {WORKERS}\noutput {OUT}",
+        f"branch {BRANCH}\nscript {SCRIPT}\ntiles {TILES}\nworkers {WORKERS}"
+        f"\noutput {OUT}",
         flush=True,
     )
     fetch_repo()
@@ -182,18 +185,22 @@ def main() -> int:
         ensure_test_packages(python)
         run("tests", [python, "-m", "pytest", "-q"], WORK, environment)
 
+    command = [
+        python,
+        f"scripts/{SCRIPT}",
+        "--tiles",
+        TILES,
+        "--workers",
+        WORKERS,
+        "--out",
+        str(OUT),
+    ]
+    if SCRIPT == "run_change.py" and PAIR:
+        command += ["--pair", PAIR]
+
     print("\n=== measure ===", flush=True)
     process = subprocess.Popen(
-        [
-            python,
-            "scripts/run_noise_floor.py",
-            "--tiles",
-            TILES,
-            "--workers",
-            WORKERS,
-            "--out",
-            str(OUT),
-        ],
+        command,
         cwd=WORK,
         env=environment,
         stdout=subprocess.PIPE,
