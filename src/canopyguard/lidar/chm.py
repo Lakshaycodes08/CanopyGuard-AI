@@ -21,6 +21,8 @@ from canopyguard.lidar.grid import grid_box
 
 FLAG_EXPRESSION = "Synthetic == 0 && Withheld == 0 && Overlap == 0"
 
+Reader = dict[str, Any] | list[dict[str, Any]]
+
 
 def reader_stage(input_path: str) -> dict[str, Any]:
     """Read a point cloud file."""
@@ -190,11 +192,27 @@ def height_threshold_stage(minimum_m: float) -> dict[str, Any]:
     }
 
 
+def reader_stages(reader: Reader) -> list[dict[str, Any]]:
+    """Reader stages of one epoch, merged into a single stream when several.
+
+    An acquisition published as several resources is read one resource at a
+    time, and the merge joins them before any filter sees a point, so every
+    later stage treats the epoch as one cloud.
+    """
+    readers = [reader] if isinstance(reader, dict) else list(reader)
+    if not readers:
+        raise ValueError("At least one reader is required")
+    stages = [dict(stage) for stage in readers]
+    if len(stages) > 1:
+        stages.append({"type": "filters.merge"})
+    return stages
+
+
 def _preamble(
-    reader: dict[str, Any], grid: dict[str, Any], config: dict[str, Any]
+    reader: Reader, grid: dict[str, Any], config: dict[str, Any]
 ) -> list[dict[str, Any]]:
     harmonization = config["harmonization"]
-    stages = [dict(reader), return_guard_stage()]
+    stages = [*reader_stages(reader), return_guard_stage()]
     if harmonization.get("drop_class_flags", True):
         stages.append(flag_filter_stage())
     stages += [
@@ -210,7 +228,7 @@ def _preamble(
 
 
 def build_terrain_pipeline(
-    reader: dict[str, Any],
+    reader: Reader,
     dtm_path: str,
     dsm_path: str,
     grid: dict[str, Any],
@@ -234,7 +252,7 @@ def build_terrain_pipeline(
 
 
 def build_layer_pipeline(
-    reader: dict[str, Any],
+    reader: Reader,
     layer_path: str,
     threshold_m: float,
     grid: dict[str, Any],

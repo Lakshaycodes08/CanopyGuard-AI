@@ -1,6 +1,9 @@
 epochs:
   - name: "2013"
-    dataset: USGS_LPC_CA_Sonoma_A2_A3_A4_2013
+    datasets:
+      - USGS_LPC_CA_Sonoma_A2_2013_LAS_2017
+      - USGS_LPC_CA_Sonoma_A3_2013_LAS_2017
+      - USGS_LPC_CA_Sonoma_A4_2013_LAS_2017
     collection: OT.092014.2871.1
     start: "2013-09-28"
     end: "2013-11-26"
@@ -114,6 +117,22 @@ noise_floor:
       either acquisition. bias_m is specific to this pair and is removed
       from pair differences with lidar.difference.remove_bias before
       comparison against the limit of detection.
+
+change:
+  pairs: [["2013", "2022"], ["2013", "2023"]]
+  tile_size_m: 500
+  tile_count: 60
+  canopy_min_height_m: 2.0
+  bare_max_height_m: 1.0
+  disturbance_limit_m: 3.0
+  change_note: >
+    Long-baseline pairs are measured inside the study box, where both epochs
+    cover the ground in full. The 2013 acquisition is served as three
+    resources, which are read together and merged for each tile. Cells low in
+    both epochs give the pair its own stable-ground check, since the
+    2022-2023 floor is an upper bound measured on a different pair. Cells
+    changing by more than the disturbance limit are reported and left out of
+    the canopy stratum.
 
 admission_screen:
   min_density_pts_m2: 8.0

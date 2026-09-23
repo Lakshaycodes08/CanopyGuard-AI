@@ -17,6 +17,7 @@ from canopyguard.lidar.chm import (
     pit_free_combine,
     raster_stage,
     reader_stage,
+    reader_stages,
     return_guard_stage,
     scan_angle_stage,
     stats_stage,
@@ -312,3 +313,36 @@ def test_pipeline_stats_reads_the_statistics_node():
 
 def test_pipeline_stats_tolerates_a_missing_node():
     assert pipeline_stats({"metadata": {}}) == {}
+
+
+def test_several_readers_are_merged_before_any_filter():
+    readers = [reader_stage("a.laz"), reader_stage("b.laz"), reader_stage("c.laz")]
+    pipeline = build_terrain_pipeline(
+        readers, "dtm.tif", "dsm.tif", GRID, CONFIG
+    )["pipeline"]
+    order = types_of(pipeline)
+    assert order[:4] == ["readers.las"] * 3 + ["filters.merge"]
+    assert order.count("filters.merge") == 1
+    assert pipeline[4]["expression"].startswith("ReturnNumber")
+
+
+def test_layer_pipeline_accepts_several_readers():
+    readers = [reader_stage("a.laz"), reader_stage("b.laz")]
+    pipeline = build_layer_pipeline(readers, "l.tif", 5.0, GRID, CONFIG)["pipeline"]
+    assert types_of(pipeline)[:3] == ["readers.las", "readers.las", "filters.merge"]
+
+
+def test_a_single_reader_is_not_merged():
+    single = build_terrain_pipeline(
+        reader_stage("in.laz"), "dtm.tif", "dsm.tif", GRID, CONFIG
+    )["pipeline"]
+    listed = build_terrain_pipeline(
+        [reader_stage("in.laz")], "dtm.tif", "dsm.tif", GRID, CONFIG
+    )["pipeline"]
+    assert "filters.merge" not in types_of(single)
+    assert single == listed
+
+
+def test_reader_stages_require_a_reader():
+    with pytest.raises(ValueError, match="At least one reader"):
+        reader_stages([])

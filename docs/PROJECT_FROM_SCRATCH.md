@@ -108,6 +108,8 @@ not spectral value, is what carries information above saturation.
   clouds on AWS. No point-cloud file is downloaded. The LiDAR-to-raster step
   runs in the `canopyguard-lidar` environment on a hosted notebook; every
   other step runs in the working environment on a laptop.
+- The 2013 acquisition is served as three 3DEP resources (Sonoma A2, A3 and
+  A4), which are read together and merged for each tile.
 - Optical composites are built server side in Google Earth Engine and
   exported as rasters. The STAC path in `configs/ingestion.yaml` is the
   fallback for contributors without Earth Engine.
