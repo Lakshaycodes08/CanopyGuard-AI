@@ -27,7 +27,7 @@ def main() -> int:
     count = args.tiles or int(config["tiers"]["sample_tile_count"])
     plan = calibration_plan(config, count, footprints, args.seed)
     config["harmonization"]["sample_radius_m"] = plan["sample_radius_m"]
-    (out / "plan.json").write_text(json.dumps(plan, indent=2), encoding="utf-8")
+    _guard_plan(out, plan)
 
     print(
         f"co-covered {plan['candidate_tiles']} tiles of "
@@ -51,6 +51,24 @@ def main() -> int:
     )
     _report(result)
     return 0 if result["gate"]["passed"] else 1
+
+
+def _guard_plan(out: Path, plan: dict) -> None:
+    """Refuse to reuse surfaces that were built for different tiles.
+
+    Surfaces are named by tile index, so a changed tile list would silently
+    read the previous run's rasters.
+    """
+    saved = out / "plan.json"
+    stale = f"{out} holds surfaces for other tiles; use a new --out"
+    if saved.exists():
+        previous = json.loads(saved.read_text(encoding="utf-8"))
+        boxes = [tile["box"] for tile in previous.get("tiles", [])]
+        if boxes != [tile["box"] for tile in plan["tiles"]]:
+            raise SystemExit(stale)
+    elif any(out.glob("dtm_*.tif")):
+        raise SystemExit(stale)
+    saved.write_text(json.dumps(plan, indent=2), encoding="utf-8")
 
 
 def _footprints(config, out: Path) -> dict[str, list]:
