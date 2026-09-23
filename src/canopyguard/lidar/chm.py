@@ -289,7 +289,10 @@ def run_pipeline(pipeline: dict[str, Any]) -> dict[str, Any]:
 
     executed = pdal.Pipeline(json.dumps(pipeline))
     points = int(executed.execute())
-    return {"points": points, "stats": pipeline_stats(json.loads(executed.metadata))}
+    metadata = executed.metadata
+    if not isinstance(metadata, dict):
+        metadata = json.loads(metadata)
+    return {"points": points, "stats": pipeline_stats(metadata)}
 
 
 def pipeline_stats(metadata: dict[str, Any]) -> dict[str, dict[str, float]]:
