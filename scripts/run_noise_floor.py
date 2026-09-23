@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
 import json
 from pathlib import Path
 
@@ -27,6 +28,7 @@ def main() -> int:
     count = args.tiles or int(config["tiers"]["sample_tile_count"])
     plan = calibration_plan(config, count, footprints, args.seed)
     config["harmonization"]["sample_radius_m"] = plan["sample_radius_m"]
+    plan["build_signature"] = _signature(plan, config)
     _guard_plan(out, plan)
 
     print(
@@ -55,18 +57,30 @@ def main() -> int:
     return 0 if result["gate"]["passed"] else 1
 
 
-def _guard_plan(out: Path, plan: dict) -> None:
-    """Refuse to reuse surfaces that were built for different tiles.
+def _signature(plan: dict, config: dict) -> str:
+    """Digest of everything that decides what a surface contains.
 
-    Surfaces are named by tile index, so a changed tile list would silently
-    read the previous run's rasters.
+    Surfaces are named by tile index, so a changed tile list, sampling radius
+    or pipeline setting would otherwise be answered from the previous run's
+    rasters.
     """
+    material = {
+        "boxes": [tile["box"] for tile in plan["tiles"]],
+        "grids": [tile["grid"] for tile in plan["tiles"]],
+        "harmonization": config["harmonization"],
+        "chm": config["chm"],
+    }
+    payload = json.dumps(material, sort_keys=True, default=str).encode("utf-8")
+    return hashlib.sha256(payload).hexdigest()
+
+
+def _guard_plan(out: Path, plan: dict) -> None:
+    """Refuse to reuse surfaces that were not built the same way."""
     saved = out / "plan.json"
-    stale = f"{out} holds surfaces for other tiles; use a new --out"
+    stale = f"{out} holds surfaces built differently; use a new --out"
     if saved.exists():
         previous = json.loads(saved.read_text(encoding="utf-8"))
-        boxes = [tile["box"] for tile in previous.get("tiles", [])]
-        if boxes != [tile["box"] for tile in plan["tiles"]]:
+        if previous.get("build_signature") != plan["build_signature"]:
             raise SystemExit(stale)
     elif any(out.glob("dtm_*.tif")):
         raise SystemExit(stale)
