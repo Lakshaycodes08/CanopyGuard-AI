@@ -19,6 +19,9 @@ from canopyguard.lidar.ept import pdal_bounds
 from canopyguard.lidar.grid import grid_box
 
 
+FLAG_EXPRESSION = "Synthetic == 0 && Withheld == 0 && Overlap == 0"
+
+
 def reader_stage(input_path: str) -> dict[str, Any]:
     """Read a point cloud file."""
     return {"type": "readers.las", "filename": str(input_path)}
@@ -41,11 +44,10 @@ def return_guard_stage() -> dict[str, Any]:
 def flag_filter_stage() -> dict[str, Any]:
     """Drop withheld, overlap and synthetic returns.
 
-    In the point format these acquisitions use, withheld and overlap are bits
-    of the classification flags byte, not a classification value, so a filter
-    on Classification does not reach them. Bit 0 is synthetic, bit 1 is key
-    point, bit 2 is withheld and bit 3 is overlap, so the returns to keep are
-    the ones whose flags byte is zero or carries the key point bit alone.
+    Withheld and overlap are flags, not classification values, so a filter on
+    Classification does not reach them. The EPT and LAS readers expose the
+    flags as the separate dimensions Synthetic, KeyPoint, Withheld and Overlap;
+    key point returns are kept.
 
     Overlap returns are the edge-of-swath returns of an adjacent strip. Two
     acquisitions do not overlap in the same places, so leaving them in puts a
@@ -53,7 +55,7 @@ def flag_filter_stage() -> dict[str, Any]:
     """
     return {
         "type": "filters.expression",
-        "expression": "ClassFlags == 0 || ClassFlags == 2",
+        "expression": FLAG_EXPRESSION,
     }
 
 

@@ -248,11 +248,11 @@ def test_pit_free_combine_rejects_an_empty_stack():
 
 
 def test_flag_filter_drops_withheld_and_overlap():
-    """Withheld and overlap are bits of the classification flags byte, not
-    classification values, so a filter on Classification misses them."""
+    """Withheld and overlap are flags, not classification values, so a filter
+    on Classification misses them."""
     stage = flag_filter_stage()
     assert stage["type"] == "filters.expression"
-    assert stage["expression"] == "ClassFlags == 0 || ClassFlags == 2"
+    assert stage["expression"] == "Synthetic == 0 && Withheld == 0 && Overlap == 0"
 
 
 def test_flag_filter_runs_before_reprojection():
@@ -260,7 +260,7 @@ def test_flag_filter_runs_before_reprojection():
         reader_stage("in.laz"), "dtm.tif", "dsm.tif", GRID, CONFIG
     )["pipeline"]
     expressions = [stage.get("expression") for stage in pipeline]
-    flags = expressions.index("ClassFlags == 0 || ClassFlags == 2")
+    flags = expressions.index("Synthetic == 0 && Withheld == 0 && Overlap == 0")
     assert flags < types_of(pipeline).index("filters.reprojection")
 
 
@@ -270,7 +270,7 @@ def test_flag_filter_is_optional():
     pipeline = build_terrain_pipeline(
         reader_stage("in.laz"), "dtm.tif", "dsm.tif", GRID, config
     )["pipeline"]
-    assert "ClassFlags == 0 || ClassFlags == 2" not in [
+    assert "Synthetic == 0 && Withheld == 0 && Overlap == 0" not in [
         stage.get("expression") for stage in pipeline
     ]
 

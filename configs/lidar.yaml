@@ -97,9 +97,8 @@ harmonization:
   drop_classes: [7, 9, 12, 18]
   drop_class_flags: true
   drop_class_flags_note: >
-    Withheld and overlap are bits of the classification flags byte in the
-    point format these acquisitions use, not classification values, so a
-    filter on Classification does not reach them. Overlap returns are the
+    Withheld and overlap are flags, not classification values, so a filter on
+    Classification does not reach them. Overlap returns are the
     edge-of-swath returns of an adjacent strip, and two acquisitions do not
     overlap in the same places.
   stats_dimensions: [Z, ScanAngleRank, GpsTime, NumberOfReturns]
