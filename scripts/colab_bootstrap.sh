@@ -4,7 +4,7 @@
 set -euo pipefail
 
 REPO="${REPO:-https://github.com/Lakshaycodes08/CanopyGuard-AI.git}"
-BRANCH="${BRANCH:-phase1/reconciliation-and-pipelines}"
+BRANCH="${BRANCH:-feat/lidar-truth-pipeline}"
 TILES="${TILES:-40}"
 WORK="${WORK:-/content/CanopyGuard-AI}"
 ENV_PREFIX="${ENV_PREFIX:-/content/lidar-env}"
