@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import os
+import shutil
 import subprocess
 import sys
 import tarfile
@@ -15,9 +16,30 @@ ENV_PREFIX = Path(os.environ.get("ENV_PREFIX", "/content/lidar-env"))
 OUT = Path(os.environ.get("OUT", "/content/truth"))
 MAMBA_URL = "https://micro.mamba.pm/api/micromamba/linux-64/latest"
 MAMBA = Path("/content/bin/micromamba")
+PROJ_DATA = ENV_PREFIX / "share" / "proj"
 
 
-def run(step: str, command: list[str], cwd: Path | None = None) -> None:
+def prefix_environment() -> dict[str, str]:
+    """Environment for the prefix interpreter, which is never activated.
+
+    PROJ and GDAL find their data through these variables. Calling the
+    interpreter by path skips activation, so they must be set here.
+    """
+    return {
+        **os.environ,
+        "PROJ_DATA": str(PROJ_DATA),
+        "PROJ_LIB": str(PROJ_DATA),
+        "GDAL_DATA": str(ENV_PREFIX / "share" / "gdal"),
+        "PYTHONUNBUFFERED": "1",
+    }
+
+
+def run(
+    step: str,
+    command: list[str],
+    cwd: Path | None = None,
+    env: dict[str, str] | None = None,
+) -> None:
     """Run a command, streaming its output through this process's stdout.
 
     A child writing straight to its own stdout does not reach a notebook cell,
@@ -27,6 +49,7 @@ def run(step: str, command: list[str], cwd: Path | None = None) -> None:
     process = subprocess.Popen(
         command,
         cwd=cwd,
+        env=env,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
@@ -65,10 +88,23 @@ def fetch_micromamba() -> None:
     print(f"installed {MAMBA}", flush=True)
 
 
+def environment_is_complete() -> bool:
+    """A half-built prefix has an interpreter but no PROJ database.
+
+    Checking only for the interpreter lets an interrupted build be reused, and
+    every reprojection then fails with an unhelpful PROJ error.
+    """
+    interpreter = ENV_PREFIX / "bin" / "python"
+    return interpreter.exists() and (PROJ_DATA / "proj.db").exists()
+
+
 def create_environment() -> None:
-    if (ENV_PREFIX / "bin" / "python").exists():
+    if environment_is_complete():
         print(f"\n=== environment ===\ncached at {ENV_PREFIX}", flush=True)
         return
+    if ENV_PREFIX.exists():
+        print("\n=== environment ===\nincomplete, rebuilding", flush=True)
+        shutil.rmtree(ENV_PREFIX)
     run(
         "create environment",
         [
@@ -84,10 +120,14 @@ def create_environment() -> None:
             "python-pdal",
             "rasterio",
             "pyproj",
+            "proj",
+            "proj-data",
             "numpy",
             "pyyaml",
         ],
     )
+    if not environment_is_complete():
+        raise SystemExit(f"environment built without a PROJ database at {PROJ_DATA}")
 
 
 def main() -> int:
@@ -97,10 +137,13 @@ def main() -> int:
     create_environment()
 
     python = str(ENV_PREFIX / "bin" / "python")
-    check = "import pdal, rasterio; print('pdal', pdal.__version__)"
-    run("verify", [python, "-c", check])
+    check = (
+        "import pdal, rasterio, pyproj; print('pdal', pdal.__version__);"
+        " print('crs', pyproj.CRS.from_user_input('EPSG:6339').name)"
+    )
+    run("verify", [python, "-c", check], env=prefix_environment())
 
-    environment = {**os.environ, "PYTHONPATH": "src", "PYTHONUNBUFFERED": "1"}
+    environment = {**prefix_environment(), "PYTHONPATH": "src"}
     print("\n=== measure ===", flush=True)
     process = subprocess.Popen(
         [python, "scripts/run_noise_floor.py", "--tiles", TILES, "--out", str(OUT)],
