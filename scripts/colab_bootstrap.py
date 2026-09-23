@@ -11,6 +11,7 @@ from pathlib import Path
 REPO = os.environ.get("REPO", "https://github.com/Lakshaycodes08/CanopyGuard-AI.git")
 BRANCH = os.environ.get("BRANCH", "feat/lidar-truth-pipeline")
 TILES = os.environ.get("TILES", "40")
+WORKERS = os.environ.get("WORKERS", "1")
 RUN_TESTS = os.environ.get("RUN_TESTS", "1") != "0"
 WORK = Path(os.environ.get("WORK", "/content/CanopyGuard-AI"))
 ENV_PREFIX = Path(os.environ.get("ENV_PREFIX", "/content/lidar-env"))
@@ -161,7 +162,10 @@ def ensure_test_packages(python: str) -> None:
 
 
 def main() -> int:
-    print(f"branch {BRANCH}\ntiles {TILES}\noutput {OUT}", flush=True)
+    print(
+        f"branch {BRANCH}\ntiles {TILES}\nworkers {WORKERS}\noutput {OUT}",
+        flush=True,
+    )
     fetch_repo()
     fetch_micromamba()
     create_environment()
@@ -180,7 +184,16 @@ def main() -> int:
 
     print("\n=== measure ===", flush=True)
     process = subprocess.Popen(
-        [python, "scripts/run_noise_floor.py", "--tiles", TILES, "--out", str(OUT)],
+        [
+            python,
+            "scripts/run_noise_floor.py",
+            "--tiles",
+            TILES,
+            "--workers",
+            WORKERS,
+            "--out",
+            str(OUT),
+        ],
         cwd=WORK,
         env=environment,
         stdout=subprocess.PIPE,

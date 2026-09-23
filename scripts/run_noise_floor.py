@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 from canopyguard.config import load_config
@@ -18,6 +19,7 @@ def main() -> int:
     parser.add_argument("--tiles", type=int, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--out", default="/content/truth")
+    parser.add_argument("--workers", type=int, default=1)
     args = parser.parse_args()
 
     config = load_config("configs/lidar.yaml")
@@ -40,11 +42,16 @@ def main() -> int:
     print("\ntile epoch      retained          ground   ground%   scan angle")
 
     previous = _build_log(out)
-    build_log = [
-        _build(tile, epoch, reader, out, config, previous)
+    jobs = [
+        (tile, epoch, reader, out, config, previous)
         for tile in plan["tiles"]
         for epoch, reader in sorted(tile["readers"].items())
     ]
+    if args.workers > 1:
+        with ProcessPoolExecutor(max_workers=args.workers) as pool:
+            build_log = list(pool.map(_build_job, jobs))
+    else:
+        build_log = [_build_job(job) for job in jobs]
     (out / "build_log.json").write_text(
         json.dumps(build_log, indent=2), encoding="utf-8"
     )
@@ -110,6 +117,11 @@ def _build_log(out: Path) -> dict[tuple[int, str], dict]:
         (int(entry["tile"]), str(entry["epoch"])): entry
         for entry in json.loads(log.read_text(encoding="utf-8"))
     }
+
+
+def _build_job(job: tuple) -> dict:
+    """Unpack one build for a worker process."""
+    return _build(*job)
 
 
 def _build(tile, epoch: str, reader, out: Path, config, previous: dict) -> dict:
