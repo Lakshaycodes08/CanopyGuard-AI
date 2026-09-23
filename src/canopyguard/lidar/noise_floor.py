@@ -227,7 +227,7 @@ def reference_spread(
     return float(coefficient * cells**-exponent), "extrapolated"
 
 
-def _load_pairs(
+def load_pairs(
     plan: dict[str, Any],
     out_dir: str | Path,
     epochs: tuple[str, str],
@@ -287,7 +287,7 @@ def measure(
     aggregation = config["aggregation"]
     epochs = tuple(config["noise_floor"]["epoch_pair"])
 
-    loaded, verdicts = _load_pairs(
+    loaded, verdicts = load_pairs(
         plan, out_dir, epochs, config["noise_floor"]["tile_admission"]
     )
     if not loaded:
