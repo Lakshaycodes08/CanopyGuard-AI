@@ -261,10 +261,11 @@ def test_change_plan_carries_reader_lists(lidar_config, resource_boxes):
     for tile in plan["tiles"]:
         assert set(tile["readers"]) == {"2013", "2022"}
         assert len(tile["readers"]["2022"]) == 1
-        assert 1 <= len(tile["readers"]["2013"]) <= 3
+        assert tile["readers"]["2013"][-1]["type"] == "filters.assign"
+        assert 1 <= len(tile["readers"]["2013"]) - 1 <= 3
         for readers in tile["readers"].values():
             for reader in readers:
-                assert reader["type"] == "readers.ept"
+                assert reader["type"] in {"readers.ept", "filters.assign"}
         assert 460 <= tile["grid"]["width"] <= 540
 
 
