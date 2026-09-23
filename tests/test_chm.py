@@ -35,9 +35,22 @@ CONFIG = {
 
 
 def test_class_filter_excludes_the_listed_classes():
-    stage = class_filter_stage([7, 9])
+    """One negated range per class. A comma-separated list inside one range
+    is rejected by the range parser."""
+    stage = class_filter_stage([7, 9, 12, 18])
     assert stage["type"] == "filters.range"
-    assert "Classification!" in stage["limits"]
+    assert stage["limits"] == (
+        "Classification![7:7],Classification![9:9],"
+        "Classification![12:12],Classification![18:18]"
+    )
+
+
+def test_every_range_limit_is_parseable():
+    """Each comma-separated term must carry its own colon separator."""
+    limits = class_filter_stage([7, 9, 12, 18])["limits"]
+    for term in limits.split(","):
+        assert ":" in term, term
+        assert term.count("[") == 1 and term.count("]") == 1
 
 
 def test_class_filter_requires_a_class():

@@ -26,11 +26,17 @@ def reprojection_stage(target_crs: str) -> dict[str, Any]:
 
 
 def class_filter_stage(drop_classes: list[int]) -> dict[str, Any]:
-    """Drop noise, water and overlap classes."""
+    """Drop noise, water and overlap classes.
+
+    Each excluded class needs its own negated range. A single range holding a
+    comma-separated list is not valid range syntax.
+    """
     if not drop_classes:
         raise ValueError("At least one class must be dropped")
-    joined = ",".join(str(int(value)) for value in drop_classes)
-    return {"type": "filters.range", "limits": f"Classification![{joined}:{joined}]"}
+    ranges = ",".join(
+        f"Classification![{int(value)}:{int(value)}]" for value in drop_classes
+    )
+    return {"type": "filters.range", "limits": ranges}
 
 
 def scan_angle_stage(max_abs_deg: float) -> dict[str, Any]:
