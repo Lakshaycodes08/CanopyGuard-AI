@@ -131,8 +131,9 @@ change:
     resources, which are read together and merged for each tile. Cells low in
     both epochs give the pair its own stable-ground check, since the
     2022-2023 floor is an upper bound measured on a different pair. Cells
-    changing by more than the disturbance limit are reported and left out of
-    the canopy stratum.
+    changing by more than the disturbance limit are reported; those losing
+    more than it are left out of the canopy stratum, while growth beyond it is
+    kept as signal.
 
 admission_screen:
   min_density_pts_m2: 8.0

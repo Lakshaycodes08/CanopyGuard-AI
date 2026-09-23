@@ -96,11 +96,26 @@ def disturbed_mask(
         return valid & (np.abs(bottom - top) > limit_m)
 
 
+def loss_mask(
+    first: ArrayLike, second: ArrayLike, limit_m: float
+) -> NDArray[np.bool_]:
+    """Cells whose height falls by more than the disturbance limit."""
+    if limit_m <= 0:
+        raise ValueError("Disturbance limit must be positive")
+    top, bottom, valid = _pair_grids(first, second)
+    with np.errstate(invalid="ignore"):
+        return valid & (bottom - top < -limit_m)
+
+
 def canopy_stratum(
     first: ArrayLike, second: ArrayLike, min_height_m: float, limit_m: float
 ) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Both epochs blanked outside undisturbed canopy cells."""
-    keep = canopy_mask(first, second, min_height_m) & ~disturbed_mask(
+    """Both epochs blanked outside canopy cells that did not lose height.
+
+    Only losses are removed. Over a multi-year baseline, growth beyond the
+    disturbance limit is part of the signal being measured.
+    """
+    keep = canopy_mask(first, second, min_height_m) & ~loss_mask(
         first, second, limit_m
     )
     return apply_mask(first, keep), apply_mask(second, keep)
