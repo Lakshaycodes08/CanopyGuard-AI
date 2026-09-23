@@ -192,7 +192,6 @@ keep its stated scientific role.
 - Systematic literature search and final defensible novelty statement
 - LiDAR epoch screen run, point-cloud fetch, and generated canopy height
   models. The code exists; no data has been processed
-- Per-tile co-registration run and the measured noise floor
 - Earth Engine scripts for the Sentinel-2 and Landsat composites
 - Detectability surface across aggregation scale and temporal baseline
 - Per-alliance height-increment model and measured growth rates

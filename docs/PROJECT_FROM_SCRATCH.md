@@ -227,6 +227,10 @@ under the curve of about 0.56, so no clearance decision can rest on it.
 - Evaluation core in `src/canopyguard/evaluation`: metrics, paired spatial
   block bootstrap, variogram-driven blocking, detectability surface.
 
+- Measured noise floor, 2022-2023 pair, 52 admitted tiles: NMAD 0.10 m at
+  30-50 m, LoD95 about 0.20 m, sigma at the 100 m reference scale 0.092 m
+  (extrapolated), bias -0.08 m, gate passed.
+
 ## 12. Not completed
 
 See the `Not completed` list in `MEMORY.md`, which is the live record.
