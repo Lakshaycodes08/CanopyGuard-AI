@@ -133,9 +133,9 @@ not spectral value, is what carries information above saturation.
 6. **Aggregate and difference.** Produce the scale ladder and the epoch-pair
    differences.
 7. **Noise floor.** Measure `sigma_n(s)` and `LoD95(s)` from the one-year
-   pair. Gate: proceed only if the mean one-year change over unburned conifer
-   lies in a physically plausible range and `sigma_n` falls monotonically with
-   scale.
+   pair over stable cells. Gate: proceed only if the mean one-year change lies
+   between minus the detection limit and a physically plausible growth, and
+   `sigma_n` falls with scale within its sampling error.
 8. **Predictors.** Seasonal composites with topographic correction and
    view-angle normalisation, vegetation indices, multi-scale neighbourhood
    statistics, terrain, fire and disturbance status, corridor spans.

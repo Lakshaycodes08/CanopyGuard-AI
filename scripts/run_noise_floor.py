@@ -195,6 +195,7 @@ def _report(result: dict, epochs: tuple[str, str]) -> None:
             f"{row['mean_m']:>+7.3f} {row['cells']:>12,.0f} "
             f"{row['sigma_relative_error']:>7.1%}  {'yes' if row['admitted'] else 'no'}"
         )
+    print(f"\nstable cells {result['stable_fraction']:.1%}")
     print(
         f"\ndecay exponent {result['rows'][0]['decay_exponent']:.3f} "
         f"over {result['rows'][0]['decay_scales']:.0f} scales"

@@ -71,8 +71,18 @@ noise_floor:
       carry a tenth of the returns in one epoch, which lowers the surface
       maximum in that epoch alone, so the two coverages are compared as well
       as counted.
+  stable_change_limit_m: 3.0
+  stable_note: >
+    The floor is measured on stable cells. A 1 m cell whose height changes by
+    more than the limit between the two epochs is treated as disturbed and
+    excluded from both epochs before aggregation. Felled and fallen trees
+    otherwise dominate the mean and keep the spread from falling with scale.
   gate:
-    mean_one_year_change_m: [0.0, 1.5]
+    max_mean_one_year_change_m: 1.5
+    mean_note: >
+      The lower bound is minus the detection limit at the finest admitted
+      scale. One year of growth and a sensor bias of a few centimetres cannot
+      be separated, so a mean inside the detection limit is accepted.
     max_shift_m: 1.5
     sigma_reference_scale_m: 100
     max_sigma_at_reference_m: 2.0

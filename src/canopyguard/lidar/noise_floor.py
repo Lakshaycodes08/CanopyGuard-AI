@@ -119,6 +119,29 @@ def admit_tile(
     return result
 
 
+def stable_heights(
+    first: ArrayLike, second: ArrayLike, limit_m: float
+) -> tuple[NDArray[np.float64], NDArray[np.float64], tuple[int, int]]:
+    """Blank cells whose height changes by more than the limit in both epochs.
+
+    Returns the two masked grids and the counts of stable and of valid cells.
+    """
+    if limit_m <= 0:
+        raise ValueError("Stable change limit must be positive")
+    top = np.asarray(first, dtype=np.float64)
+    bottom = np.asarray(second, dtype=np.float64)
+    if top.shape != bottom.shape:
+        raise ValueError("Both epochs must share a grid")
+    change = bottom - top
+    valid = np.isfinite(change)
+    stable = valid & (np.abs(np.where(valid, change, 0.0)) <= limit_m)
+    return (
+        np.where(stable, top, np.nan),
+        np.where(stable, bottom, np.nan),
+        (int(stable.sum()), int(valid.sum())),
+    )
+
+
 def pool_ladder(
     deltas: list[dict[float, NDArray[np.float64]]],
 ) -> dict[float, NDArray[np.float64]]:
@@ -138,7 +161,11 @@ def evaluate_gate(
     shift: dict[str, float],
     thresholds: dict[str, Any],
 ) -> dict[str, Any]:
-    """Apply the gate conditions to the scales the sample can support."""
+    """Apply the gate conditions to the scales the sample can support.
+
+    Spread may rise between adjacent scales by no more than twice the combined
+    relative standard error of the two estimates.
+    """
     admitted = [row for row in rows if row.get("admitted", True)]
     if not admitted:
         raise ValueError("Gate needs at least one measured scale")
@@ -146,15 +173,18 @@ def evaluate_gate(
     by_scale = {row["scale_m"]: row for row in admitted}
     sigmas = [row["sigma_m"] for row in admitted]
     finest = by_scale[min(by_scale)]
-    low, high = thresholds["mean_one_year_change_m"]
+    low = -float(finest.get("lod95_m", 0.0))
+    high = thresholds["max_mean_one_year_change_m"]
     reference = thresholds["sigma_reference_scale_m"]
+    errors = [row.get("sigma_relative_error", 0.0) for row in admitted]
 
     checks = {
         "mean_one_year_change_in_range": bool(low <= finest["mean_m"] <= high),
         "sigma_falls_with_scale": bool(
             all(
-                later <= earlier
-                for earlier, later in zip(sigmas, sigmas[1:], strict=False)
+                sigmas[i + 1]
+                <= sigmas[i] * (1.0 + 2.0 * np.hypot(errors[i], errors[i + 1]))
+                for i in range(len(sigmas) - 1)
             )
         ),
         "coregistration_converged": bool(shift["converged"]),
@@ -249,6 +279,9 @@ def measure(
         settings["convergence_tolerance_m"],
     )
 
+    limit = float(config["noise_floor"]["stable_change_limit_m"])
+    stable_cells = 0
+    valid_cells = 0
     heights: list[dict[str, Any]] = []
     deltas: list[dict[float, NDArray[np.float64]]] = []
     for tile in loaded:
@@ -273,10 +306,13 @@ def measure(
                 ),
             }
         )
+        stable_a, stable_b, counts = stable_heights(height_a, height_b, limit)
+        stable_cells += counts[0]
+        valid_cells += counts[1]
         deltas.append(
             difference_ladder(
-                height_a,
-                height_b,
+                stable_a,
+                stable_b,
                 resolution,
                 aggregation["scales_m"],
                 aggregation["min_valid_fraction"],
@@ -293,5 +329,6 @@ def measure(
         "shift": shift,
         "tiles": verdicts,
         "heights": heights,
+        "stable_fraction": stable_cells / valid_cells if valid_cells else 0.0,
         "gate": evaluate_gate(rows, shift, config["noise_floor"]["gate"]),
     }

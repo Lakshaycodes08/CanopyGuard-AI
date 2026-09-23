@@ -10,13 +10,14 @@ from canopyguard.lidar.noise_floor import (
     evaluate_gate,
     height_summary,
     pool_ladder,
+    stable_heights,
     surface_paths,
     tile_stem,
 )
 
 CONFIG = {"chm": {"clamp_min_m": 0.0, "clamp_max_m": 120.0}}
 GATE = {
-    "mean_one_year_change_m": [0.0, 1.5],
+    "max_mean_one_year_change_m": 1.5,
     "max_shift_m": 1.5,
     "sigma_reference_scale_m": 100,
     "max_sigma_at_reference_m": 2.0,
@@ -102,8 +103,37 @@ def test_gate_fails_on_a_high_sigma_at_the_reference_scale():
 
 
 def test_gate_fails_on_an_implausible_mean_change():
-    result = evaluate_gate(rows(1.0, mean_fine=-2.0), shift(), GATE)
+    result = evaluate_gate(rows(1.0, mean_fine=-6.0), shift(), GATE)
     assert not result["checks"]["mean_one_year_change_in_range"]
+
+
+def test_gate_accepts_a_negative_mean_inside_the_detection_limit():
+    result = evaluate_gate(rows(1.0, mean_fine=-2.0), shift(), GATE)
+    assert result["checks"]["mean_one_year_change_in_range"]
+
+
+def test_gate_tolerates_a_rise_inside_the_sampling_error():
+    rows_ = [
+        {"scale_m": 30.0, "sigma_m": 0.104, "mean_m": 0.0,
+         "sigma_relative_error": 0.020},
+        {"scale_m": 50.0, "sigma_m": 0.109, "mean_m": 0.0,
+         "sigma_relative_error": 0.032},
+    ]
+    assert evaluate_gate(rows_, shift(), GATE)["checks"]["sigma_falls_with_scale"]
+
+
+def test_stable_heights_blank_disturbed_cells_in_both_epochs():
+    first = np.array([[10.0, 20.0, np.nan]])
+    second = np.array([[10.5, 5.0, 3.0]])
+    a, b, counts = stable_heights(first, second, 3.0)
+    assert a[0, 0] == 10.0 and b[0, 0] == 10.5
+    assert np.isnan(a[0, 1]) and np.isnan(b[0, 1])
+    assert counts == (1, 2)
+
+
+def test_stable_heights_reject_a_non_positive_limit():
+    with pytest.raises(ValueError, match="must be positive"):
+        stable_heights(np.zeros((1, 1)), np.zeros((1, 1)), 0.0)
 
 
 def test_gate_fails_on_a_large_coregistration_shift():
