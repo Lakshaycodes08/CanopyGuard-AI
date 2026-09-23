@@ -71,33 +71,52 @@ expected measurement error, so the distribution of their difference over
 stable cells estimates the measurement error directly:
 
 ```
-sigma_n(s) = sd[ delta_h(2022 -> 2023, s) ]
+sigma_n(s) = NMAD[ delta_h(2022 -> 2023, s) ]
 LoD95(s)   = 1.96 * sigma_n(s)
 ```
+
+The spread is the normalised median absolute deviation, which is insensitive
+to the disturbance tail. The plain standard deviation is reported alongside
+it; the two diverging is itself a finding. LoD95 is the 95 percent limit only
+where the difference is Gaussian, which the measured decay exponent tests.
 
 This replaces literature estimates of the limit of detection with a
 site-measured value. It is computed before any model is fitted.
 
 The two acquisitions are separate 3DEP work units that abut rather than
-overlap. Their delivery tile grids are offset by half a tile, so the area
-carrying both epochs is a seam at most 645 m wide and about 51 km2 in total,
-established by intersecting the per-file bounds in the two source manifests.
-No square of 750 m or more lies wholly inside both acquisitions anywhere in
-the region, and the same holds for every other pair of 3DEP work units that
-touches the study area. Calibration therefore runs on 250 m tiles drawn from
-the co-covered seam, the ladder is measured to 200 m, and coarser scales are
-extrapolated from the fitted decay exponent and reported as extrapolated.
+overlap. Their 1 km delivery tile grids are offset, so the area carrying both
+epochs is a seam at most 507 m wide and about 51 km2 in total, established by
+intersecting the per-file bounds in the two source manifests. No square of
+750 m or more lies wholly inside both acquisitions anywhere in the region, and
+the same holds for every other pair of 3DEP work units that touches the study
+area. Calibration therefore runs on 250 m tiles drawn from the co-covered
+seam, the ladder is measured to 200 m, and coarser scales are extrapolated
+from the fitted decay exponent and reported as extrapolated.
+
+A manifest bound is the box of a delivered file's points, not its flown
+polygon, so 51 km2 is an upper bound and tiles are admitted again on the
+coverage of the built surfaces. A scale enters the gate and the decay fit only
+once its pooled cell count reaches the configured minimum, because a spread
+estimated from a handful of cells carries no information.
 
 The seam extends beyond the study area. Measurement error is a property of the
 sensors and terrain, not of the study boundary, so calibrating outside the
-boundary is valid provided the strata match. The sample is stratified by
-vegetation group, slope band and canopy height class to the composition of the
-study area, and stratum coverage is verified before the measurement is
-accepted.
+boundary is valid provided the strata match. A seam is also the worst geometry
+either acquisition has, so the floor measured there is an upper bound on the
+floor of interior coverage and is reported as one. Stratification of the
+sample by vegetation group, slope band and canopy height class, and the check
+on stratum coverage, are pending.
 
 The horizontal offset between two acquisitions is a property of the pair, and
 a 250 m tile spans too narrow a range of aspect to resolve it. One offset is
-solved from every tile at once and applied to all of them.
+solved from every tile at once and applied to all of them. Its horizontal part
+is applied to the canopy height grids; its vertical part belongs to the
+terrain alone, because a canopy height is a difference taken inside one epoch
+and its datum has already cancelled.
+
+The 2023 and 2023 pair of CA_NorthCoastRanges_2_B23 and CA_SolanoCounty_1_A23
+carries no true growth. It is run as a control, so that a residual offset
+between epochs separates a pipeline fault from a real or seasonal change.
 
 ## Hypotheses
 
@@ -294,6 +313,8 @@ General Order 95 and Public Resources Code 4293.
 - Admission of the 2007 epoch, from the epoch screen.
 - Final spatial block size, from training residuals only.
 - Sample tile count, from the measured effective sample size.
+- Whether the co-covered seam carries canopy at all, from the height
+  distribution of the built surfaces.
 - Whether any acquisition pair with wide co-coverage exists, which would
   extend the measured ladder above 200 m.
 - Whether the open fire-incident join carries enough events to report.
