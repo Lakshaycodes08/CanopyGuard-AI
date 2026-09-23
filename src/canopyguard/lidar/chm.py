@@ -4,7 +4,8 @@ PDAL is imported inside `run_pipeline` only. Every other function here returns
 plain data and is testable without PDAL installed.
 
 The same pipeline runs for every epoch. Differing ground algorithms, height
-thresholds or raster reducers between epochs would appear as canopy change.
+thresholds, raster reducers or raster grids between epochs would appear as
+canopy change.
 """
 
 from __future__ import annotations
@@ -14,10 +15,27 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
+from canopyguard.lidar.ept import pdal_bounds
+from canopyguard.lidar.grid import grid_box
+
 
 def reader_stage(input_path: str) -> dict[str, Any]:
     """Read a point cloud file."""
     return {"type": "readers.las", "filename": str(input_path)}
+
+
+def return_guard_stage() -> dict[str, Any]:
+    """Drop returns whose return numbering is unset.
+
+    A return carrying zero for ReturnNumber or NumberOfReturns is invalid. The
+    ground classifier rejects a tile outright when it meets a mixture of valid
+    and invalid numbering, so these returns are removed before anything reads
+    them.
+    """
+    return {
+        "type": "filters.expression",
+        "expression": "ReturnNumber > 0 && NumberOfReturns > 0",
+    }
 
 
 def reprojection_stage(target_crs: str) -> dict[str, Any]:
@@ -26,17 +44,13 @@ def reprojection_stage(target_crs: str) -> dict[str, Any]:
 
 
 def class_filter_stage(drop_classes: list[int]) -> dict[str, Any]:
-    """Drop noise, water and overlap classes.
-
-    Each excluded class needs its own negated range. A single range holding a
-    comma-separated list is not valid range syntax.
-    """
+    """Drop noise, water and overlap classes."""
     if not drop_classes:
         raise ValueError("At least one class must be dropped")
-    ranges = ",".join(
-        f"Classification![{int(value)}:{int(value)}]" for value in drop_classes
+    terms = " && ".join(
+        f"Classification != {int(value)}" for value in sorted(set(drop_classes))
     )
-    return {"type": "filters.range", "limits": ranges}
+    return {"type": "filters.expression", "expression": terms}
 
 
 def scan_angle_stage(max_abs_deg: float) -> dict[str, Any]:
@@ -44,13 +58,32 @@ def scan_angle_stage(max_abs_deg: float) -> dict[str, Any]:
     if max_abs_deg <= 0:
         raise ValueError("Scan angle limit must be positive")
     return {
-        "type": "filters.range",
-        "limits": f"ScanAngleRank[{-max_abs_deg}:{max_abs_deg}]",
+        "type": "filters.expression",
+        "expression": (
+            f"ScanAngleRank >= {-float(max_abs_deg)} "
+            f"&& ScanAngleRank <= {float(max_abs_deg)}"
+        ),
     }
 
 
+def crop_stage(box: tuple[float, float, float, float]) -> dict[str, Any]:
+    """Clip to the exact tile extent in the working frame.
+
+    The read window is a rectangle in the frame the resource is indexed in,
+    which is not a rectangle in the working frame, so the surplus is removed
+    after reprojection and before anything is rasterised.
+    """
+    return {"type": "filters.crop", "bounds": pdal_bounds(box)}
+
+
 def decimation_stage(radius_m: float) -> dict[str, Any]:
-    """Thin to a common point density with Poisson-disk sampling."""
+    """Thin to a common point density with Poisson-disk sampling.
+
+    Thinning precedes ground classification so that both epochs are classified
+    at the same density. Classifying at native density and thinning afterwards
+    would leave a density-dependent difference in the ground surface, which is
+    the one error that does not cancel when two epochs are subtracted.
+    """
     if radius_m <= 0:
         raise ValueError("Sampling radius must be positive")
     return {"type": "filters.sample", "radius": float(radius_m)}
@@ -65,6 +98,11 @@ def ground_stage(smrf: dict[str, Any]) -> dict[str, Any]:
     return {"type": "filters.smrf", **{key: smrf[key] for key in required}}
 
 
+def ground_only_stage() -> dict[str, Any]:
+    """Keep the returns the ground classifier accepted."""
+    return {"type": "filters.expression", "expression": "Classification == 2"}
+
+
 def hag_stage(method: str) -> dict[str, Any]:
     """Normalise return elevations to height above ground."""
     allowed = {"hag_delaunay", "hag_nn"}
@@ -74,17 +112,40 @@ def hag_stage(method: str) -> dict[str, Any]:
 
 
 def raster_stage(
-    output_path: str, output_type: str, resolution: float, dimension: str | None = None
+    output_path: str,
+    output_type: str,
+    grid: dict[str, Any],
+    dimension: str | None = None,
+    binmode: bool = False,
 ) -> dict[str, Any]:
-    """Write a raster with a single reducer."""
-    if resolution <= 0:
-        raise ValueError("Raster resolution must be positive")
+    """Write a raster onto a fixed grid with a single reducer.
+
+    Origin and size come from the grid rather than from the extent of the
+    points that arrive, so every epoch of a tile lands on identical cells and
+    the two rasters subtract without resampling.
+
+    With binmode a point contributes only to the cell it falls in. Without it
+    the reducer gathers points within a search radius, which turns a canopy
+    apex into a plateau and makes the result depend on point density.
+    """
+    for key in ("origin_x", "origin_y", "width", "height", "resolution_m"):
+        if key not in grid:
+            raise ValueError(f"Grid is missing {key}")
+    if int(grid["width"]) < 1 or int(grid["height"]) < 1:
+        raise ValueError("Grid must have at least one cell on each side")
+
     stage: dict[str, Any] = {
         "type": "writers.gdal",
         "filename": str(output_path),
         "output_type": output_type,
-        "resolution": float(resolution),
+        "resolution": float(grid["resolution_m"]),
+        "origin_x": float(grid["origin_x"]),
+        "origin_y": float(grid["origin_y"]),
+        "width": int(grid["width"]),
+        "height": int(grid["height"]),
         "gdaldriver": "GTiff",
+        "allow_empty": True,
+        "binmode": bool(binmode),
     }
     if dimension:
         stage["dimension"] = dimension
@@ -95,44 +156,72 @@ def height_threshold_stage(minimum_m: float) -> dict[str, Any]:
     """Keep returns above a pit-free layer threshold."""
     if minimum_m < 0:
         raise ValueError("Layer threshold must be non-negative")
-    return {"type": "filters.range", "limits": f"HeightAboveGround[{minimum_m}:]"}
+    return {
+        "type": "filters.expression",
+        "expression": f"HeightAboveGround >= {float(minimum_m)}",
+    }
 
 
-def _preamble(reader: dict[str, Any], config: dict[str, Any]) -> list[dict[str, Any]]:
+def _preamble(
+    reader: dict[str, Any], grid: dict[str, Any], config: dict[str, Any]
+) -> list[dict[str, Any]]:
     harmonization = config["harmonization"]
     return [
         dict(reader),
+        return_guard_stage(),
         reprojection_stage(harmonization["target_crs"]),
         class_filter_stage(harmonization["drop_classes"]),
         scan_angle_stage(harmonization["max_scan_angle_deg"]),
+        crop_stage(grid_box(grid)),
         decimation_stage(harmonization["sample_radius_m"]),
+        ground_stage(config["chm"]["smrf"]),
     ]
 
 
 def build_terrain_pipeline(
-    reader: dict[str, Any], dtm_path: str, dsm_path: str, config: dict[str, Any]
+    reader: dict[str, Any],
+    dtm_path: str,
+    dsm_path: str,
+    grid: dict[str, Any],
+    config: dict[str, Any],
 ) -> dict[str, Any]:
     """Pipeline producing the ground surface and the top-of-return surface."""
     chm = config["chm"]
-    stages = _preamble(reader, config)
-    stages.append(ground_stage(chm["smrf"]))
-    stages.append(raster_stage(dsm_path, chm["dsm_output_type"], chm["resolution_m"]))
-    stages.append({"type": "filters.range", "limits": "Classification[2:2]"})
-    stages.append(raster_stage(dtm_path, chm["dtm_output_type"], chm["resolution_m"]))
+    stages = _preamble(reader, grid, config)
+    stages.append(
+        raster_stage(
+            dsm_path, chm["dsm_output_type"], grid, binmode=bool(chm["dsm_binmode"])
+        )
+    )
+    stages.append(ground_only_stage())
+    stages.append(
+        raster_stage(
+            dtm_path, chm["dtm_output_type"], grid, binmode=bool(chm["dtm_binmode"])
+        )
+    )
     return {"pipeline": stages}
 
 
 def build_layer_pipeline(
-    reader: dict[str, Any], layer_path: str, threshold_m: float, config: dict[str, Any]
+    reader: dict[str, Any],
+    layer_path: str,
+    threshold_m: float,
+    grid: dict[str, Any],
+    config: dict[str, Any],
 ) -> dict[str, Any]:
     """Pipeline producing one pit-free canopy layer."""
     chm = config["chm"]
-    stages = _preamble(reader, config)
-    stages.append(ground_stage(chm["smrf"]))
+    stages = _preamble(reader, grid, config)
     stages.append(hag_stage(chm["height_above_ground"]))
     stages.append(height_threshold_stage(threshold_m))
     stages.append(
-        raster_stage(layer_path, "max", chm["resolution_m"], "HeightAboveGround")
+        raster_stage(
+            layer_path,
+            "max",
+            grid,
+            dimension="HeightAboveGround",
+            binmode=bool(chm["dsm_binmode"]),
+        )
     )
     return {"pipeline": stages}
 

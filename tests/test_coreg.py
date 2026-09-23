@@ -3,7 +3,14 @@ from __future__ import annotations
 import numpy as np
 import pytest
 
-from canopyguard.lidar.coreg import accept, align, apply_shift, estimate_shift
+from canopyguard.lidar.coreg import (
+    accept,
+    align,
+    align_pooled,
+    apply_shift,
+    estimate_pooled_shift,
+    estimate_shift,
+)
 from canopyguard.lidar.raster import shift_bilinear
 
 RESOLUTION = 2.0
@@ -90,3 +97,45 @@ def test_accept_applies_the_magnitude_limit():
     assert accept(converged, 1.5)
     assert not accept(converged, 1.0)
     assert not accept({"converged": 0.0, "magnitude_m": 0.1}, 1.5)
+
+
+def test_pooled_shift_is_solved_from_every_tile():
+    """A tile a few hundred metres across spans too narrow a range of aspect
+    to resolve an offset alone, and the offset belongs to the epoch pair."""
+    tiles = [rough_terrain(size=40, seed=seed) for seed in range(6)]
+    pairs = [(tile, offset_copy(tile, 1.5, -0.8, 0.0)) for tile in tiles]
+    pooled = estimate_pooled_shift(pairs, RESOLUTION)
+    single = estimate_pooled_shift(pairs[:1], RESOLUTION)
+    assert pooled["cells"] > single["cells"]
+    assert pooled["dx_m"] == pytest.approx(1.5, abs=0.5)
+    assert pooled["dy_m"] == pytest.approx(-0.8, abs=0.5)
+
+
+def test_pooled_alignment_recovers_a_known_offset():
+    tiles = [rough_terrain(size=60, seed=seed) for seed in range(4)]
+    pairs = [(tile, offset_copy(tile, 2.0, 1.0, 0.0)) for tile in tiles]
+    result = align_pooled(pairs, RESOLUTION)
+    assert result["dx_m"] == pytest.approx(2.0, abs=0.3)
+    assert result["dy_m"] == pytest.approx(1.0, abs=0.3)
+    assert result["tiles"] == 4.0
+    assert result["rmse_after_m"] < result["rmse_before_m"]
+
+
+def test_pooled_alignment_needs_a_pair():
+    with pytest.raises(ValueError, match="At least one grid pair"):
+        align_pooled([], RESOLUTION)
+
+
+def test_pooled_alignment_ignores_a_tile_without_usable_slope():
+    flat = np.zeros((40, 40))
+    tile = rough_terrain(size=40, seed=11)
+    pairs = [(flat, flat + 1.0), (tile, offset_copy(tile, 1.0, 0.0, 0.0))]
+    assert estimate_pooled_shift(pairs, RESOLUTION)["dx_m"] == pytest.approx(
+        1.0, abs=0.5
+    )
+
+
+def test_pooled_alignment_needs_usable_cells():
+    flat = np.zeros((40, 40))
+    with pytest.raises(ValueError, match="Too few usable cells"):
+        estimate_pooled_shift([(flat, flat + 1.0)], RESOLUTION)

@@ -5,8 +5,10 @@ import math
 import pytest
 
 from canopyguard.lidar.ept import (
+    box_from_web_mercator,
     box_to_web_mercator,
     ept_url,
+    from_web_mercator,
     mercator_scale,
     parse_ept,
     pdal_bounds,
@@ -16,7 +18,7 @@ from canopyguard.lidar.ept import (
     to_web_mercator,
 )
 
-CALIBRATION = (-123.39, 38.79, -122.36, 38.93)
+CALIBRATION = (-122.85, 38.50, -122.80, 38.55)
 
 
 def test_ept_url_uses_the_project_short_name():
@@ -108,3 +110,22 @@ def test_reader_stage_requests_only_the_window():
     assert stage["filename"].endswith("CA_NorthernCA_1_B22/ept.json")
     assert stage["bounds"].startswith("([")
     assert stage["threads"] == 4
+
+
+def test_inverse_mercator_returns_the_original_coordinate():
+    longitude, latitude = -122.538, 38.502
+    back = from_web_mercator(*to_web_mercator(longitude, latitude))
+    assert back[0] == pytest.approx(longitude, abs=1e-9)
+    assert back[1] == pytest.approx(latitude, abs=1e-9)
+
+
+def test_inverse_box_returns_the_original_box():
+    box = (-123.0, 38.4, -122.4, 38.9)
+    assert box_from_web_mercator(box_to_web_mercator(box)) == pytest.approx(
+        box, abs=1e-9
+    )
+
+
+def test_inverse_box_rejects_an_inverted_box():
+    with pytest.raises(ValueError, match="min < max"):
+        box_from_web_mercator((10.0, 0.0, 0.0, 10.0))

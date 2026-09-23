@@ -37,6 +37,15 @@ def to_web_mercator(longitude: float, latitude: float) -> tuple[float, float]:
     return x, y
 
 
+def from_web_mercator(x: float, y: float) -> tuple[float, float]:
+    """Convert one EPSG:3857 coordinate back to longitude and latitude."""
+    longitude = math.degrees(x / WEB_MERCATOR_RADIUS_M)
+    latitude = math.degrees(
+        2.0 * math.atan(math.exp(y / WEB_MERCATOR_RADIUS_M)) - math.pi / 2.0
+    )
+    return longitude, latitude
+
+
 def box_to_web_mercator(box: Box) -> Box:
     """Convert a west, south, east, north box to EPSG:3857 metres."""
     west, south, east, north = box
@@ -45,6 +54,16 @@ def box_to_web_mercator(box: Box) -> Box:
     min_x, min_y = to_web_mercator(west, south)
     max_x, max_y = to_web_mercator(east, north)
     return (min_x, min_y, max_x, max_y)
+
+
+def box_from_web_mercator(box_3857: Box) -> Box:
+    """Convert a projected box back to west, south, east, north degrees."""
+    min_x, min_y, max_x, max_y = box_3857
+    if min_x >= max_x or min_y >= max_y:
+        raise ValueError("Require min < max on both axes")
+    west, south = from_web_mercator(min_x, min_y)
+    east, north = from_web_mercator(max_x, max_y)
+    return (west, south, east, north)
 
 
 def pdal_bounds(box_3857: Box) -> str:

@@ -11,6 +11,7 @@ from pathlib import Path
 REPO = os.environ.get("REPO", "https://github.com/Lakshaycodes08/CanopyGuard-AI.git")
 BRANCH = os.environ.get("BRANCH", "feat/lidar-truth-pipeline")
 TILES = os.environ.get("TILES", "40")
+RUN_TESTS = os.environ.get("RUN_TESTS", "1") != "0"
 WORK = Path(os.environ.get("WORK", "/content/CanopyGuard-AI"))
 ENV_PREFIX = Path(os.environ.get("ENV_PREFIX", "/content/lidar-env"))
 OUT = Path(os.environ.get("OUT", "/content/truth"))
@@ -124,6 +125,7 @@ def create_environment() -> None:
             "proj-data",
             "numpy",
             "pyyaml",
+            "pytest",
         ],
     )
     if not environment_is_complete():
@@ -144,6 +146,9 @@ def main() -> int:
     run("verify", [python, "-c", check], env=prefix_environment())
 
     environment = {**prefix_environment(), "PYTHONPATH": "src"}
+    if RUN_TESTS:
+        run("tests", [python, "-m", "pytest", "-q"], WORK, environment)
+
     print("\n=== measure ===", flush=True)
     process = subprocess.Popen(
         [python, "scripts/run_noise_floor.py", "--tiles", TILES, "--out", str(OUT)],

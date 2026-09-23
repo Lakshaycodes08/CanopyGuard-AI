@@ -18,6 +18,7 @@ epochs:
     geoid: GEOID18
     role: reference
     admitted: null
+    source_files: 4361
   - name: "2023"
     dataset: CA_NorthCoastRanges_2_B23
     start: "2023-09-16"
@@ -27,11 +28,7 @@ epochs:
     geoid: GEOID18
     role: noise_floor_pair
     admitted: null
-    study_bbox_coverage: partial
-    coverage_note: >
-      Catalogue probes return this dataset for the study bbox north of about
-      38.78 and not at 38.48 to 38.55 or 38.62 to 38.69. Its overall bounds
-      enclose the study area but its work units do not.
+    source_files: 8541
   - name: "2007"
     dataset: EarthScope_Northern_California
     collection: OT.052008.32610.1
@@ -50,16 +47,21 @@ reference_epoch: "2022"
 
 noise_floor:
   epoch_pair: ["2022", "2023"]
-  calibration_area: intersection_of_epoch_footprints
+  calibration_area: co_covered_delivery_tiles
   may_extend_outside_study_bbox: true
   stratify_to_match: [vegetation_group, slope_band, canopy_height_class]
   min_stable_cells_per_stratum: 2000
-  verified_intersection: [-123.39, 38.79, -122.36, 38.93]
-  verified_intersection_km2: 1388
-  verified_on: 2026-09-23
+  search_box: [-123.40, 38.10, -122.30, 38.90]
+  coverage_source: ept_source_manifest
+  coverage_note: >
+    The two work units abut rather than overlap. Their delivery tile grids are
+    offset by half a tile, so co-coverage is a seam at most 645 m wide and
+    about 51 km2 in total. Tiles are derived from the source manifests at run
+    time rather than from a bounding box, because a box drawn around the seam
+    contains mostly single-epoch ground.
   gate:
     mean_one_year_change_m: [0.0, 1.5]
-    max_median_shift_m: 1.5
+    max_shift_m: 1.5
     sigma_reference_scale_m: 100
     max_sigma_at_reference_m: 2.0
 
@@ -95,6 +97,13 @@ chm:
   height_above_ground: hag_delaunay
   dtm_output_type: idw
   dsm_output_type: max
+  dsm_binmode: true
+  dtm_binmode: false
+  binmode_note: >
+    A point contributes to the surface cell it falls in. Gathering within a
+    search radius turns a canopy apex into a plateau and makes the maximum
+    depend on point density. The ground surface keeps the radius so that cells
+    holding no ground return are interpolated rather than left empty.
   pit_free_layers_m: [0, 2, 5, 10, 15, 20, 25, 30]
   clamp_min_m: 0.0
   clamp_max_m: 120.0
@@ -103,7 +112,11 @@ coregistration:
   method: nuth_kaab
   surface: dtm
   reference_epoch: "2022"
-  tile_size_m: 1000
+  scope: pooled_over_sample
+  scope_note: >
+    One offset is solved from every tile at once. The offset is a property of
+    the acquisition pair, and a 250 m tile spans too narrow a range of aspect
+    to resolve it alone.
   min_slope_deg: 5.0
   max_slope_deg: 45.0
   slope_band_note: >
@@ -114,15 +127,24 @@ coregistration:
   max_accepted_shift_m: 5.0
 
 aggregation:
-  scales_m: [10, 20, 30, 50, 100, 200, 500, 1000, 2000, 5000]
+  scales_m: [10, 20, 30, 50, 100, 200]
   statistic: mean
   secondary_statistic: p95
   min_valid_fraction: 0.5
+  ladder_note: >
+    A scale wider than the calibration tile cannot be measured. The widest
+    co-covered square the epoch pair admits is about 500 m and there is one of
+    them, so the ladder stops at 200 m and coarser scales are extrapolated
+    from the fitted decay exponent and reported as extrapolated.
 
 tiers:
   corridor_buffer_m: 60
-  sample_tile_size_m: 1000
-  sample_tile_count: 40
+  sample_tile_size_m: 250
+  sample_tile_count: 120
+  coverage_cells_per_tile: 5
+  tile_size_note: >
+    Set by the width of the co-coverage seam. No 750 m or 1000 m square lies
+    wholly inside both acquisitions anywhere in the search box.
   stratify_by: [vegetation_group, slope_band, burn_state]
   slope_bands_deg: [[0, 15], [15, 30], [30, 90]]
   seed: 42

@@ -7,25 +7,33 @@ from pathlib import Path
 from canopyguard.config import load_config
 from canopyguard.lidar.chm import build_terrain_pipeline, run_pipeline
 from canopyguard.lidar.noise_floor import measure, surface_paths
-from canopyguard.lidar.plan import calibration_plan
+from canopyguard.lidar.plan import calibration_plan, noise_floor_footprints
 
 
 def main() -> int:
     parser = argparse.ArgumentParser(
         description="Build surfaces and measure the floor."
     )
-    parser.add_argument("--tiles", type=int, default=40)
+    parser.add_argument("--tiles", type=int, default=None)
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--out", default="/content/truth")
     args = parser.parse_args()
 
     config = load_config("configs/lidar.yaml")
-    plan = calibration_plan(config, args.tiles, args.seed)
-    config["harmonization"]["sample_radius_m"] = plan["sample_radius_m"]
-
     out = Path(args.out)
     out.mkdir(parents=True, exist_ok=True)
-    print(f"{plan['tile_count']} tiles, {plan['sample_area_km2']:.1f} km2")
+
+    footprints = _footprints(config, out)
+    count = args.tiles or int(config["tiers"]["sample_tile_count"])
+    plan = calibration_plan(config, count, footprints, args.seed)
+    config["harmonization"]["sample_radius_m"] = plan["sample_radius_m"]
+    (out / "plan.json").write_text(json.dumps(plan, indent=2), encoding="utf-8")
+
+    print(
+        f"co-covered {plan['candidate_tiles']} tiles of "
+        f"{plan['tile_size_m']:.0f} m, {plan['candidate_area_km2']:.1f} km2"
+    )
+    print(f"drawn {plan['tile_count']} tiles, {plan['sample_area_km2']:.1f} km2")
     print(f"sampling radius {plan['sample_radius_m']:.4f} m")
 
     build_log = [
@@ -45,6 +53,20 @@ def main() -> int:
     return 0 if result["gate"]["passed"] else 1
 
 
+def _footprints(config, out: Path) -> dict[str, list]:
+    """Read the source manifests once and keep them beside the surfaces."""
+    cache = out / "footprints.json"
+    if cache.exists():
+        print("footprints cached")
+        return json.loads(cache.read_text(encoding="utf-8"))
+
+    footprints = noise_floor_footprints(config)
+    cache.write_text(json.dumps(footprints), encoding="utf-8")
+    for epoch, boxes in sorted(footprints.items()):
+        print(f"epoch {epoch} source files {len(boxes):>7,}")
+    return footprints
+
+
 def _build(tile, epoch: str, reader, out: Path, config) -> dict:
     paths = surface_paths(out, epoch, tile["index"])
     built = (paths[kind] for kind in ("dtm", "dsm"))
@@ -53,7 +75,7 @@ def _build(tile, epoch: str, reader, out: Path, config) -> dict:
         return {"tile": tile["index"], "epoch": epoch, "points": -1, "note": "cached"}
 
     pipeline = build_terrain_pipeline(
-        reader, str(paths["dtm"]), str(paths["dsm"]), config
+        reader, str(paths["dtm"]), str(paths["dsm"]), tile["grid"], config
     )
     try:
         points = run_pipeline(pipeline)
@@ -65,6 +87,15 @@ def _build(tile, epoch: str, reader, out: Path, config) -> dict:
 
 
 def _report(result: dict) -> None:
+    shift = result["shift"]
+    print(
+        f"\nshift dx {shift['dx_m']:+.3f} dy {shift['dy_m']:+.3f} "
+        f"dz {shift['dz_m']:+.3f} over {shift['tiles']:.0f} tiles, "
+        f"{shift['cells']:,.0f} cells, {shift['iterations']:.0f} iterations"
+    )
+    print(
+        f"terrain rmse {shift['rmse_before_m']:.3f} -> {shift['rmse_after_m']:.3f} m"
+    )
     print("\nscale_m    sigma   lod95    mean        cells")
     for row in result["rows"]:
         print(

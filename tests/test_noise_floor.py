@@ -15,7 +15,7 @@ from canopyguard.lidar.noise_floor import (
 CONFIG = {"chm": {"clamp_min_m": 0.0, "clamp_max_m": 120.0}}
 GATE = {
     "mean_one_year_change_m": [0.0, 1.5],
-    "max_median_shift_m": 1.5,
+    "max_shift_m": 1.5,
     "sigma_reference_scale_m": 100,
     "max_sigma_at_reference_m": 2.0,
 }
@@ -83,30 +83,35 @@ def test_pool_ladder_rejects_an_empty_run():
         pool_ladder([])
 
 
+def shift(magnitude_m: float = 0.4, converged: float = 1.0, tiles: float = 5.0):
+    return {"magnitude_m": magnitude_m, "converged": converged, "tiles": tiles}
+
+
 def test_gate_passes_a_clean_result():
-    shifts = [{"accepted": 1.0, "magnitude_m": 0.4}] * 5
-    result = evaluate_gate(rows(1.2), shifts, GATE)
+    result = evaluate_gate(rows(1.2), shift(), GATE)
     assert result["passed"]
-    assert result["accepted_tiles"] == 5
+    assert result["tiles"] == 5.0
 
 
 def test_gate_fails_on_a_high_sigma_at_the_reference_scale():
-    shifts = [{"accepted": 1.0, "magnitude_m": 0.4}]
-    result = evaluate_gate(rows(2.6), shifts, GATE)
+    result = evaluate_gate(rows(2.6), shift(), GATE)
     assert not result["passed"]
     assert not result["checks"]["sigma_at_reference_below_limit"]
 
 
 def test_gate_fails_on_an_implausible_mean_change():
-    shifts = [{"accepted": 1.0, "magnitude_m": 0.4}]
-    result = evaluate_gate(rows(1.0, mean_fine=-2.0), shifts, GATE)
+    result = evaluate_gate(rows(1.0, mean_fine=-2.0), shift(), GATE)
     assert not result["checks"]["mean_one_year_change_in_range"]
 
 
-def test_gate_fails_on_large_coregistration_shifts():
-    shifts = [{"accepted": 1.0, "magnitude_m": 3.0}] * 3
-    result = evaluate_gate(rows(1.0), shifts, GATE)
-    assert not result["checks"]["median_tile_shift_below_limit"]
+def test_gate_fails_on_a_large_coregistration_shift():
+    result = evaluate_gate(rows(1.0), shift(magnitude_m=3.0), GATE)
+    assert not result["checks"]["shift_below_limit"]
+
+
+def test_gate_fails_when_the_solver_did_not_converge():
+    result = evaluate_gate(rows(1.0), shift(converged=0.0), GATE)
+    assert not result["checks"]["coregistration_converged"]
 
 
 def test_gate_fails_when_sigma_rises_with_scale():
@@ -114,10 +119,9 @@ def test_gate_fails_when_sigma_rises_with_scale():
         {"scale_m": 10.0, "sigma_m": 1.0, "mean_m": 0.3},
         {"scale_m": 100.0, "sigma_m": 1.5, "mean_m": 0.3},
     ]
-    result = evaluate_gate(bad, [{"accepted": 1.0, "magnitude_m": 0.2}], GATE)
-    assert not result["checks"]["sigma_falls_with_scale"]
+    assert not evaluate_gate(bad, shift(), GATE)["checks"]["sigma_falls_with_scale"]
 
 
 def test_gate_needs_a_measured_scale():
     with pytest.raises(ValueError, match="at least one measured scale"):
-        evaluate_gate([], [], GATE)
+        evaluate_gate([], shift(), GATE)
