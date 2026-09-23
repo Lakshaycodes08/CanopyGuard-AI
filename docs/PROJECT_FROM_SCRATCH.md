@@ -111,7 +111,7 @@ not spectral value, is what carries information above saturation.
 - Optical composites are built server side in Google Earth Engine and
   exported as rasters. The STAC path in `configs/ingestion.yaml` is the
   fallback for contributors without Earth Engine.
-- Aggregation ladder: 10, 20, 30, 50, 100, 200, 500, 1000, 2000, 5000 m.
+- Aggregation ladder: 10, 20, 30, 50, 100, 200 m.
 - Temporal baselines: 1 year (2022 to 2023), 9 years (2013 to 2022), 10 years
   (2013 to 2023).
 - Every required result runs on CPU.

@@ -23,11 +23,11 @@ radius of 0.2699 m before any surface is built.
 with the three autumn epochs, and its density and vertical datum are not
 declared in the catalogue record.
 
-## Coverage probes
+## Coverage
 
 A published acquisition bounding box is the hull of its work units, not its
 coverage. Ten bounding-box queries against the OpenTopography catalogue
-establish where each 3DEP acquisition is actually returned.
+establish where each 3DEP acquisition is returned.
 
 | Probe box, west south east north | 2022 | 2023 |
 | --- | --- | --- |
@@ -44,34 +44,65 @@ establish where each 3DEP acquisition is actually returned.
 
 Raw record: `data/interim/lidar/coverage_probes.json`.
 
+A probe answers presence per box, not per work unit, and a box returning both
+epochs can still hold no ground carrying both. The per-file bounds in each
+project's Entwine source manifest settle it: 4,361 delivered files for 2022
+and 8,541 for 2023, each a delivery tile of about 1,290 m.
+
+| Quantity | Value |
+| --- | --- |
+| Overlapping file pairs | 719 |
+| Largest overlap of any pair, shorter side | 645 m |
+| Co-covered area | about 51 km2 |
+| Squares of 1,000 m wholly inside both | 0 |
+| Squares of 500 m wholly inside both | 1 |
+| Squares of 250 m wholly inside both | 361 |
+
+645 m is half a delivery tile. The two work units abut, and their tile grids
+are offset by half a tile, so what reads as overlap is a seam about 200 km
+long and at most half a tile wide.
+
+The same assay was run on every other pair of 3DEP work units whose bounds
+touch the study area.
+
+| Pair | Years | Co-covered | 1,000 m squares | 500 m | 250 m |
+| --- | --- | --- | --- | --- | --- |
+| CA_NorthernCA_1_B22, CA_NorthCoastRanges_2_B23 | 2022, 2023 | 51 km2 | 0 | 1 | 361 |
+| CA_NorthCoastRanges_2_B23, CA_NoCAL_Wildfires_TL_QL2_2018 | 2018, 2023 | 27 km2 | 0 | 32 | 313 |
+| CA_NorthCoastRanges_2_B23, CA_SolanoCounty_1_A23 | 2023, 2023 | 21 km2 | 0 | 4 | 118 |
+| CA_NorthernCA_1_B22, CA_SolanoCounty_1_A23 | 2022, 2023 | 0.8 km2 | 0 | 0 | 5 |
+| CA_NorthernCA_1_B22, CA_NoCAL_Wildfires_TL_QL2_2018 | 2018, 2022 | 0 | 0 | 0 | 0 |
+
+No pair admits a single 1,000 m square.
+
 ## Consequences
 
 The 2022 acquisition covers the whole study area. The 2023 acquisition does
-not. Its southern limit falls between 38.78 and 38.80, so it clips only the
-northern edge of the study bounding box, a strip about 0.03 degrees tall.
+not, and the two barely meet.
 
-The noise floor is measured from the 2022 and 2023 pair. That measurement
-therefore runs on the intersection of the two acquisitions rather than on the
-study area. The intersection spans -123.39 to -122.36 in longitude and 38.79
-to 38.93 in latitude, about 15.6 km by 89.2 km, or 1,388 km2 before
-work-unit gaps and non-forest cover are removed.
+Calibration tiles are 250 m and are derived from the source manifests at run
+time. A bounding box drawn around the seam contains mostly single-epoch
+ground, so no box is recorded in the configuration.
+
+The aggregation ladder stops at 200 m. A scale wider than the calibration tile
+cannot be measured, and coarser scales are extrapolated from the fitted decay
+exponent and reported as extrapolated.
+
+Co-registration is solved once over the whole sample. The horizontal offset
+belongs to the acquisition pair, and a 250 m tile spans too narrow a range of
+aspect to resolve it alone.
 
 Measurement error is a property of the sensors and the terrain, not of the
-study boundary, so calibrating outside the boundary is valid provided the
-strata match. The calibration sample is stratified by vegetation group, slope
-band and canopy height class to the composition of the study area, and the
-per-stratum cell counts are checked against the minimum in
-`configs/lidar.yaml` before the measurement is accepted.
-
-This also reorders the work. The noise floor no longer depends on the
-study-area fetch, so the gate that decides whether span-scale change is
-detectable is reached after downloading two epochs over the calibration band
-rather than three epochs over the study area.
+study boundary, so calibrating on the seam is valid provided the strata match.
+The sample is stratified by vegetation group, slope band and canopy height
+class to the composition of the study area, and the per-stratum cell counts
+are checked against the minimum in `configs/lidar.yaml` before the measurement
+is accepted.
 
 ## Pending
 
-- Work-unit level coverage inside the calibration band. The probes establish
-  presence per box, not per tile.
 - Per-stratum cell counts, which require the vegetation and terrain layers.
+- Whether any 3DEP pair outside this region carries wide co-coverage one year
+  apart, which would extend the measured ladder above 200 m.
 - 2007 remains excluded. Admitting it for conifer alliances only would need
   its density and vertical datum confirmed from the source metadata.

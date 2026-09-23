@@ -48,8 +48,9 @@ measurement noise floor.
 
 ## Analysis unit and target
 
-- Prediction grid: EPSG:6339, aggregated from 10 m to 5,000 m per
-  `configs/lidar.yaml`. Primary working scale 100 m.
+- Prediction grid: EPSG:6339, aggregated from 10 m to 200 m per
+  `configs/lidar.yaml`. Primary working scale 100 m. The upper bound is
+  set by the calibration coverage described under noise floor measurement.
 - Target: airborne LiDAR canopy height change `delta_h` between two epochs,
   computed from canopy height models regenerated from point clouds with one
   identical pipeline.
@@ -77,14 +78,26 @@ LoD95(s)   = 1.96 * sigma_n(s)
 This replaces literature estimates of the limit of detection with a
 site-measured value. It is computed before any model is fitted.
 
-The 2023 acquisition covers only the northern part of the study bounding box.
-The noise floor is therefore calibrated on the full intersection of the 2022
-and 2023 footprints, which extends beyond the study area, and is stratified by
-vegetation group, slope band and canopy height class to match the composition
-of the study area. Measurement error is a property of the sensors and terrain,
-not of the study boundary, so calibrating outside the boundary is valid
-provided the strata match. Stratum coverage is verified before the measurement
-is accepted.
+The two acquisitions are separate 3DEP work units that abut rather than
+overlap. Their delivery tile grids are offset by half a tile, so the area
+carrying both epochs is a seam at most 645 m wide and about 51 km2 in total,
+established by intersecting the per-file bounds in the two source manifests.
+No square of 750 m or more lies wholly inside both acquisitions anywhere in
+the region, and the same holds for every other pair of 3DEP work units that
+touches the study area. Calibration therefore runs on 250 m tiles drawn from
+the co-covered seam, the ladder is measured to 200 m, and coarser scales are
+extrapolated from the fitted decay exponent and reported as extrapolated.
+
+The seam extends beyond the study area. Measurement error is a property of the
+sensors and terrain, not of the study boundary, so calibrating outside the
+boundary is valid provided the strata match. The sample is stratified by
+vegetation group, slope band and canopy height class to the composition of the
+study area, and stratum coverage is verified before the measurement is
+accepted.
+
+The horizontal offset between two acquisitions is a property of the pair, and
+a 250 m tile spans too narrow a range of aspect to resolve it. One offset is
+solved from every tile at once and applied to all of them.
 
 ## Hypotheses
 
@@ -113,8 +126,9 @@ scale.
 ### H4: product recovery
 
 Existing global canopy height products, differenced across epochs, do not
-recover airborne LiDAR change above `LoD95` at scales below 1 km. Falsified if
-any product recovers change above the limit at span scale.
+recover airborne LiDAR change above `LoD95` at the measured scales, which run
+to 200 m. Falsified if any product recovers change above the limit at span
+scale.
 
 ### H5: ranking value
 
@@ -280,5 +294,7 @@ General Order 95 and Public Resources Code 4293.
 - Admission of the 2007 epoch, from the epoch screen.
 - Final spatial block size, from training residuals only.
 - Sample tile count, from the measured effective sample size.
+- Whether any acquisition pair with wide co-coverage exists, which would
+  extend the measured ladder above 200 m.
 - Whether the open fire-incident join carries enough events to report.
 - Target journal and its disclosure policy.
