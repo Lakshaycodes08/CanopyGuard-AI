@@ -57,6 +57,11 @@ noise_floor:
   verified_intersection: [-123.39, 38.79, -122.36, 38.93]
   verified_intersection_km2: 1388
   verified_on: 2026-09-23
+  gate:
+    mean_one_year_change_m: [0.0, 1.5]
+    max_median_shift_m: 1.5
+    sigma_reference_scale_m: 100
+    max_sigma_at_reference_m: 2.0
 
 admission_screen:
   min_density_pts_m2: 8.0

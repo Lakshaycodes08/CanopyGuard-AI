@@ -55,8 +55,13 @@ scientific claims here.
   square metre, matching the catalogue. The 8.16 per square metre quoted in
   the 2023 acquisition specification is pulse density from a 0.35 m nominal
   pulse spacing, a different quantity that must not be mixed with the first.
-- `notebooks/01_noise_floor.ipynb` runs the LiDAR step end to end in the
-  lidar environment and prints the gate result.
+- The LiDAR step has two entrypoints. `notebooks/01_noise_floor.ipynb` is
+  interactive. `scripts/colab_bootstrap.sh` provisions the environment with
+  micromamba and runs `scripts/run_noise_floor.py` headlessly, with no kernel
+  restart, so it works under a non-interactive runner. The script exits
+  non-zero when the gate fails.
+- Gate thresholds are in `configs/lidar.yaml` under `noise_floor.gate` and are
+  applied by `lidar/noise_floor.evaluate_gate`, not by the caller.
 - Phase 1 literature review: `reports/literature_review.md` contains a verified
   15-study core matrix and a provisional, explicitly falsifiable gap. It is not
   yet a systematic review.
