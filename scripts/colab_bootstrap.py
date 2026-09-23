@@ -124,6 +124,7 @@ def create_environment() -> None:
             "proj",
             "proj-data",
             "numpy",
+            "pandas",
             "pyyaml",
             "pytest",
         ],
@@ -132,31 +133,30 @@ def create_environment() -> None:
         raise SystemExit(f"environment built without a PROJ database at {PROJ_DATA}")
 
 
-def ensure_pytest(python: str) -> None:
-    """Add pytest to a prefix built before the test step existed.
+TEST_PACKAGES = ("pytest", "pandas")
 
-    A cached environment is otherwise reused without it and the test step
-    fails on an environment that is fine for the measurement.
+
+def ensure_test_packages(python: str) -> None:
+    """Add the test packages to a prefix built before the test step existed.
+
+    A cached environment is otherwise reused as complete and collection fails
+    on an environment that is fine for the measurement itself.
     """
-    probe = subprocess.run(
-        [python, "-c", "import pytest"],
-        env=prefix_environment(),
-        capture_output=True,
-    )
-    if probe.returncode == 0:
+    missing = [
+        package
+        for package in TEST_PACKAGES
+        if subprocess.run(
+            [python, "-c", f"import {package}"],
+            env=prefix_environment(),
+            capture_output=True,
+        ).returncode
+    ]
+    if not missing:
         return
     run(
-        "install pytest",
-        [
-            str(MAMBA),
-            "install",
-            "-y",
-            "-p",
-            str(ENV_PREFIX),
-            "-c",
-            "conda-forge",
-            "pytest",
-        ],
+        "install test packages",
+        [str(MAMBA), "install", "-y", "-p", str(ENV_PREFIX), "-c", "conda-forge"]
+        + missing,
     )
 
 
@@ -175,7 +175,7 @@ def main() -> int:
 
     environment = {**prefix_environment(), "PYTHONPATH": "src"}
     if RUN_TESTS:
-        ensure_pytest(python)
+        ensure_test_packages(python)
         run("tests", [python, "-m", "pytest", "-q"], WORK, environment)
 
     print("\n=== measure ===", flush=True)
