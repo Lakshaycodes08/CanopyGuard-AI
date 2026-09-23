@@ -132,6 +132,34 @@ def create_environment() -> None:
         raise SystemExit(f"environment built without a PROJ database at {PROJ_DATA}")
 
 
+def ensure_pytest(python: str) -> None:
+    """Add pytest to a prefix built before the test step existed.
+
+    A cached environment is otherwise reused without it and the test step
+    fails on an environment that is fine for the measurement.
+    """
+    probe = subprocess.run(
+        [python, "-c", "import pytest"],
+        env=prefix_environment(),
+        capture_output=True,
+    )
+    if probe.returncode == 0:
+        return
+    run(
+        "install pytest",
+        [
+            str(MAMBA),
+            "install",
+            "-y",
+            "-p",
+            str(ENV_PREFIX),
+            "-c",
+            "conda-forge",
+            "pytest",
+        ],
+    )
+
+
 def main() -> int:
     print(f"branch {BRANCH}\ntiles {TILES}\noutput {OUT}", flush=True)
     fetch_repo()
@@ -147,6 +175,7 @@ def main() -> int:
 
     environment = {**prefix_environment(), "PYTHONPATH": "src"}
     if RUN_TESTS:
+        ensure_pytest(python)
         run("tests", [python, "-m", "pytest", "-q"], WORK, environment)
 
     print("\n=== measure ===", flush=True)
