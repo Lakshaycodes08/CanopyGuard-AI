@@ -124,7 +124,13 @@ def canopy_stratum(
 def terrain_agreement(
     pairs: list[tuple[ArrayLike, ArrayLike]],
 ) -> dict[str, float]:
-    """Pooled agreement of two terrain surfaces on cells valid in both."""
+    """Pooled agreement of two terrain surfaces on cells valid in both.
+
+    The scale is the slope of the first surface fitted against the second and
+    exposes a unit fault. A constant offset is reported but not judged: it is
+    a datum difference, it is solved by co-registration, and it cancels inside
+    each epoch's canopy height.
+    """
     firsts, seconds = [], []
     for first, second in pairs:
         top, bottom, valid = _pair_grids(first, second)
@@ -134,14 +140,13 @@ def terrain_agreement(
     b = np.concatenate(seconds) if seconds else np.array([])
     if a.size == 0:
         raise ValueError("No terrain cell is valid in both epochs")
-    first_median = float(np.median(a))
-    second_median = float(np.median(b))
+    scale = float(np.polyfit(b, a, 1)[0]) if np.ptp(b) > 0 else float("nan")
     return {
         "cells": float(a.size),
-        "median_first_m": first_median,
-        "median_second_m": second_median,
-        "ratio": first_median / second_median if second_median else float("nan"),
-        "median_abs_difference_m": float(np.median(np.abs(b - a))),
+        "median_first_m": float(np.median(a)),
+        "median_second_m": float(np.median(b)),
+        "scale": scale,
+        "offset_m": float(np.median(a - b)),
     }
 
 
@@ -282,13 +287,11 @@ def measure_pair(
         raise ValueError("No tile passed admission")
 
     check = terrain_agreement([tile["terrain"] for tile in loaded])
-    if check["median_abs_difference_m"] > float(rules["max_terrain_difference_m"]):
+    if abs(check["scale"] - 1.0) > float(rules["max_terrain_scale_error"]):
         raise ValueError(
-            "Terrain of the two epochs disagrees before co-registration: "
-            f"median elevation {check['median_first_m']:.2f} and "
-            f"{check['median_second_m']:.2f} m, ratio {check['ratio']:.4f}, "
-            f"median absolute difference {check['median_abs_difference_m']:.2f} m. "
-            "A ratio near 3.2808 indicates elevations stored in feet."
+            "Terrain of the two epochs differs in scale before co-registration: "
+            f"fitted scale {check['scale']:.4f}, offset {check['offset_m']:.2f} m. "
+            "A scale near 3.2808 indicates elevations stored in feet."
         )
 
     shift = align_pooled(

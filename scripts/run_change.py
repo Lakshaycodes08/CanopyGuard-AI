@@ -99,6 +99,11 @@ def _footprints(config: dict, pair: tuple[str, ...], out: Path) -> dict[str, lis
 def _report(result: dict) -> None:
     epochs = result["pair"]
     shift = result["shift"]
+    check = result["terrain_check"]
+    print(
+        f"\nterrain before co-registration: scale {check['scale']:.4f}, "
+        f"offset {check['offset_m']:+.2f} m over {check['cells']:,.0f} cells"
+    )
     admitted = [tile for tile in result["tiles"] if tile["admitted"]]
     print(f"\ntiles admitted {len(admitted)} of {len(result['tiles'])}")
     for tile in result["tiles"]:

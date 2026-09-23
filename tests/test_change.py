@@ -138,10 +138,16 @@ def test_surface_table_uses_the_measured_floor():
 
 def test_terrain_agreement_exposes_a_unit_fault():
     metres = np.array([[100.0, 200.0], [300.0, np.nan]])
-    check = terrain_agreement([(metres * 3.2808333, metres)])
+    check = terrain_agreement([(metres * 3.2808333 - 32.0, metres)])
     assert check["cells"] == 3.0
-    assert check["ratio"] == pytest.approx(3.2808333)
-    assert check["median_abs_difference_m"] > 100.0
+    assert check["scale"] == pytest.approx(3.2808333)
+
+
+def test_terrain_agreement_reports_an_offset_without_a_scale_fault():
+    metres = np.array([[100.0, 200.0], [300.0, 400.0]])
+    check = terrain_agreement([(metres - 9.7, metres)])
+    assert check["scale"] == pytest.approx(1.0)
+    assert check["offset_m"] == pytest.approx(-9.7)
 
 
 def test_terrain_agreement_needs_a_shared_cell():
