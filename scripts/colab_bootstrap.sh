@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # Provision the lidar environment on a Colab VM and measure the noise floor.
-# No kernel restart, so this runs headlessly under colab exec.
+# No kernel restart. Invoked by scripts/colab_bootstrap.py, which is the
+# entrypoint colab exec accepts, or run directly in a shell.
 set -euo pipefail
 
 REPO="${REPO:-https://github.com/Lakshaycodes08/CanopyGuard-AI.git}"

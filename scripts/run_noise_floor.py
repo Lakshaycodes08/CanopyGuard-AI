@@ -47,6 +47,11 @@ def main() -> int:
 
 def _build(tile, epoch: str, reader, out: Path, config) -> dict:
     paths = surface_paths(out, epoch, tile["index"])
+    built = (paths[kind] for kind in ("dtm", "dsm"))
+    if all(path.exists() and path.stat().st_size for path in built):
+        print(f"tile {tile['index']:>4} {epoch} cached")
+        return {"tile": tile["index"], "epoch": epoch, "points": -1, "note": "cached"}
+
     pipeline = build_terrain_pipeline(
         reader, str(paths["dtm"]), str(paths["dsm"]), config
     )
