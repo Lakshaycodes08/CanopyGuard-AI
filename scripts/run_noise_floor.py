@@ -3,7 +3,7 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
-from concurrent.futures import ProcessPoolExecutor
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from pathlib import Path
 
 from canopyguard.config import load_config
@@ -47,14 +47,7 @@ def main() -> int:
         for tile in plan["tiles"]
         for epoch, reader in sorted(tile["readers"].items())
     ]
-    if args.workers > 1:
-        with ProcessPoolExecutor(max_workers=args.workers) as pool:
-            build_log = list(pool.map(_build_job, jobs))
-    else:
-        build_log = [_build_job(job) for job in jobs]
-    (out / "build_log.json").write_text(
-        json.dumps(build_log, indent=2), encoding="utf-8"
-    )
+    _checkpointed_build(out, previous, jobs, args.workers)
 
     result = measure(plan, out, config)
     (out / "noise_floor.json").write_text(
@@ -118,6 +111,39 @@ def _build_log(out: Path) -> dict[tuple[int, str], dict]:
         (int(entry["tile"]), str(entry["epoch"])): entry
         for entry in json.loads(log.read_text(encoding="utf-8"))
     }
+
+
+def _checkpointed_build(
+    out: Path, previous: dict, jobs: list[tuple], workers: int
+) -> list[dict]:
+    """Run every build job, writing build_log.json after each completion.
+
+    A one-shot write at the end loses the whole batch to a dropped
+    connection or a killed kernel, even though the expensive rasters already
+    landed on disk. Flushing per completion means a rerun's cache check in
+    `_build` has a ledger to read no matter when the run was interrupted.
+    """
+    build_log = list(previous.values())
+    seen = set(previous)
+
+    def record(entry: dict) -> None:
+        key = (int(entry["tile"]), str(entry["epoch"]))
+        if key not in seen:
+            seen.add(key)
+            build_log.append(entry)
+        (out / "build_log.json").write_text(
+            json.dumps(build_log, indent=2), encoding="utf-8"
+        )
+
+    if workers > 1:
+        with ProcessPoolExecutor(max_workers=workers) as pool:
+            futures = [pool.submit(_build_job, job) for job in jobs]
+            for future in as_completed(futures):
+                record(future.result())
+    else:
+        for job in jobs:
+            record(_build_job(job))
+    return build_log
 
 
 def _build_job(job: tuple) -> dict:

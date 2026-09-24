@@ -1,6 +1,6 @@
 # CanopyGuard-AI project memory
 
-Last updated: 2026-09-22
+Last updated: 2026-09-24
 
 ## Purpose
 
@@ -46,7 +46,51 @@ scientific claims here.
   decimation, PDAL pipeline construction, scale ladder and differencing,
   footprint and coverage probing, Entwine access, tiling and the calibration
   plan. PDAL is imported in one function, so the rest is tested without it.
-  225 tests pass. No epoch has been processed yet.
+  391 tests pass as of 2026-09-24.
+- Noise floor measured on Colab, 2026-09-23: 284 tiles built from the
+  2022-2023 co-coverage seam (51 km2; see `rehaanNotes/coverage_finding.md`
+  for why the seam, not a clean 1 km tile, bounds the ladder). GATE G1 (design
+  v4 section 6.4) PASSED: co-registration shift 0.137 m converged in 3
+  iterations; reference sigma at 10 m (robust) 0.120 m; LoD95(10 m) 0.235 m;
+  stable-cell fraction 0.936. Decay exponent 0.054, near flat rather than the
+  0.5 expected for spatially independent error; `coverage_finding.md` reads
+  this as a scale-invariant offset field, so `LoD95 = 1.96 sigma` does not
+  apply to it as a decaying quantity. Raw output (`plan.json`,
+  `noise_floor.json`, `footprints.json`, `build_log.json`, per-tile CHM
+  rasters) is in Google Drive `CanopyGuard/truth4`, not yet copied into
+  `data/processed`.
+- Corridor-driven label build (design v4 step 2, `rehaanNotes/next_block.md`
+  section 0) started on Colab 2026-09-24: pair 2013-2022, 150 background
+  tiles plus `--corridor`. 92 power lines, 1957 spans resolved from OSM; 614
+  of 2043 candidate tiles drawn (464 on corridors, 153.5 km2). Measured
+  throughput about 0.8 to 0.9 tiles per minute per epoch pair on the Colab
+  standard CPU runtime (2 vCPU), so the full 614-tile run takes roughly 9 to
+  10 hours; this is the real per-tile point-cloud fetch and PDAL cost, not a
+  worker-count artifact (workers 8 vs 2 changed throughput only slightly).
+  Running as of this entry; not yet complete.
+- Colab is now driven directly from the coding environment via the `colab`
+  CLI (`google-colab-cli`, authenticated to the project Google account)
+  instead of manual notebook copy-paste: provision, headless `exec`/`run` of
+  `scripts/colab_bootstrap.py` with env vars, `colab log`/`colab status` for
+  progress. Google Drive is read and written through a Drive MCP connector
+  on the same account, so run outputs land in `CanopyGuard/` and are read
+  back without a manual copy step.
+- The label build was migrated mid-run from the default standard CPU shape
+  (2 vCPU, 13.3 GB) to `--gpu A100` (12 vCPU, 87.5 GB; the A100 chip itself is
+  unused, PDAL has no GPU path) once measured throughput showed the 2-vCPU
+  shape would take about 9 to 10 hours for 614 tiles. Reusing the same
+  session name immediately after stopping the old one hit a real bug in
+  `google-colab-cli` (its own history log shows `keep_alive_stopped
+  reason=endpoint_mismatch` then `session_terminated reason=pruned`): the new
+  session's local keep-alive daemon polled the just-stopped old endpoint by
+  mistake and wiped the local session registry
+  (`~/.config/colab-cli/sessions.json`). The remote job kept running
+  unaffected; only local `colab status`/`stop`/`log` by name broke. Lesson:
+  do not reuse a session name immediately after `colab stop`; use a fresh
+  name, or wait, or pass `--config` to isolate concurrent CLI state per the
+  tool's own skill doc. On the A100 shape measured throughput is about 4.3
+  tiles/min (versus 0.87 on the 2-vCPU shape), so the same 614-tile run is
+  about 2.3 hours, not 9 to 10.
 - Point clouds are read by bounding box from the public 3DEP Entwine
   resources at `usgs-lidar-public`. Both noise-floor epochs are confirmed
   present: `CA_NorthernCA_1_B22` holds 95,945,998,233 points and
@@ -94,14 +138,14 @@ scientific claims here.
   Scope is gated on measurement, not on a calendar.
 - Research goal: produce a defensible journal publication, with the software
   serving the experiments and evidence.
-- Immediate next action: create the working environment and confirm the test
-  suite runs. The epoch screen and the 2022 and 2023 coverage probes are done
-  and recorded in `reports/lidar_epoch_screen.md`. Next is the notebook that
-  reads 3DEP point clouds by bounding box over the calibration intersection,
-  writes matched canopy height rasters, co-registers per tile, and produces
-  the noise floor. That measurement precedes the study-area work, so a
-  failure costs one notebook run. The full-area dense Sentinel-2 cube is
-  cancelled.
+- Immediate next action: the corridor-driven label build described above is
+  running on Colab (2013-2022, 150 background tiles, `--corridor`). On
+  completion, copy `labels_2013-2022.npz`, `spans.json`, `power_lines.json`,
+  and `change_2013-2022.json` into the repository's data workspace (or read
+  them from `CanopyGuard/` on Drive) and start the as-of feature store
+  (`rehaanNotes/next_block.md` section 2). The epoch screen, the 2022 and
+  2023 coverage probes, and the noise floor gate (G1, above) are done. The
+  full-area dense Sentinel-2 cube is cancelled.
 
 ## Research direction
 
@@ -198,7 +242,8 @@ keep its stated scientific role.
 - Systematic literature search and final defensible novelty statement
 - Per-10 m-cell labels (mean, 95th percentile, maximum canopy height and their
   changes, loss share) over corridor tiles plus a background sample, on the
-  global 10 m grid; later a crown or local-maximum layer
+  global 10 m grid; later a crown or local-maximum layer. Build running on
+  Colab as of 2026-09-24, see above.
 - As-of feature store keyed by cell and cutoff date, refusing any source
   observed after the cutoff: LiDAR t0 structure, terrain, Landsat history with
   disturbance age, climate normals and water deficit, vegetation type, fire
@@ -248,6 +293,8 @@ every future diff before committing it.
 | 2026-09-22 | Make Stage 1 a fitted GADA height-increment model per vegetation alliance | Height increment depends on position on the species height-age curve, which varies sevenfold within one species. Start height is the observable proxy for that position. |
 | 2026-09-22 | Build and test the evaluation core before acquiring data | A defect in the bootstrap, blocking or detectability code would corrupt every reported number. One such defect was found and fixed during this work. |
 | 2026-09-15 | Move data work to shared NSUT infrastructure | The estimated raw and working footprint is unsuitable for routine laptop use; shared storage also gives teammates one reproducible data location. |
+| 2026-09-23 | Accept GATE G1 as passed on the 2022-2023 seam | 284 tiles, all six G1 checks true, shift 0.137 m, LoD95(10 m) 0.235 m. The decay exponent (0.054) is far below the 0.5 independent-error case, read as a scale-invariant offset field rather than decaying measurement noise; this qualifies, not blocks, the pass. |
+| 2026-09-24 | Drive Colab from the coding environment via the `colab` CLI and read/write Google Drive via its MCP connector, instead of manual notebook copy-paste | Eliminates the manual run-and-report loop; both are authenticated to the project Google account and were verified end to end before use on real jobs. |
 
 ## Update rule
 

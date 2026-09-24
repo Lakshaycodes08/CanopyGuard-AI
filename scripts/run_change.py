@@ -2,11 +2,10 @@ from __future__ import annotations
 
 import argparse
 import json
-from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
 import numpy as np
-from run_noise_floor import _build_job, _build_log, _guard_plan, _signature
+from run_noise_floor import _build_log, _checkpointed_build, _guard_plan, _signature
 
 from canopyguard.config import load_config
 from canopyguard.data.osm_power import fetch_power_lines, parse_overpass, spans
@@ -72,17 +71,7 @@ def main() -> int:
         for tile in plan["tiles"]
         for epoch, readers in sorted(tile["readers"].items())
     ]
-    if args.workers > 1:
-        with ProcessPoolExecutor(max_workers=args.workers) as pool:
-            built = list(pool.map(_build_job, jobs))
-    else:
-        built = [_build_job(job) for job in jobs]
-    merged = {**previous}
-    for entry in built:
-        merged[(int(entry["tile"]), str(entry["epoch"]))] = entry
-    (out / "build_log.json").write_text(
-        json.dumps(list(merged.values()), indent=2), encoding="utf-8"
-    )
+    _checkpointed_build(out, previous, jobs, args.workers)
 
     result = measure_pair(plan, out, pair, config)
     labels = result.pop("labels")
