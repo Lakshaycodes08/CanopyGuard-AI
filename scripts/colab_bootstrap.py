@@ -18,6 +18,7 @@ ENV_PREFIX = Path(os.environ.get("ENV_PREFIX", "/content/lidar-env"))
 OUT = Path(os.environ.get("OUT", "/content/truth"))
 SCRIPT = os.environ.get("SCRIPT", "run_noise_floor.py")
 PAIR = os.environ.get("PAIR", "")
+EXTRA_ARGS = os.environ.get("EXTRA_ARGS", "")
 MAMBA_URL = "https://micro.mamba.pm/api/micromamba/linux-64/latest"
 MAMBA = Path("/content/bin/micromamba")
 PROJ_DATA = ENV_PREFIX / "share" / "proj"
@@ -197,6 +198,7 @@ def main() -> int:
     ]
     if SCRIPT == "run_change.py" and PAIR:
         command += ["--pair", PAIR]
+    command += EXTRA_ARGS.split()
 
     print("\n=== measure ===", flush=True)
     process = subprocess.Popen(
