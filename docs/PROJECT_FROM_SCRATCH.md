@@ -232,6 +232,9 @@ under the curve of about 0.56, so no clearance decision can rest on it.
 - Measured noise floor, 2022-2023 pair, 52 admitted tiles: NMAD 0.10 m at
   30-50 m, LoD95 about 0.20 m, sigma at the 100 m reference scale 0.092 m
   (extrapolated), bias -0.08 m, gate passed.
+- Long-baseline pair 2013-2022, 30 tiles: bare-ground NMAD 0.073 m, median
+  canopy change +0.84 to +0.95 m over 8.96 years, 87 to 92 percent of canopy
+  cells above LoD95 at 10 to 100 m.
 
 ## 12. Not completed
 

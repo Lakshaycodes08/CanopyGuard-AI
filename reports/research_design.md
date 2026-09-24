@@ -172,6 +172,37 @@ could not be anticipated at design time:
    statement to the reference scale itself rather than leaving the gate
    unable to evaluate it.
 
+## Long-baseline change measurement
+
+Run 2026-09-24, pair 2013 to 2022, baseline 8.96 years, 30 tiles of 500 m
+(7.5 km2), all admitted. The 2013 acquisition is served as three resources in
+US survey feet with a constant offset; after conversion the fitted terrain
+scale against 2022 was 1.0006 and the offset of -9.36 m was removed by
+pooled co-registration (dx -0.21 m, dy +0.07 m, terrain RMSE 9.30 to 0.31 m).
+
+Stable-ground check on cells below 1 m in both epochs (2,533,479 cells):
+mean +0.025 m, median -0.005 m, NMAD 0.073 m. Cells changing by more than
+3 m: loss 7.2 percent, gain 5.8 percent.
+
+| Scale (m) | Cells | Median, all (m) | Detectable, all | Median, canopy (m) | Detectable, canopy | LoD95 (m) |
+| --- | --- | --- | --- | --- | --- | --- |
+| 10 | 73,545 | +0.006 | 61.9 % | +0.84 | 86.9 % | 0.235 |
+| 20 | 18,500 | +0.020 | 67.0 % | +0.89 | 89.7 % | 0.210 |
+| 30 | 7,608 | +0.031 | 69.4 % | +0.94 | 91.9 % | 0.199 |
+| 50 | 2,985 | +0.044 | 71.0 % | +0.95 | 91.8 % | 0.199 |
+| 100 | 748 | +0.059 | 75.7 % | +0.93 | 89.9 % | 0.180 |
+
+Canopy denotes cells with mean height of at least 2 m that did not lose more
+than 3 m. Detectable denotes absolute change above LoD95 from the 2022-2023
+floor. The 200 m scale holds 120 cells and is not reported. The limit of
+detection is that of the one-year pair; the long pair's own canopy floor is
+not measured and its terrain residual is twice as large, so the fractions are
+upper bounds. With the median canopy change at four to five times LoD95 the
+conclusion does not depend on that margin: nine-year canopy change is
+detectable at every measured scale from 10 to 100 m, which supports H2. The
+median canopy increment corresponds to about 0.1 m per year, at the low end
+of the published range for the mapped alliances.
+
 ## Hypotheses
 
 ### H1: error decay
