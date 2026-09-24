@@ -8,13 +8,13 @@ import numpy as np
 
 from canopyguard.config import load_config
 from canopyguard.evaluation.bootstrap import excludes_zero, paired_block_bootstrap
-from canopyguard.evaluation.metrics import bias, mae, r2, rmse
 from canopyguard.evaluation.change_table import (
     cell_targets,
     flatten,
     optical_features,
     terrain_features,
 )
+from canopyguard.evaluation.metrics import bias, mae, r2, rmse
 from canopyguard.features.landsat import (
     BANDS,
     block_grid,

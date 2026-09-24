@@ -159,8 +159,9 @@ def _build(tile, epoch: str, reader, out: Path, config, previous: dict) -> dict:
     """
     paths = surface_paths(out, epoch, tile["index"])
     done = previous.get((tile["index"], epoch))
-    built = all(path.exists() and path.stat().st_size for path in
-                (paths["dtm"], paths["dsm"]))
+    built = all(
+        path.exists() and path.stat().st_size for path in (paths["dtm"], paths["dsm"])
+    )
     if built and done and done.get("ground_points", 0) > 0:
         print(f"{tile['index']:>4} {epoch}  cached")
         return done
@@ -185,10 +186,10 @@ def _build(tile, epoch: str, reader, out: Path, config, previous: dict) -> dict:
     except (RuntimeError, OSError) as error:
         entry.update(ground_points=0, retained_points=0, note=str(error)[:160])
 
+    angle_min = entry.get("scan_angle_min", 0)
+    angle_max = entry.get("scan_angle_max")
     angle_span = (
-        f"{entry.get('scan_angle_min', 0):+.1f} to {entry.get('scan_angle_max', 0):+.1f}"
-        if entry.get("scan_angle_max") is not None
-        else ""
+        f"{angle_min:+.1f} to {angle_max:+.1f}" if angle_max is not None else ""
     )
     print(
         f"{tile['index']:>4} {epoch}  {entry['retained_points']:>12,} "
@@ -222,9 +223,7 @@ def _report(result: dict, epochs: tuple[str, str]) -> None:
         f"dz {shift['dz_m']:+.3f} over {shift['tiles']:.0f} tiles, "
         f"{shift['cells']:,.0f} cells, {shift['iterations']:.0f} iterations"
     )
-    print(
-        f"terrain rmse {shift['rmse_before_m']:.3f} -> {shift['rmse_after_m']:.3f} m"
-    )
+    print(f"terrain rmse {shift['rmse_before_m']:.3f} -> {shift['rmse_after_m']:.3f} m")
 
     print("\nscale_m    nmad       sd   lod95    mean        cells  rel_err  used")
     for row in result["rows"]:

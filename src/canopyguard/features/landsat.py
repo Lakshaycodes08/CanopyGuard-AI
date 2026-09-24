@@ -24,9 +24,7 @@ QA_REJECT_BITS = 0b111110
 FILL = -9999.0
 
 
-def block_grid(
-    transform: Any, width: int, height: int, factor: int
-) -> dict[str, Any]:
+def block_grid(transform: Any, width: int, height: int, factor: int) -> dict[str, Any]:
     """Grid of cells that each cover `factor` by `factor` raster cells.
 
     `transform` is the north-up affine transform of the tile raster. Only
@@ -104,20 +102,20 @@ def with_indices(
     }
 
 
-def summer_composite(
-    ee: Any, geometry: Any, year: int, months: tuple[int, int]
-) -> Any:
+def summer_composite(ee: Any, geometry: Any, year: int, months: tuple[int, int]) -> Any:
     """Median of clear Landsat 8 reflectance over the given months of a year."""
     start = ee.Date.fromYMD(int(year), int(months[0]), 1)
     end = ee.Date.fromYMD(int(year), int(months[1]), 1).advance(1, "month")
 
     def prepare(image: Any) -> Any:
         qa = image.select("QA_PIXEL")
-        keep = qa.bitwiseAnd(QA_REJECT_BITS | 1).eq(0).And(
-            image.select("QA_RADSAT").eq(0)
+        keep = (
+            qa.bitwiseAnd(QA_REJECT_BITS | 1).eq(0).And(image.select("QA_RADSAT").eq(0))
         )
-        scaled = image.select(SOURCE_BANDS).multiply(REFLECTANCE_SCALE).add(
-            REFLECTANCE_OFFSET
+        scaled = (
+            image.select(SOURCE_BANDS)
+            .multiply(REFLECTANCE_SCALE)
+            .add(REFLECTANCE_OFFSET)
         )
         return scaled.rename(BANDS).updateMask(keep).resample("bilinear")
 

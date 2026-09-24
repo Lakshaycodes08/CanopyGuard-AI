@@ -287,9 +287,7 @@ def corridor_tiles(
         return []
     cloud = np.vstack(points)
     return [
-        tile
-        for tile in candidates
-        if near_box(cloud, project_box(tile, crs), buffer_m)
+        tile for tile in candidates if near_box(cloud, project_box(tile, crs), buffer_m)
     ]
 
 

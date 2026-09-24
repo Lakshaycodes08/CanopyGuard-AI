@@ -23,9 +23,7 @@ def main() -> int:
     config = load_config("configs/lidar.yaml")
     config["harmonization"]["sample_radius_m"] = None
     count = args.tiles or int(config["tiers"]["sample_tile_count"])
-    plan = calibration_plan(
-        config, count, noise_floor_footprints(config), args.seed
-    )
+    plan = calibration_plan(config, count, noise_floor_footprints(config), args.seed)
     config["harmonization"]["sample_radius_m"] = plan["sample_radius_m"]
 
     output = ensure_parent(data_path("interim", "lidar", "calibration_plan.json"))

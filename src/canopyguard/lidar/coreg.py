@@ -90,9 +90,7 @@ def estimate_shift(
     The returned offset satisfies moving(x, y) = reference(x + dx, y + dy) + dz
     to first order.
     """
-    return _solve(
-        *_system(reference, moving, resolution, min_slope_deg, max_slope_deg)
-    )
+    return _solve(*_system(reference, moving, resolution, min_slope_deg, max_slope_deg))
 
 
 def estimate_pooled_shift(

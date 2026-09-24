@@ -16,14 +16,28 @@ from canopyguard.data.osm_power import (
 
 PAYLOAD = {
     "elements": [
-        {"type": "node", "id": 1, "lon": -122.80, "lat": 38.60,
-         "tags": {"power": "tower"}},
+        {
+            "type": "node",
+            "id": 1,
+            "lon": -122.80,
+            "lat": 38.60,
+            "tags": {"power": "tower"},
+        },
         {"type": "node", "id": 2, "lon": -122.79, "lat": 38.60},
-        {"type": "node", "id": 3, "lon": -122.78, "lat": 38.60,
-         "tags": {"power": "tower"}},
+        {
+            "type": "node",
+            "id": 3,
+            "lon": -122.78,
+            "lat": 38.60,
+            "tags": {"power": "tower"},
+        },
         {"type": "node", "id": 4, "lon": -122.77, "lat": 38.60},
-        {"type": "way", "id": 10, "nodes": [1, 2, 3, 4],
-         "tags": {"power": "line", "voltage": "115000;60000"}},
+        {
+            "type": "way",
+            "id": 10,
+            "nodes": [1, 2, 3, 4],
+            "tags": {"power": "line", "voltage": "115000;60000"},
+        },
         {"type": "way", "id": 11, "nodes": [4], "tags": {"power": "line"}},
     ]
 }
@@ -97,7 +111,8 @@ def test_fetch_sends_a_user_agent_and_falls_back(monkeypatch):
         return _Response(b'{"elements": []}')
 
     payload = fetch_power_lines(
-        (-122.9, 38.4, -122.7, 38.8), urls=("https://first", "https://second"),
+        (-122.9, 38.4, -122.7, 38.8),
+        urls=("https://first", "https://second"),
         opener=opener,
     )
     assert payload == {"elements": []}
@@ -112,5 +127,6 @@ def test_fetch_reports_every_failure():
         raise OSError("blocked")
 
     with pytest.raises(RuntimeError, match="No Overpass endpoint answered"):
-        fetch_power_lines((-122.9, 38.4, -122.7, 38.8), urls=("https://a",),
-                          opener=opener)
+        fetch_power_lines(
+            (-122.9, 38.4, -122.7, 38.8), urls=("https://a",), opener=opener
+        )

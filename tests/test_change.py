@@ -13,9 +13,9 @@ from canopyguard.lidar.change import (
     disturbance,
     disturbed_mask,
     loss_mask,
-    terrain_agreement,
     pair_epochs,
     surface_table,
+    terrain_agreement,
 )
 
 MEASURED = {
@@ -69,9 +69,7 @@ def test_canopy_stratum_keeps_growth_beyond_the_limit():
         np.array([[10.0, 10.0]]), np.array([[14.5, 5.0]]), 2.0, 3.0
     )
     assert np.isfinite(second).tolist() == [[True, False]]
-    assert loss_mask(np.array([[10.0]]), np.array([[14.5]]), 3.0).tolist() == [
-        [False]
-    ]
+    assert loss_mask(np.array([[10.0]]), np.array([[14.5]]), 3.0).tolist() == [[False]]
 
 
 def test_masks_reject_mismatched_grids():

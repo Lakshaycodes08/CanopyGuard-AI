@@ -114,10 +114,18 @@ def test_gate_accepts_a_negative_mean_inside_the_detection_limit():
 
 def test_gate_tolerates_a_rise_inside_the_sampling_error():
     rows_ = [
-        {"scale_m": 30.0, "sigma_m": 0.104, "mean_m": 0.0,
-         "sigma_relative_error": 0.020},
-        {"scale_m": 50.0, "sigma_m": 0.109, "mean_m": 0.0,
-         "sigma_relative_error": 0.032},
+        {
+            "scale_m": 30.0,
+            "sigma_m": 0.104,
+            "mean_m": 0.0,
+            "sigma_relative_error": 0.020,
+        },
+        {
+            "scale_m": 50.0,
+            "sigma_m": 0.109,
+            "mean_m": 0.0,
+            "sigma_relative_error": 0.032,
+        },
     ]
     assert evaluate_gate(rows_, shift(), GATE)["checks"]["sigma_falls_with_scale"]
 
@@ -226,8 +234,13 @@ def test_gate_fails_when_the_reference_scale_cannot_be_reached():
 
 
 def test_gate_extrapolates_an_unsupported_reference_scale():
-    decay = {"decay_coefficient": 1.0, "decay_exponent": 0.25,
-             "decay_base_scale_m": 1.0, "admitted": True, "mean_m": 0.0}
+    decay = {
+        "decay_coefficient": 1.0,
+        "decay_exponent": 0.25,
+        "decay_base_scale_m": 1.0,
+        "admitted": True,
+        "mean_m": 0.0,
+    }
     measured = [
         {**decay, "scale_m": 10.0, "sigma_m": 0.32},
         {**decay, "scale_m": 20.0, "sigma_m": 0.22},
@@ -242,5 +255,8 @@ def test_gate_extrapolates_an_unsupported_reference_scale():
 
 def test_gate_needs_an_admitted_scale():
     with pytest.raises(ValueError, match="at least one measured scale"):
-        evaluate_gate([{"scale_m": 10.0, "sigma_m": 1.0, "mean_m": 0.0,
-                        "admitted": False}], shift(), GATE)
+        evaluate_gate(
+            [{"scale_m": 10.0, "sigma_m": 1.0, "mean_m": 0.0, "admitted": False}],
+            shift(),
+            GATE,
+        )

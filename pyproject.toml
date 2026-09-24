@@ -55,3 +55,4 @@ pythonpath = ["src"]
 
 [tool.ruff.lint.per-file-ignores]
 "scripts/check_text_hygiene.py" = ["E402", "I001"]
+"notebooks/*.ipynb" = ["E402", "E501"]

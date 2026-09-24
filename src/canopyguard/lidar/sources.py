@@ -72,7 +72,9 @@ def union_box(boxes: list[Box]) -> Box:
     )
 
 
-def cell_steps(box: Box, tile_size_m: float, cells_per_tile: int) -> tuple[float, float]:
+def cell_steps(
+    box: Box, tile_size_m: float, cells_per_tile: int
+) -> tuple[float, float]:
     """Longitude and latitude step of the assay grid.
 
     The two steps differ so that a tile is square on the ground rather than
@@ -115,9 +117,7 @@ def coverage_mask(
     shift = 0.5 if union else 0.0
     for left, bottom, right, top in boxes:
         first_column = max(0, math.ceil((left - west) / longitude_step - shift))
-        last_column = min(
-            columns, math.floor((right - west) / longitude_step + shift)
-        )
+        last_column = min(columns, math.floor((right - west) / longitude_step + shift))
         first_row = max(0, math.ceil((bottom - south) / latitude_step - shift))
         last_row = min(rows, math.floor((top - south) / latitude_step + shift))
         if last_column > first_column and last_row > first_row:

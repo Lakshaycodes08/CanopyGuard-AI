@@ -79,9 +79,10 @@ def cell_labels(
     factor = int(round(ratio))
     if factor < 1 or abs(ratio - factor) > 1e-9:
         raise ValueError("Cell size must be a whole multiple of the resolution")
-    if abs(left / cell_m - round(left / cell_m)) > 1e-6 or abs(
-        top / cell_m - round(top / cell_m)
-    ) > 1e-6:
+    if (
+        abs(left / cell_m - round(left / cell_m)) > 1e-6
+        or abs(top / cell_m - round(top / cell_m)) > 1e-6
+    ):
         raise ValueError("Raster corner is not on the global grid")
     if first.shape[0] < factor or first.shape[1] < factor:
         raise ValueError("Raster is smaller than one cell")

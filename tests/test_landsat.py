@@ -50,8 +50,10 @@ def test_clear_rejects_fill_cloud_shadow_and_snow():
 
 
 def test_indices_follow_their_definitions():
-    stack = {band: np.array([0.1]) for band in
-             ["blue", "green", "red", "nir", "swir1", "swir2"]}
+    stack = {
+        band: np.array([0.1])
+        for band in ["blue", "green", "red", "nir", "swir1", "swir2"]
+    }
     stack["nir"] = np.array([0.5])
     out = with_indices(stack)
     assert out["ndvi"][0] == pytest.approx(0.4 / 0.6)

@@ -41,8 +41,10 @@ def main() -> int:
     if args.corridor:
         lines = _power_lines(config, study_box, out, args.lines)
         corridor = (lines, float(config["change"]["corridor_buffer_m"]))
-        count = args.tiles if args.tiles is not None else int(
-            config["change"]["background_tiles"]
+        count = (
+            args.tiles
+            if args.tiles is not None
+            else int(config["change"]["background_tiles"])
         )
     plan = change_plan(
         config, study_box, pair, footprints, count, args.seed, corridor=corridor

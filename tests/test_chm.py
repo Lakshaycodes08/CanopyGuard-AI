@@ -14,16 +14,16 @@ from canopyguard.lidar.chm import (
     ground_stage,
     hag_stage,
     height_threshold_stage,
+    pipeline_stats,
     pit_free_combine,
     raster_stage,
     reader_stage,
     reader_stages,
-    vertical_scale_stage,
     return_guard_stage,
     scan_angle_stage,
     stats_stage,
+    vertical_scale_stage,
 )
-from canopyguard.lidar.chm import pipeline_stats
 
 CONFIG = {
     "harmonization": {
@@ -299,10 +299,20 @@ def test_pipeline_stats_reads_the_statistics_node():
         "metadata": {
             "filters.stats": {
                 "statistic": [
-                    {"name": "Z", "count": 100, "minimum": 1.0, "maximum": 9.0,
-                     "average": 5.0},
-                    {"name": "ScanAngleRank", "count": 100, "minimum": -14.0,
-                     "maximum": 13.0, "average": 0.2},
+                    {
+                        "name": "Z",
+                        "count": 100,
+                        "minimum": 1.0,
+                        "maximum": 9.0,
+                        "average": 5.0,
+                    },
+                    {
+                        "name": "ScanAngleRank",
+                        "count": 100,
+                        "minimum": -14.0,
+                        "maximum": 13.0,
+                        "average": 0.2,
+                    },
                 ]
             }
         }
@@ -318,9 +328,9 @@ def test_pipeline_stats_tolerates_a_missing_node():
 
 def test_several_readers_are_merged_before_any_filter():
     readers = [reader_stage("a.laz"), reader_stage("b.laz"), reader_stage("c.laz")]
-    pipeline = build_terrain_pipeline(
-        readers, "dtm.tif", "dsm.tif", GRID, CONFIG
-    )["pipeline"]
+    pipeline = build_terrain_pipeline(readers, "dtm.tif", "dsm.tif", GRID, CONFIG)[
+        "pipeline"
+    ]
     order = types_of(pipeline)
     assert order[:4] == ["readers.las"] * 3 + ["filters.merge"]
     assert order.count("filters.merge") == 1

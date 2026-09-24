@@ -91,6 +91,21 @@ scientific claims here.
   tool's own skill doc. On the A100 shape measured throughput is about 4.3
   tiles/min (versus 0.87 on the 2-vCPU shape), so the same 614-tile run is
   about 2.3 hours, not 9 to 10.
+- That first full 614-tile A100 run completed cleanly, all tiles built and
+  the full scale ladder printed, but the local CLI's connection to the VM
+  died in the few seconds between completion and downloading outputs, and
+  the VM could not be reattached (confirmed dead via the documented
+  reattach-URL trick, tried both locally and in the user's own browser). The
+  printed summary survived because it was already in the local log; the raw
+  `labels_2013-2022.npz`/`change_2013-2022.json` files did not, because
+  `run_change.py` and `run_noise_floor.py` held every result in memory and
+  wrote `build_log.json` only once at the very end. A per-tile disk cache
+  already existed in `_build` (skips a tile if its raster is on disk and
+  `build_log.json` has a matching entry) and was designed for exactly this,
+  but had nothing to read after an interruption. Fixed in `8d36ab8`: both
+  scripts now checkpoint `build_log.json` after every tile completion via a
+  shared `_checkpointed_build` helper, so a dropped connection now costs at
+  most a quick rerun (cache hits on everything already built), not hours.
 - Point clouds are read by bounding box from the public 3DEP Entwine
   resources at `usgs-lidar-public`. Both noise-floor epochs are confirmed
   present: `CA_NorthernCA_1_B22` holds 95,945,998,233 points and

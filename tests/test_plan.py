@@ -8,12 +8,12 @@ from canopyguard.lidar.plan import (
     calibration_plan,
     calibration_tiles,
     change_plan,
-    epoch_unit_stages,
     change_tiles,
     dispersion_grid_side,
     epoch_datasets,
     epoch_footprint,
     epoch_resource_footprints,
+    epoch_unit_stages,
     noise_floor_projects,
     pair_projects,
     search_box,
@@ -108,9 +108,7 @@ def test_plan_draws_the_requested_tile_count(lidar_config, footprints):
     assert plan["sample_area_km2"] == pytest.approx(40 * 0.0625, rel=0.05)
 
 
-def test_plan_never_draws_more_than_the_co_coverage_allows(
-    lidar_config, footprints
-):
+def test_plan_never_draws_more_than_the_co_coverage_allows(lidar_config, footprints):
     plan = calibration_plan(lidar_config, 10**6, footprints)
     assert plan["tile_count"] == plan["candidate_tiles"]
 
@@ -133,9 +131,7 @@ def test_plan_carries_one_raster_grid_per_tile(lidar_config, footprints):
         assert 230 <= grid["height"] <= 270
 
 
-def test_plan_uses_the_sparsest_epoch_for_the_sampling_radius(
-    lidar_config, footprints
-):
+def test_plan_uses_the_sparsest_epoch_for_the_sampling_radius(lidar_config, footprints):
     plan = calibration_plan(lidar_config, 25, footprints)
     assert plan["sample_radius_m"] == pytest.approx(0.2258, abs=1e-3)
 
@@ -279,9 +275,7 @@ def test_change_plan_refuses_a_pair_without_co_coverage(lidar_config, resource_b
 
 def test_change_plan_is_deterministic(lidar_config, resource_boxes):
     first = change_plan(lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 20)
-    second = change_plan(
-        lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 20
-    )
+    second = change_plan(lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 20)
     assert [tile["box"] for tile in first["tiles"]] == [
         tile["box"] for tile in second["tiles"]
     ]
@@ -300,13 +294,17 @@ def test_corridor_tiles_are_always_built(lidar_config, resource_boxes):
 
     line = {"lon": [-122.85, -122.80], "lat": [38.60, 38.60]}
     plan = change_plan(
-        lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 5,
+        lidar_config,
+        STUDY_BOX,
+        ("2013", "2022"),
+        resource_boxes,
+        5,
         corridor=([line], 100.0),
     )
     assert plan["required_tiles"] >= 8
     assert plan["tile_count"] == plan["required_tiles"] + 5
     forced = [tuple(t["box"]) for t in plan["tiles"][: plan["required_tiles"]]]
-    for west, south, east, north in forced:
+    for _west, south, _east, north in forced:
         assert south - 0.002 <= 38.60 <= north + 0.002
     assert corridor_tiles(forced, [], 100.0, "EPSG:6339") == []
     for tile in plan["tiles"]:
@@ -317,7 +315,11 @@ def test_corridor_tiles_are_always_built(lidar_config, resource_boxes):
 def test_corridor_only_plan_draws_nothing_else(lidar_config, resource_boxes):
     line = {"lon": [-122.85, -122.80], "lat": [38.60, 38.60]}
     plan = change_plan(
-        lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 0,
+        lidar_config,
+        STUDY_BOX,
+        ("2013", "2022"),
+        resource_boxes,
+        0,
         corridor=([line], 100.0),
     )
     assert plan["tile_count"] == plan["required_tiles"]

@@ -48,7 +48,11 @@ def test_labels_count_loss_and_blank_thin_cells():
 
 def test_labels_reject_an_off_grid_corner():
     with pytest.raises(ValueError, match="global grid"):
-        cell_labels(np.zeros((10, 10)), np.zeros((10, 10)),
-                    (1.0, 0.0, 510003.0, 0.0, -1.0, 4270020.0), 10.0)
+        cell_labels(
+            np.zeros((10, 10)),
+            np.zeros((10, 10)),
+            (1.0, 0.0, 510003.0, 0.0, -1.0, 4270020.0),
+            10.0,
+        )
     with pytest.raises(ValueError, match="whole multiple"):
         cell_labels(np.zeros((10, 10)), np.zeros((10, 10)), TRANSFORM, 2.5 * 1.1)

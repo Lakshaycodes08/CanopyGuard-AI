@@ -42,17 +42,27 @@ def test_terrain_features_on_a_plane_facing_east():
 
 
 def test_trend_ignores_missing_years_and_needs_three():
-    values = {2013: np.array([1.0, 1.0]), 2014: np.array([2.0, np.nan]),
-              2015: np.array([np.nan, np.nan]), 2016: np.array([4.0, 4.0])}
+    values = {
+        2013: np.array([1.0, 1.0]),
+        2014: np.array([2.0, np.nan]),
+        2015: np.array([np.nan, np.nan]),
+        2016: np.array([4.0, 4.0]),
+    }
     slope = trend(values)
     assert slope[0] == pytest.approx(1.0)
     assert np.isnan(slope[1])
 
 
 def test_optical_features_build_start_end_difference_and_trend():
-    stacks = {year: {"ndvi": np.array([0.1 * (year - 2012)]), "nbr": np.array([0.2]),
-                     "ndmi": np.array([0.3]), "clear_count": np.array([5.0])}
-              for year in range(2013, 2017)}
+    stacks = {
+        year: {
+            "ndvi": np.array([0.1 * (year - 2012)]),
+            "nbr": np.array([0.2]),
+            "ndmi": np.array([0.3]),
+            "clear_count": np.array([5.0]),
+        }
+        for year in range(2013, 2017)
+    }
     features = optical_features(stacks, 2013, 2016)
     assert features["ndvi_diff"][0] == pytest.approx(0.3)
     assert features["ndvi_trend"][0] == pytest.approx(0.1)

@@ -100,9 +100,7 @@ def spans(lines: list[dict[str, Any]]) -> list[dict[str, Any]]:
     result = []
     for line in lines:
         count = len(line["lon"])
-        breaks = [
-            i for i in range(count) if i in (0, count - 1) or line["support"][i]
-        ]
+        breaks = [i for i in range(count) if i in (0, count - 1) or line["support"][i]]
         for number, (a, b) in enumerate(zip(breaks, breaks[1:], strict=False)):
             result.append(
                 {

@@ -18,7 +18,6 @@ from numpy.typing import ArrayLike, NDArray
 from canopyguard.lidar.ept import pdal_bounds
 from canopyguard.lidar.grid import grid_box
 
-
 FLAG_EXPRESSION = "Synthetic == 0 && Withheld == 0 && Overlap == 0"
 
 Reader = dict[str, Any] | list[dict[str, Any]]
