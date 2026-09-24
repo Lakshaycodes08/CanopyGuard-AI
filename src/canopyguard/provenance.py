@@ -117,6 +117,13 @@ def read_provenance(path: str | Path) -> dict[str, Any]:
         raise ValueError(msg)
 
     require_keys(record, REQUIRED_FIELDS)
+    current = file_sha256(path)
+    if record["sha256"] != current:
+        msg = (
+            f"Data file does not match its provenance sidecar: {path} "
+            f"(sidecar {record['sha256']}, current {current})"
+        )
+        raise ValueError(msg)
     return record
 
 

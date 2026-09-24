@@ -26,8 +26,9 @@ def tile_grid(box: Box, tile_size_m: float) -> list[Box]:
         METRES_PER_DEGREE_LATITUDE * math.cos(mean_latitude)
     )
 
-    rows = max(1, int((north - south) / latitude_step))
-    columns = max(1, int((east - west) / longitude_step))
+    tolerance = 1e-9
+    rows = max(1, math.ceil((north - south) / latitude_step - tolerance))
+    columns = max(1, math.ceil((east - west) / longitude_step - tolerance))
     return [
         (
             west + column * longitude_step,
@@ -55,6 +56,10 @@ def stratified_sample(
         raise ValueError("Sample count must be positive")
     if not items:
         raise ValueError("Cannot sample an empty collection")
+    if count > len(items):
+        raise ValueError(
+            f"Sample count {count} exceeds the collection size {len(items)}"
+        )
 
     groups: dict[str, list[Any]] = {}
     for item in items:

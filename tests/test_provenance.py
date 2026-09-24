@@ -56,6 +56,20 @@ def test_read_rejects_incomplete_sidecar(data_file):
         read_provenance(data_file)
 
 
+def test_read_rejects_a_data_file_modified_after_its_sidecar(data_file):
+    write_provenance(
+        data_file,
+        source_url="https://example.org/item",
+        script_name="tests",
+        bbox_wgs84=SONOMA,
+        crs="EPSG:4326",
+        row_count=1,
+    )
+    data_file.write_text('{"value": 2}\n', encoding="utf-8")
+    with pytest.raises(ValueError, match="does not match its provenance sidecar"):
+        read_provenance(data_file)
+
+
 def test_boxes_intersect_detects_wrong_region():
     assert boxes_intersect(SONOMA, SONOMA)
     assert not boxes_intersect(SONOMA, POTOMAC)

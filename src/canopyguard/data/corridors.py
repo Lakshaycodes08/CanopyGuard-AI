@@ -15,11 +15,15 @@ def parse_corridor_geojson(geojson_dict: dict[str, Any]) -> list[dict[str, Any]]
         props = feature.get("properties", {})
         geometry = feature.get("geometry", {})
         coords = geometry.get("coordinates", [])
+        geometry_type = geometry.get("type")
 
-        if not coords or geometry.get("type") not in ("LineString", "MultiLineString"):
+        if not coords or geometry_type not in ("LineString", "MultiLineString"):
             continue
 
-        line_coords = coords[0] if geometry.get("type") == "MultiLineString" else coords
+        # A MultiLineString's components are disconnected on the ground (a
+        # gap, a jump to another circuit segment); each becomes its own
+        # record rather than being merged or dropped.
+        components = coords if geometry_type == "MultiLineString" else [coords]
 
         raw_voltage = props.get("VOLTAGE")
         try:
@@ -27,17 +31,18 @@ def parse_corridor_geojson(geojson_dict: dict[str, Any]) -> list[dict[str, Any]]
         except (ValueError, TypeError):
             voltage = 0.0
 
-        records.append(
-            {
-                "line_id": str(
-                    props.get("ID") or props.get("OBJECTID") or len(records)
-                ),
-                "voltage_kv": voltage,
-                "status": str(props.get("STATUS", "UNKNOWN")),
-                "owner": str(props.get("OWNER", "UNKNOWN")),
-                "coordinates": line_coords,
-            }
-        )
+        base_id = str(props.get("ID") or props.get("OBJECTID") or len(records))
+        for index, line_coords in enumerate(components):
+            line_id = base_id if len(components) == 1 else f"{base_id}_{index}"
+            records.append(
+                {
+                    "line_id": line_id,
+                    "voltage_kv": voltage,
+                    "status": str(props.get("STATUS", "UNKNOWN")),
+                    "owner": str(props.get("OWNER", "UNKNOWN")),
+                    "coordinates": line_coords,
+                }
+            )
 
     return records
 

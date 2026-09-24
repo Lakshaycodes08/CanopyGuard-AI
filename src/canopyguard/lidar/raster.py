@@ -116,8 +116,8 @@ def _bilinear_sample(
     inside = (
         (row_floor >= 0)
         & (column_floor >= 0)
-        & (row_floor < rows - 1)
-        & (column_floor < columns - 1)
+        & (row_floor < rows)
+        & (column_floor < columns)
     )
 
     clipped_row = np.clip(row_floor, 0, rows - 2)

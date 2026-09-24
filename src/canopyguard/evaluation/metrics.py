@@ -89,8 +89,12 @@ def _ranked_inputs(
     )
     if weight.shape != score.shape:
         raise ValueError("Weights must match the score shape")
+    if not np.all(np.isfinite(weight)):
+        raise ValueError("Weights must be finite")
     if np.any(weight < 0):
         raise ValueError("Weights must be non-negative")
+    if np.sum(weight) <= 0:
+        raise ValueError("Weights must sum to a positive total")
 
     order = np.argsort(-score, kind="stable")
     return label[order], weight[order]

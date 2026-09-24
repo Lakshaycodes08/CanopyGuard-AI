@@ -8,7 +8,7 @@ import pytest
 from canopyguard.io import project_root
 
 FEATURE_PACKAGES = ("features", "forecasting", "risk")
-FORBIDDEN_MODULES = ("canopyguard.lidar",)
+FORBIDDEN_MODULES = ("canopyguard.lidar", "canopyguard.data.lidar")
 FORBIDDEN_PATHS = ("processed/truth", "data/processed/truth")
 
 

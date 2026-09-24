@@ -8,6 +8,7 @@ from canopyguard.evaluation.detectability import noise_floor_table
 from canopyguard.io import data_path, ensure_parent
 from canopyguard.lidar.difference import difference_ladder
 from canopyguard.lidar.gridio import read_grid
+from canopyguard.provenance import file_sha256, study_area_box, write_provenance
 
 
 def main() -> int:
@@ -34,6 +35,16 @@ def main() -> int:
 
     output = ensure_parent(data_path("processed", "truth", "noise_floor.json"))
     output.write_text(json.dumps(rows, indent=2), encoding="utf-8")
+    study_config = load_config("configs/study_area.yaml")
+    write_provenance(
+        output,
+        source_url=f"local:{args.start_chm},{args.end_chm}",
+        script_name="scripts/measure_noise_floor.py",
+        bbox_wgs84=study_area_box(study_config),
+        crs=study_config["study_area"]["crs"],
+        row_count=len(rows),
+        config_sha256=file_sha256("configs/lidar.yaml"),
+    )
     print(json.dumps(rows, indent=2))
     return 0
 

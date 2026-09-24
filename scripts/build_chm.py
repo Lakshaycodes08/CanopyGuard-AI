@@ -11,6 +11,9 @@ from canopyguard.lidar.chm import (
     run_pipeline,
 )
 from canopyguard.lidar.plan import calibration_plan, noise_floor_footprints
+from canopyguard.provenance import file_sha256, write_provenance
+
+GRID_CRS = "EPSG:6339"
 
 
 def main() -> int:
@@ -28,6 +31,15 @@ def main() -> int:
 
     output = ensure_parent(data_path("interim", "lidar", "calibration_plan.json"))
     output.write_text(json.dumps(plan, indent=2), encoding="utf-8")
+    write_provenance(
+        output,
+        source_url="local:calibration_plan",
+        script_name="scripts/build_chm.py",
+        bbox_wgs84=plan["coverage_box"],
+        crs="EPSG:4326",
+        row_count=plan["tile_count"],
+        config_sha256=file_sha256("configs/lidar.yaml"),
+    )
     print(
         f"{plan['tile_count']} of {plan['candidate_tiles']} co-covered tiles, "
         f"{plan['sample_area_km2']:.1f} km2 -> {output}"
@@ -37,29 +49,34 @@ def main() -> int:
 
     for tile in plan["tiles"]:
         for epoch, reader in sorted(tile["readers"].items()):
-            _build_tile(reader, epoch, tile["index"], tile["grid"], config)
+            _build_tile(reader, epoch, tile["index"], tile["grid"], tile["box"], config)
     return 0
 
 
-def _build_tile(reader, epoch: str, index: int, grid, config) -> None:
+def _build_tile(reader, epoch: str, index: int, grid, box, config) -> None:
     stem = f"{epoch}_t{index:04d}"
-    terrain = build_terrain_pipeline(
-        reader,
-        str(data_path("processed", "truth", f"dtm_{stem}.tif")),
-        str(data_path("processed", "truth", f"dsm_{stem}.tif")),
-        grid,
-        config,
-    )
+    dtm = data_path("processed", "truth", f"dtm_{stem}.tif")
+    dsm = data_path("processed", "truth", f"dsm_{stem}.tif")
+    terrain = build_terrain_pipeline(reader, str(dtm), str(dsm), grid, config)
     print(f"{stem} ground points: {run_pipeline(terrain)['points']}")
+    for path in (dtm, dsm):
+        _write_raster_provenance(path, reader, box)
     for threshold in config["chm"]["pit_free_layers_m"]:
-        layer = build_layer_pipeline(
-            reader,
-            str(data_path("processed", "truth", f"layer_{stem}_{threshold:g}.tif")),
-            float(threshold),
-            grid,
-            config,
-        )
+        path = data_path("processed", "truth", f"layer_{stem}_{threshold:g}.tif")
+        layer = build_layer_pipeline(reader, str(path), float(threshold), grid, config)
         run_pipeline(layer)
+        _write_raster_provenance(path, reader, box)
+
+
+def _write_raster_provenance(path, reader: dict, box: tuple) -> None:
+    write_provenance(
+        path,
+        source_url=reader["filename"],
+        script_name="scripts/build_chm.py",
+        bbox_wgs84=box,
+        crs=GRID_CRS,
+        config_sha256=file_sha256("configs/lidar.yaml"),
+    )
 
 
 if __name__ == "__main__":

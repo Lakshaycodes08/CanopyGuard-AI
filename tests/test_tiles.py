@@ -25,6 +25,13 @@ def test_tile_grid_rejects_bad_input():
         tile_grid(CALIBRATION, 0.0)
 
 
+def test_tile_grid_covers_a_final_partial_strip():
+    box = (-122.80, 38.80, -122.799, 38.8035)  # north-south extent is 3.5 rows
+    tiles = tile_grid(box, 100.0)
+    norths = [tile[3] for tile in tiles]
+    assert max(norths) == pytest.approx(box[3])
+
+
 def test_sample_area_sums_the_tiles():
     tiles = tile_grid(CALIBRATION, 1000.0)
     assert sample_area_km2(tiles) == pytest.approx(len(tiles), rel=0.05)

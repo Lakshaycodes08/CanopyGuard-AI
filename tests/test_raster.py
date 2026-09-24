@@ -74,6 +74,12 @@ def test_shift_bilinear_marks_out_of_range_cells():
     assert np.isnan(shifted[5, -1])
 
 
+def test_shift_bilinear_with_zero_shift_keeps_the_last_row_and_column():
+    grid = np.arange(100, dtype=np.float64).reshape(10, 10)
+    shifted = shift_bilinear(grid, dx_m=0.0, dy_m=0.0, resolution=10.0)
+    assert np.array_equal(shifted, grid)
+
+
 def test_shift_bilinear_is_reversible_in_the_interior():
     rng = np.random.default_rng(0)
     grid = rng.normal(size=(40, 40))

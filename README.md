@@ -55,8 +55,11 @@ Every arrow is a file under `data/interim` or `data/processed`. Root data direct
 
 ## Dependency strategy
 
-The working environment is a plain virtual environment. Every dependency in
-it ships a wheel, so no compiler and no conda are required.
+`environment.yml` is the canonical dependency source and is what CI installs
+from. Use conda because the geospatial stack relies on compiled packages.
+
+A plain virtual environment also works for day-to-day development, since
+every dependency in `pyproject.toml` ships a wheel and needs no compiler:
 
 ```bash
 uv venv --python 3.11 --seed
@@ -65,9 +68,9 @@ uv pip install -e ".[dev]"
 make check
 ```
 
-`python -m venv` and `pip` work identically if uv is not installed.
-`environment.yml` is a thin conda wrapper around the same install for anyone
-who prefers conda.
+`python -m venv` and `pip` work identically if uv is not installed. Keep
+`pyproject.toml` a subset of `environment.yml`, not an independent source: a
+dependency belongs in `environment.yml` first.
 
 Optional extras: `.[models]` adds SciPy, scikit-learn and LightGBM for the
 modelling stage. LightGBM needs an OpenMP runtime on macOS, so install that

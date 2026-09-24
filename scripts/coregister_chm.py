@@ -5,8 +5,9 @@ import json
 
 from canopyguard.config import load_config
 from canopyguard.io import data_path, ensure_parent
-from canopyguard.lidar.coreg import accept, align, apply_shift
+from canopyguard.lidar.coreg import accept, align, apply_horizontal_shift
 from canopyguard.lidar.gridio import read_grid, write_grid
+from canopyguard.provenance import file_sha256, study_area_box, write_provenance
 
 
 def main() -> int:
@@ -34,11 +35,34 @@ def main() -> int:
     shift["accepted"] = float(accept(shift, settings["max_accepted_shift_m"]))
 
     canopy, profile = read_grid(args.moving_chm)
-    write_grid(args.output_chm, apply_shift(canopy, shift, resolution), profile)
+    write_grid(
+        args.output_chm, apply_horizontal_shift(canopy, shift, resolution), profile
+    )
+
+    study_config = load_config("configs/study_area.yaml")
+    box = study_area_box(study_config)
+    crs = study_config["study_area"]["crs"]
+    config_sha256 = file_sha256("configs/lidar.yaml")
+    write_provenance(
+        args.output_chm,
+        source_url=f"local:{args.moving_chm}",
+        script_name="scripts/coregister_chm.py",
+        bbox_wgs84=box,
+        crs=crs,
+        config_sha256=config_sha256,
+    )
 
     report = ensure_parent(data_path("processed", "truth", "coregistration.jsonl"))
     with report.open("a", encoding="utf-8") as handle:
         handle.write(json.dumps({"moving": args.moving_chm, **shift}) + "\n")
+    write_provenance(
+        report,
+        source_url=f"local:{args.moving_dtm}",
+        script_name="scripts/coregister_chm.py",
+        bbox_wgs84=box,
+        crs=crs,
+        config_sha256=config_sha256,
+    )
     print(json.dumps(shift, indent=2))
     return 0 if shift["accepted"] else 1
 

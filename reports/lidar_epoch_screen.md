@@ -42,7 +42,7 @@ establish where each 3DEP acquisition is returned.
 | -123.05, 38.83, -122.71, 38.92 | yes | yes |
 | -123.39, 38.83, -123.05, 38.92 | yes | yes |
 
-Raw record: `data/interim/lidar/coverage_probes.json`.
+Raw record: `reports/lidar_coverage_probes.json`.
 
 A probe answers presence per box, not per work unit, and a box returning both
 epochs can still hold no ground carrying both. The per-file bounds in each

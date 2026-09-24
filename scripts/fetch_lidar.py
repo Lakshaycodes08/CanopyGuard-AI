@@ -9,6 +9,7 @@ from canopyguard.data.lidar_fetch import (
 )
 from canopyguard.io import data_path, ensure_parent
 from canopyguard.lidar.footprint import as_box, covered_area_km2, probe_grid
+from canopyguard.provenance import write_provenance
 
 
 def main() -> int:
@@ -27,6 +28,14 @@ def main() -> int:
         data_path("interim", "lidar", f"{args.identifier}.coverage.json")
     )
     output.write_text(_report(args.identifier, probes, present, box), encoding="utf-8")
+    write_provenance(
+        output,
+        source_url=build_catalog_url(box),
+        script_name="scripts/fetch_lidar.py",
+        bbox_wgs84=(study["west"], study["south"], study["east"], study["north"]),
+        crs="EPSG:4326",
+        row_count=len(probes),
+    )
     print(f"Covered {covered_area_km2(probes, present):.1f} km2, wrote {output}")
     return 0
 
