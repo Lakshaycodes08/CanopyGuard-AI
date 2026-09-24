@@ -131,8 +131,8 @@ with disagreeing evidence remain uncertain rather than being labelled stable.
    repeat LiDAR, biological priors, and maintenance optimization.
 4. Calibrate and validate the disturbance-screening thresholds on labelled
    Sonoma audit samples.
-5. Revisit the locked research question only if new evidence falsifies its
-   open-evaluation contribution.
+5. Revisit the research question if new evidence falsifies its span-level
+   forecast contribution.
 
 ## Rerun inputs
 

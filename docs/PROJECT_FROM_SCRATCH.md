@@ -1,18 +1,19 @@
 # CanopyGuard-AI from scratch
 
-Technical onboarding. Read `reports/research_design.md` first for the locked
-design. This document explains the concepts and the pipeline that implement it.
+Technical onboarding. Read `reports/research_design.md` first for the current
+design. This document explains the concepts and the pipeline that implement
+it.
 
 ## 1. Problem
 
-Measure the spatial aggregation scale and temporal baseline at which open
-optical satellite time series recover airborne-LiDAR-measured canopy height
-change in Mediterranean-climate mixed forest, then test whether that signal
-supports prioritisation of transmission corridor spans.
+Given an airborne LiDAR survey at `t0` and open data available up to `t0`,
+forecast which transmission-corridor spans will carry vegetation within
+clearance distance by `t0 + k` years, and rank spans better than cyclic,
+current-height-first and random allocation.
 
-Two halves. The detectability measurement and product benchmark form the
-spine. The corridor span ranking is the applied half and is reported whatever
-its outcome.
+The forecast and span ranking are the spine. Label-quality measurement (the
+LiDAR noise floor and the detectability of canopy change) is a supporting
+result inside methods, not the primary contribution.
 
 ## 2. Why the target is canopy height change
 
@@ -28,8 +29,12 @@ static canopy height, because the growth component contributes at most about
 
 Airborne LiDAR change over a nine-year baseline is 0.7 to 5.5 m against a
 limit of detection of 0.5 to 2.8 m depending on aggregation. That is the only
-formulation where signal exceeds the noise floor. The full arithmetic is in
-`reports/research_design.md`.
+formulation where signal exceeds the noise floor, and it is why LiDAR-derived
+canopy height change is the label the forecast heads are trained against.
+Block-mean height change is a label-quality statement, not the operational
+target: clearance risk is carried by upper-percentile and local-maximum
+canopy height near conductors, not by the 30 m block mean. The full
+arithmetic is in `reports/research_design.md`.
 
 ## 3. The measuring instrument
 
@@ -141,86 +146,78 @@ not spectral value, is what carries information above saturation.
 8. **Predictors.** Seasonal composites with topographic correction and
    view-angle normalisation, vegetation indices, multi-scale neighbourhood
    statistics, terrain, fire and disturbance status, corridor spans.
-9. **Detectability surface.** Signal, noise, signal-to-noise ratio and
-   detectable fraction over the scale and baseline grid.
-10. **Models.** The ladder in section 8.
+9. **As-of feature store.** LiDAR t0 structure, terrain, optical history to
+    t0, climate, vegetation type, fire history, keyed by cell and cutoff
+    date. The builder refuses any source observed after its cutoff.
+10. **Forecast heads.** A disturbance hazard head and a conditional growth
+    head, described in section 8.
 11. **Product benchmark.** Existing free canopy height products against the
-    same truth, inside corridor buffers and across the tile sample.
-12. **Ranking.** Span prioritisation against six allocation baselines.
+    same truth, both as differenced baselines and as candidate features.
+12. **Span ranking.** Span prioritisation by predicted encroachment
+    probability and expected time, against cyclic, current-height-first,
+    random and span-length allocation.
 
 ## 8. Models
 
-Stage 1 uses no satellite data. A generalised algebraic difference form with a
-Chapman-Richards base function is fitted per vegetation alliance, predicting
-height increment from start height, elapsed interval and terrain-derived site
-quality. Height increment depends on position on the species height-age curve,
-which varies sevenfold within one species, and start height is the observable
-proxy for that position.
+Two heads, both conditioned on the as-of feature set at t0:
 
-Stage 2 predicts the Stage 1 residual from satellite and texture features.
-That residual is a growth anomaly, whose plausible drivers are canopy water
-stress, competition, sub-threshold disturbance and recovery trajectory. The
-reported scientific quantity is the error reduction of Stage 2 over Stage 1.
+- A disturbance hazard head, predicting the probability that a cell or span
+  crosses the clearance-relevant threshold by `t0 + k`.
+- A conditional growth head, quantile regression on height change given no
+  disturbance, at quantiles 0.05, 0.25, 0.50, 0.75 and 0.95.
 
-The start-height anchor is the ring median of the eight neighbours, excluding
-the centre, because the centre cell's start height appears in the target with
-a negative sign and its measurement error would induce spurious correlation.
-
-Ladder, in order, each with a condition to proceed: global mean and median;
-ring-anchor isotonic fit; Stage 1; ridge on the residual; gradient boosting on
-the residual; quantile heads with conformal calibration; scale sweep; product
-benchmark; span ranking. A patch convolutional model is optional and no
-required result depends on it.
+Growth and disturbance-loss residuals are bimodal, so a single Gaussian
+likelihood is not used. The start-height anchor for the growth head is the
+ring median of the eight neighbours, excluding the centre cell, because the
+centre cell's own height appears in the target and its measurement error
+would induce spurious correlation if also used as a feature.
 
 Model capacity is bounded by the number of spatially independent blocks, not
 the number of cells. Limits are in `configs/forecasting.yaml`.
 
 ## 9. Validation
 
-Three regimes, all reported.
+Spatial block cross-validation, with block size from the practical range of
+the variogram of out-of-fold residuals and a buffer between train and test
+blocks sized from the same residual variogram. One region is held out
+entirely from every fold, for a fully independent generalisation estimate.
 
-- **Design-based.** A random sample withheld permanently before modelling.
-  Truth is wall to wall over the processing scope, so this is an unbiased
-  estimate of map accuracy. Most canopy height studies cannot do this.
-- **Spatial block.** Block size from the practical range of the variogram of
-  out-of-fold residuals, floored at 500 m, folds assigned so each is
-  spatially dispersed.
-- **Leave-one-fire-out.** Each fire perimeter withheld in turn. Wide intervals
-  by construction.
+An out-of-time check runs on the 2022 to 2023 pair, the one interval where
+both a t0-only feature set and the realised outcome exist.
 
-Confidence intervals on model differences come from a paired bias-corrected
-and accelerated bootstrap that resamples whole blocks. Resampling individual
-cells understates the interval by roughly the square root of the cells per
-block.
+Confidence intervals on model and ranking differences come from a paired
+tile-block bootstrap that resamples whole blocks. Resampling individual cells
+understates the interval by roughly the square root of the cells per block.
 
 Two ablations are blocking and run before the others. The temporal shuffle
-permutes which year's composites attach to each cell; if error does not
-degrade, the model carries no temporal information. The matched random field
+permutes the as-of cutoff date; if error does not degrade, the model carries
+no temporal information and is not forecasting. The matched random field
 replaces the satellite block with a Gaussian random field of the same spatial
 autocorrelation; if it reproduces the gain, the gain is spatial structure, not
 signal.
 
 ## 10. Metrics
 
-Regression: mean absolute error primary, with root mean squared error, signed
-bias and coefficient of determination secondary, reported by height class,
-vegetation class, disturbance status and slope band.
+Cell level: mean absolute error on the growth head, and quantile coverage for
+both heads, reported by height class, vegetation class, disturbance status
+and slope band.
 
-Ranking: recall at 10 percent of ranked corridor length primary, reported
-absolutely and as lift over the cyclic baseline. That budget is not arbitrary;
-it matches the published boundary of a utility high-risk band. Secondary are
-the partial area under the gain curve, precision at 1, 2 and 10 percent, area
-under the precision-recall curve reported with prevalence, and inspection
-burden per true positive.
+Span level: recall at 1, 2 and 10 percent of ranked corridor length for
+"vegetation within the clearance envelope by t1", primary, reported
+absolutely and as lift over the cyclic baseline, against current-height-first,
+random and span-length allocation. Secondary are the partial area under the
+gain curve, area under the precision-recall curve reported with prevalence,
+and inspection burden per true positive.
 
 Mean absolute error in metres is a validation quantity, not a headline. A 6 m
 height error against a 1.22 m clearance threshold gives a discrimination area
-under the curve of about 0.56, so no clearance decision can rest on it.
+under the curve of about 0.56, so no clearance decision can rest on cell-level
+height error alone; the span-ranking evaluation is what the claim rests on.
 
 ## 11. Completed
 
 - Phase 0 feasibility, all six scientific gates.
-- Locked research design.
+- Research design reframed to a span-level encroachment forecast, 2026-09-24.
 - Verified literature comparison matrix.
 - Sentinel-2 catalogue manifest, 458 Level-2A items, tile 10SEH, DVC-recorded.
 - Reflectance scaling, clear-pixel compositing, clear-observation counts.
@@ -286,7 +283,7 @@ that reaches the manuscript has a row in `reports/claims_log.md`.
 
 | File | Holds |
 | --- | --- |
-| `reports/research_design.md` | Locked question, hypotheses, protocol, claim limits |
+| `reports/research_design.md` | Current question, hypotheses, protocol, claim limits |
 | `MEMORY.md` | Current phase, decisions, immediate next action |
 | `reports/data_feasibility.md` | Phase 0 evidence |
 | `reports/phase1_data_protocol.md` | Growth evidence and disturbance screen |

@@ -71,9 +71,11 @@ scientific claims here.
 - First ingestion target: Sentinel-2 MGRS tile 10SEH, which contains reference
   corridor feature 671. The config-driven, DVC-recorded STAC stage retained 458
   Level-2A items across 2017-2022 with all 11 required assets.
-- Pre-data research design: `reports/research_design.md` locks the primary
+- Research design: `reports/research_design.md` sets out the primary
   question, hypotheses, time and spatial splits, baselines, ablations, metrics,
-  and falsification criteria before model results exist.
+  and falsification criteria. Reframed 2026-09-24 from a detectability
+  benchmark to a span-level encroachment forecast; nothing in the design is
+  locked or pre-registered, and it is revised as evidence accumulates.
 - Compute: CPU only for every required result. Two environments.
   `environment.yml` runs data assembly, modelling, evaluation, figures and
   tests on a laptop. `environment-lidar.yml` carries PDAL and GDAL and is used
@@ -103,16 +105,20 @@ scientific claims here.
 
 ## Research direction
 
-CanopyGuard-AI measures the spatial scale and temporal baseline at which open
-satellite time series recover airborne-LiDAR-measured canopy height change,
-benchmarks existing free canopy height products against the same truth inside
-transmission corridors, and tests whether the recovered signal supports
-prioritisation of corridor spans over the allocation rules a utility would
-otherwise use.
+CanopyGuard-AI forecasts, from an airborne LiDAR survey at t0 and open data
+available up to t0, which transmission-corridor spans will carry vegetation
+within clearance distance by t0 + k years, and ranks spans against cyclic,
+current-height-first and random allocation. Label quality (the LiDAR noise
+floor and the detectability of canopy change) is measured as a supporting
+result, not the primary contribution. Existing free canopy height products
+are benchmarked against the same LiDAR truth, both as baselines and as
+candidate features.
 
-The research question and evaluation protocol are predeclared in
-`reports/research_design.md`. The novelty claim is the measured detectability
-boundary and the open evaluation protocol, not component integration.
+The research question and evaluation protocol are in
+`reports/research_design.md` and are revised as evidence accumulates. The
+contribution is the span-level forecast, its ranking evaluation against
+operational allocation rules, and the open evaluation protocol, not component
+integration.
 
 The risk score is a research prioritization aid. It is not a regulatory
 clearance, engineering survey, or safety certification.
@@ -190,16 +196,24 @@ keep its stated scientific role.
 ## Not completed
 
 - Systematic literature search and final defensible novelty statement
-- LiDAR epoch screen run, point-cloud fetch, and generated canopy height
-  models. The code exists; no data has been processed
-- Earth Engine scripts for the Sentinel-2 and Landsat composites
-- Detectability surface across aggregation scale and temporal baseline
-- Per-alliance height-increment model and measured growth rates
-- Sentinel-2 and Landsat seasonal composites, texture, terrain, fire screen
-- Corridor spans and the analysis table
-- Model ladder, ablations, and significance tests
-- Product benchmark against the repeat-LiDAR truth
-- Span ranking against the six allocation baselines
+- Per-10 m-cell labels (mean, 95th percentile, maximum canopy height and their
+  changes, loss share) over corridor tiles plus a background sample, on the
+  global 10 m grid; later a crown or local-maximum layer
+- As-of feature store keyed by cell and cutoff date, refusing any source
+  observed after the cutoff: LiDAR t0 structure, terrain, Landsat history with
+  disturbance age, climate normals and water deficit, vegetation type, fire
+  perimeters before t0, NAIP
+- Disturbance hazard head and conditional growth head (quantile heads)
+- Corridor spans from OpenStreetMap power lines, cross-checked against the
+  CEC layer for voltage, and span-level cell aggregation
+- Spatial block cross-validation with a residual-variogram buffer and one
+  region held out entirely; out-of-time check on the 2022-2023 pair
+- Span-ranking evaluation against cyclic, current-height-first, random and
+  span-length allocation, with paired tile-block bootstrap intervals
+- Product benchmark and candidate-feature test using Lang et al. 2023,
+  Meta/WRI and GLAD products
+- Output span table and map of top-ranked spans with probability and expected
+  time to encroachment
 - Final figures, manuscript results, and journal submission
 - DVC remote and experiment tracker
 
@@ -222,7 +236,8 @@ every future diff before committing it.
 | 2026-09-15 | Use age-aware growth evidence only as a weak prior | Published height growth varies strongly with species, age, site, and competition. A universal annual-growth constant would not be defensible. |
 | 2026-09-15 | Select MGRS tile 10SEH for the first cube | The already-checked reference corridor feature 671 falls in this tile, allowing the first data cube to stay tied to verified corridor vegetation. |
 | 2026-09-15 | Keep disturbance screening independent | CAL FIRE, MTBS, and Landsat trajectory evidence will define stable and challenge subsets without treating Sentinel-2 forecast inputs as unquestioned truth. |
-| 2026-09-15 | Lock the pre-data research design | Declaring hypotheses, baselines, splits, metrics, and falsification rules before training reduces result-driven methodological changes. |
+| 2026-09-15 | Lock the pre-data research design | Declaring hypotheses, baselines, splits, metrics, and falsification rules before training reduces result-driven methodological changes. Superseded 2026-09-24. |
+| 2026-09-24 | Unlock the design and reframe from a detectability benchmark to a span-level encroachment forecast | An independent review found the retrospective Landsat model used end-of-period imagery and the outcome differences themselves, valid as attribution but not as forecast; utilities need span-level, ranked, backtested, forward-looking risk, and block-mean height change is not the clearance-relevant quantity. Full design in `reports/research_design.md`. |
 | 2026-09-15 | Start with CPU baselines | Median, persistence, Random Forest, and histogram gradient boosting must establish value before any heavy or GPU model is justified. |
 | 2026-09-22 | Quarantine all files in `data/interim` and add provenance and truth-isolation guards | Seven parquet files present in the pipeline input directory were synthetic and described a bounding box about 4,000 km from the study area. They were not produced by any script in the repository. |
 | 2026-09-22 | Withdraw the one-year-ahead GEDI RH98 target | Label error of 6 to 10 m against annual growth of 0.075 to 0.61 m gives a maximum growth-attributable coefficient of determination of about 4e-4. Any fitted model would be a static height map. |

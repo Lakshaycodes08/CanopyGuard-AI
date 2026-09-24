@@ -1,69 +1,69 @@
 # CanopyGuard-AI research design
 
-Locked: 2026-09-22. No data acquired and no model fitted at lock time.
+Reframed: 2026-09-24, superseding the design dated 2026-09-22. Nothing in this
+project is locked or pre-registered; this document is a working design and is
+revised as evidence accumulates. Thresholds calibrated after data were seen
+are marked post hoc.
 
 ## Decision
 
-Status: PRE-DATA DESIGN LOCKED
-
-This document fixes the primary question, hypotheses, data roles, baselines,
-splits, metrics, and claim rules before any result exists. Thresholds that
-require empirical calibration are listed as pending and are calibrated from
-training data only.
+An independent review on 2026-09-24 found that the design this document
+previously fixed answered an attribution question, not a forecast question:
+the retrospective Landsat model explained 2013-2022 canopy height change using
+2022 imagery and the 2013-2022 differences themselves, both of which observe
+the outcome it claimed to predict. Utilities act on span-level, one-to-three
+year, ranked and backtested encroachment risk, and block-mean 30 m height
+change of about 0.1 m per year is not the clearance-relevant quantity; the
+upper percentiles and local maxima near conductors are. The project is
+reframed from a detectability benchmark to a forecast product. Detectability
+remains in the design as a label-quality result, not as the spine.
 
 ## Primary research question
 
-At what spatial aggregation scale and temporal baseline do open optical
-satellite time series recover airborne-LiDAR-measured canopy height change in
-Mediterranean-climate mixed forest, and is that recovery sufficient to
-prioritise maintenance on transmission corridor spans?
+Given an airborne LiDAR survey at `t0` and open data available up to `t0`,
+forecast which transmission-corridor spans will carry vegetation within
+clearance distance by `t0 + k` years, and rank spans better than cyclic,
+current-height-first and random allocation.
 
-The contribution is a measured detectability boundary and an open evaluation
-protocol. It is not a claim of first-ever vegetation detection, growth
-forecasting, risk assessment, or maintenance optimisation.
+The contribution is a span-level forecast and ranking evaluated against
+operational allocation rules, built on a measured label-quality
+characterisation of the underlying LiDAR truth. It is not a claim of
+first-ever vegetation detection, a compliance determination, or a hazard-tree
+identification.
 
-## Why the target is change and not a one-year-ahead height
+## Unit of analysis
 
-Quality-filtered GEDI RH98 in steep mixed forest has a single-shot error
-standard deviation of 6 to 10 m. Published annual height increment for the
-mapped Sonoma alliances is 0.075 to 0.61 m. The ratio of label error to
-annual signal is between 10 to 1 and 213 to 1.
+- Cell grid: global 10 m grid in EPSG:6339. A cell's stable identifier is the
+  integer column and row index of its lower-left corner from the CRS origin,
+  so identifiers are stable across tiles, runs and study areas. 30 m cells
+  nest as 3x3 blocks of the 10 m grid.
+- Span: a tower-to-tower segment of OpenStreetMap power line geometry within
+  the study box. Voltage is cross-checked against the California Energy
+  Commission transmission line layer, since OpenStreetMap voltage tagging is
+  not authoritative on its own. A span buffer aggregates the 10 m cells that
+  fall inside it.
+- Working scale for label statistics is 10 m and 30 m; span-level aggregation
+  is computed from the underlying cell grid, not from a coarser raster.
 
-Decomposing a one-year-ahead height target gives a canopy height variance of
-order 144 m2, an annual growth variance of order 0.02 m2, and a label error
-variance of order 49 m2. The maximum coefficient of determination attributable
-to growth is 0.02 / (0.02 + 49), approximately 4e-4. Such a model would report
-a coefficient of determination of 0.6 to 0.75, all of it static canopy height.
+## Labels
 
-Detecting one year of mean growth at the two-sigma level requires
-approximately 1,695 footprints per aggregation unit. GEDI density over the
-study area is approximately 120 per km2 before the consensus quality filters
-and of order 6 per km2 after them, giving a minimum detection unit of 3.5 to
-14 km2 against a 10 m pixel of 1e-4 km2.
+Derived from airborne LiDAR canopy height models over corridor tiles and a
+background sample, for the epoch pairs 2013 to 2022 and 2022 to 2023. Per 10 m
+cell, at each of `t0` and `t1`: mean, 95th percentile and maximum canopy
+height, and their changes between epochs; loss share within the cell; a crown
+or local-maximum layer is a planned addition, not yet built. Percentile and
+maximum statistics are carried forward because block-mean height change
+understates the clearance-relevant tail; a single tall stem or crown apex
+inside an otherwise short-canopy cell is the operationally relevant case and a
+mean would average it away.
 
-Airborne LiDAR canopy height change over a nine-year baseline is 0.7 to 5.5 m
-against a limit of detection of 0.5 to 2.8 m depending on aggregation scale.
-This is the only formulation in the available data where signal exceeds the
-measurement noise floor.
+## Label quality
 
-## Analysis unit and target
+This section holds what was previously the noise-floor and long-baseline
+change measurement. It characterises the airborne LiDAR truth the labels and
+evaluation depend on; it is not itself the primary contribution.
 
-- Prediction grid: EPSG:6339, aggregated from 10 m to 200 m per
-  `configs/lidar.yaml`. Primary working scale 100 m. The upper bound is
-  set by the calibration coverage described under noise floor measurement.
-- Target: airborne LiDAR canopy height change `delta_h` between two epochs,
-  computed from canopy height models regenerated from point clouds with one
-  identical pipeline.
-- Epoch pairs: 2022 to 2023 (1 year), 2013 to 2022 (9 years), 2013 to 2023
-  (10 years). The 2007 epoch is admitted for conifer alliances only and only
-  if it passes the epoch screen.
-- Predictors: Sentinel-2 L2A seasonal composites 2017 onward, Landsat 8
-  Collection 2 seasonal composites 2013 onward, multi-scale neighbourhood
-  statistics, 3DEP terrain, vegetation alliance, fire and disturbance status.
-- Corridor geometry: approximate context and aggregation only, never
-  survey-grade clearance truth.
-
-## Noise floor measurement
+### Noise floor from the 2022-2023 pair
 
 The 2022 and 2023 acquisitions are one year apart at 21.51 and 21.32 points
 per square metre. True one-year growth is small and low-variance relative to
@@ -79,9 +79,6 @@ The spread is the normalised median absolute deviation, which is insensitive
 to the disturbance tail. The plain standard deviation is reported alongside
 it; the two diverging is itself a finding. LoD95 is the 95 percent limit only
 where the difference is Gaussian, which the measured decay exponent tests.
-
-This replaces literature estimates of the limit of detection with a
-site-measured value. It is computed before any model is fitted.
 
 The two acquisitions are separate 3DEP work units that abut rather than
 overlap. Their 1 km delivery tile grids are offset, so the area carrying both
@@ -103,9 +100,7 @@ The seam extends beyond the study area. Measurement error is a property of the
 sensors and terrain, not of the study boundary, so calibrating outside the
 boundary is valid provided the strata match. A seam is also the worst geometry
 either acquisition has, so the floor measured there is an upper bound on the
-floor of interior coverage and is reported as one. Stratification of the
-sample by vegetation group, slope band and canopy height class, and the check
-on stratum coverage, are pending.
+floor of interior coverage and is reported as one.
 
 The horizontal offset between two acquisitions is a property of the pair, and
 a 250 m tile spans too narrow a range of aspect to resolve it. One offset is
@@ -117,8 +112,6 @@ and its datum has already cancelled.
 The 2023 and 2023 pair of CA_NorthCoastRanges_2_B23 and CA_SolanoCounty_1_A23
 carries no true growth. It is run as a control, so that a residual offset
 between epochs separates a pipeline fault from a real or seasonal change.
-
-### Measured result
 
 Run on 2026-09-24, on the 2022-2023 pair. Of 287 candidate co-covered 250 m
 tiles, 284 were drawn and 52 admitted after coverage and agreement checks,
@@ -136,13 +129,13 @@ giving 2,153,732 stable-cell co-registration cells over 3 iterations.
 Stable fraction 93.6 percent. Co-registration converged to shift dx +0.053 m,
 dy -0.126 m, dz +0.032 m, with terrain RMSE falling from 0.176 to 0.150 m. The
 decay fit over the four admitted scales gives exponent 0.054 against 0.5 for
-spatially independent error, so H1 is supported: measurement error decays far
-slower than the independent-error rate, consistent with spatially correlated
-error. The 100 m reference scale could not be admitted, because the seam is
-exhausted at 284 of 287 candidate tiles and only 176 cells result, below the
-200-cell minimum. Its sigma is extrapolated from the decay fit at 0.092 m; the
-measured-but-unadmitted 100 m NMAD of 0.082 m agrees with this figure. All six
-gate checks pass: mean_one_year_change_in_range, sigma_falls_with_scale,
+spatially independent error: measurement error decays far slower than the
+independent-error rate, consistent with spatially correlated error. The 100 m
+reference scale could not be admitted, because the seam is exhausted at 284 of
+287 candidate tiles and only 176 cells result, below the 200-cell minimum. Its
+sigma is extrapolated from the decay fit at 0.092 m; the measured-but-
+unadmitted 100 m NMAD of 0.082 m agrees with this figure. All six gate checks
+pass: mean_one_year_change_in_range, sigma_falls_with_scale,
 coregistration_converged, shift_below_limit, sigma_at_reference_below_limit,
 reference_sigma_available. GATE PASS.
 
@@ -151,28 +144,24 @@ admitted scale, and is treated as a pair-specific bias rather than growth. The
 seam is the worst geometry of either acquisition, so this floor is an upper
 bound for interior coverage.
 
-Changes to the gate after the data were seen, both required by results that
-could not be anticipated at design time:
+Two gate thresholds were revised after the data were seen, both post hoc and
+both required by results that could not be anticipated in advance:
 
 1. The noise floor is measured on stable cells only, cells whose 1 m change
-   lies within `noise_floor.stable_change_limit_m` (3.0 m). This implements
-   the stable-cells statement already in this section; it was not previously
-   enforced in the gate arithmetic. The mean check changed from a fixed [0,
-   1.5] m band to [-LoD95 at the finest admitted scale, +1.5 m], because a
-   one-year growth signal and a few-centimetre sensor bias cannot be
-   separated from a single differenced pair. The monotonic-sigma check now
-   tolerates a rise between adjacent scales within twice their combined
-   relative standard error, since a sample-size-limited estimate can rise
-   slightly by chance even when the underlying spread is falling.
+   lies within `noise_floor.stable_change_limit_m` (3.0 m). The mean check
+   changed from a fixed [0, 1.5] m band to [-LoD95 at the finest admitted
+   scale, +1.5 m], because a one-year growth signal and a few-centimetre
+   sensor bias cannot be separated from a single differenced pair. The
+   monotonic-sigma check now tolerates a rise between adjacent scales within
+   twice their combined relative standard error, since a sample-size-limited
+   estimate can rise slightly by chance even when the underlying spread is
+   falling.
 2. When the 100 m reference scale cannot be admitted, because the seam does
    not carry the configured minimum cell count at that scale, its sigma is
    extrapolated from the decay fit over at least three admitted scales and
-   reported as extrapolated. This section already stated that coarser scales
-   are extrapolated from the fitted decay exponent; the change applies that
-   statement to the reference scale itself rather than leaving the gate
-   unable to evaluate it.
+   reported as extrapolated.
 
-## Long-baseline change measurement
+### Long-baseline change, 2013 to 2022
 
 Run 2026-09-24, pair 2013 to 2022, baseline 8.96 years, 30 tiles of 500 m
 (7.5 km2), all admitted. The 2013 acquisition is served as three resources in
@@ -199,186 +188,189 @@ detection is that of the one-year pair; the long pair's own canopy floor is
 not measured and its terrain residual is twice as large, so the fractions are
 upper bounds. With the median canopy change at four to five times LoD95 the
 conclusion does not depend on that margin: nine-year canopy change is
-detectable at every measured scale from 10 to 100 m, which supports H2. The
-median canopy increment corresponds to about 0.1 m per year, at the low end
-of the published range for the mapped alliances.
+detectable at every measured scale from 10 to 100 m. The median canopy
+increment corresponds to about 0.1 m per year, at the low end of the
+published range for the mapped alliances, and is a block-mean figure: it is
+not the clearance-relevant quantity, which is carried by upper percentiles and
+local maxima near conductors, not by the block mean.
 
-## Hypotheses
+### Retrospective Landsat attribution (superseded as a forecast claim)
 
-### H1: error decay
+Fitted on 30 tiles, 30 m cells, tile-grouped cross-validation: a static
+baseline (start height, terrain, vegetation alliance) gives mean absolute
+error 0.83 m, r2 about 0; adding Landsat history to end of period gives mean
+absolute error 0.60 m, r2 0.50, with a bootstrap confidence interval on the
+mean absolute error difference of -0.35 to -0.16 m. On the undisturbed-canopy
+subset alone, r2 is 0.28.
 
-`sigma_n(s)` decreases with aggregation scale more slowly than the inverse
-square root of the cell count, because measurement error is spatially
-correlated. Falsified if the fitted decay exponent equals 0.5 within its
-confidence interval at every scale.
+This result uses end-of-period (2022) imagery and the 2013-2022 difference
+itself as part of its evidence, both of which are the outcome it appears to
+explain. It is retained as an attribution result, meaning it characterises
+association between observed change and observed imagery over the same
+window, and it is not evidence of forecast skill: a genuine forecast must use
+only data available at `t0`, before the outcome window. F3 below restates the
+comparable question in a forecast-valid form.
 
-### H2: detectability boundary
+## Features
 
-There exists a scale and temporal baseline at which true canopy change exceeds
-`LoD95`. The boundary is located and reported. Falsified if no available
-combination clears the limit of detection.
+An as-of feature store keyed by cell identifier and cutoff date. The builder
+refuses any source with an observation date after the cutoff; this is
+enforced in code, not only documented, because a forecast evaluated with
+post-cutoff information is not a forecast.
 
-### H3: optical skill
+- LiDAR structure at `t0`: ring-anchored height statistics (mean, percentiles,
+  maximum) and gap distance from the eight-neighbour ring, excluding the
+  centre cell. The centre cell's own height must not appear in both the
+  feature set and the target, because the target is defined from the centre
+  cell and shared measurement error would induce spurious correlation.
+- Terrain: slope, aspect, and derived site-quality indices from 3DEP.
+- Optical history to `t0`: Landsat 5, 7 and 8 time series with disturbance age
+  from LandTrendr segmentation.
+- Climate: TerraClimate normals and climatic water deficit.
+- Vegetation type: LANDFIRE existing vegetation type, or the CDFW Sonoma
+  vegetation map where it has finer resolution.
+- Fire history before `t0`: CAL FIRE FRAP and MTBS perimeters.
+- NAIP imagery where it adds resolution the other sources lack.
 
-After conditioning on vegetation alliance, start height and terrain site
-quality through a fitted height-increment model, Sentinel-2 and Landsat
-features reduce the mean absolute error of the residual increment. Supported
-only when the paired spatial-block bootstrap interval for the difference lies
-below zero. Falsified if the interval includes zero at every operational
-scale.
+## Models
 
-### H4: product recovery
+Two heads, both conditioned on the as-of feature set at `t0`:
 
-Existing global canopy height products, differenced across epochs, do not
-recover airborne LiDAR change above `LoD95` at the measured scales, which run
-to 200 m. Falsified if any product recovers change above the limit at span
-scale.
-
-### H5: ranking value
-
-Span ranking by predicted change achieves higher recall at 10 percent of
-ranked corridor length than random, cyclic, current-height-first, static-risk,
-span-length and distance-to-conductor allocation. Falsified if the interval on
-the difference includes zero against any of the six.
-
-### H6: growth-rate consistency
-
-Per-alliance one-year height increments measured from the 2022 to 2023 pair
-agree with one ninth of the 2013 to 2022 increment and with the fitted
-height-increment curve, within stated confidence intervals. Disagreement
-beyond those intervals localises a pipeline fault and is reported as such.
-
-H1, H2 and H6 are measurements and return a result regardless of outcome. H3,
-H4 and H5 can each return null.
-
-## Data roles
-
-| Source | Role | Prohibited use |
-| --- | --- | --- |
-| Sonoma 2013, 2022, 2023 airborne LiDAR | Target and independent truth | Any model feature |
-| Sentinel-2 Level-2A | Seasonal predictors from 2017 | Tile cloud percentage as a substitute for pixel masking |
-| Landsat 8 Collection 2 | Seasonal predictors from 2013 | Unharmonised mixing with Sentinel-2 in one feature block |
-| USGS 3DEP | Terrain predictors and site quality | Substituting for a co-registration check |
-| Sonoma vegetation map | Alliance stratification and growth-model grouping | Assuming species purity at 10 m |
-| GEDI02_A Version 2 | Independent cross-check and gap fill | Training target |
-| CAL FIRE, MTBS, Landsat change | Disturbance status | Treating absence from one source as proof of stability |
-| CEC transmission lines | Span construction and aggregation | Engineering clearance or causation claims |
-
-Truth isolation is enforced in continuous integration by
-`tests/test_truth_isolation.py`, which fails if any feature or model module
-imports the LiDAR package or references a truth path.
-
-## Model protocol
-
-Two stages.
-
-Stage 1 is a mechanical growth model using no satellite data. A
-generalised algebraic difference form with a Chapman-Richards base function is
-fitted per vegetation alliance on stable cells, predicting height increment
-from start height, elapsed interval and terrain-derived site quality.
-Alliances with insufficient stable sample are pooled to the physiognomic group
-and the pooling is recorded.
-
-Stage 2 predicts the residual of Stage 1 from satellite and texture features.
-The reported scientific quantity is the incremental error reduction of Stage 2
-over Stage 1.
-
-The start-height anchor is the median of the eight neighbouring cells,
-excluding the centre. The centre cell's start height appears in the target
-with a negative sign, so using it as a feature induces spurious correlation
-through shared measurement error. The centre-anchor variant is reported as a
-sensitivity and the difference quantifies the artifact.
-
-Residuals are bimodal, with a growth mode and a disturbance-loss mode, so a
-unimodal Gaussian likelihood is not used. Two heads are fitted: a binary head
-for the structure-loss event below the negative limit of detection, and
-quantile heads at 0.05, 0.25, 0.50, 0.75 and 0.95. Intervals are calibrated by
-split conformal and by group-conditional conformal on disturbance status and
-height decile, with empirical coverage reported per stratum.
+- Disturbance hazard head: probability that a cell or span crosses the
+  clearance-relevant threshold by `t0 + k`.
+- Conditional growth head: quantile regression on height change given no
+  disturbance, at quantiles 0.05, 0.25, 0.50, 0.75 and 0.95, because growth
+  and disturbance-loss residuals are bimodal and a single Gaussian likelihood
+  is not appropriate.
 
 Model capacity is bounded by the number of spatially independent blocks, not
 the number of cells. Limits are in `configs/forecasting.yaml`.
 
 ## Validation protocol
 
-Three regimes, all reported.
+Spatial block cross-validation, with block size selected from the practical
+range of the variogram of out-of-fold residuals and a buffer applied between
+train and test blocks so the buffer is at least the correlation range. One
+region is held out entirely and never used for any fold, to give a fully
+independent generalisation estimate.
 
-1. Design-based. A simple random sample of cells is withheld permanently
-   before modelling. Because truth is wall to wall over the processed
-   footprint, this is an unbiased estimate of map accuracy.
-2. Spatial block. Block size is selected from the practical range of the
-   variogram of out-of-fold residuals, not of the target, floored at 500 m.
-   Blocks are assigned to folds systematically so each fold is spatially
-   dispersed.
-3. Leave-one-fire-out. Each mapped fire perimeter is withheld in turn. Fold
-   count is small and the resulting intervals are wide.
+An out-of-time check runs on the 2022 to 2023 pair, where both a t0-only
+feature set and the realised outcome exist, to test forecast skill over the
+one interval with ground truth on both sides of the cutoff.
 
-Area of applicability is computed per fold. Folds whose test cells exceed the
-training dissimilarity quantile are flagged as extrapolation.
+Confidence intervals on error and ranking differences between two models come
+from a paired tile-block bootstrap that resamples whole blocks. Resampling
+individual cells understates the interval on autocorrelated residuals by
+approximately the square root of the cells per block.
 
-Confidence intervals on the error difference between two models come from a
-paired bias-corrected and accelerated bootstrap that resamples whole blocks.
-Resampling individual cells understates the interval on autocorrelated
-residuals by approximately the square root of the cells per block.
+## Evaluation
 
-## Baselines
+- Cell level: mean absolute error on the growth head, and quantile coverage
+  (empirical fraction below each predicted quantile) for the disturbance
+  hazard and growth heads together.
+- Span level: recall at 1, 2 and 10 percent of ranked corridor line length for
+  the event "vegetation within the clearance envelope by `t1`", against
+  cyclic, current-height-first, random and span-length allocation. Reported
+  with a paired tile-block bootstrap confidence interval on each pairwise
+  difference.
+- Existing products (Lang et al. 2023 canopy height at 10 m, Meta/WRI canopy
+  height at 1 m, GLAD forest change at 30 m) are evaluated both as baselines,
+  differenced across epochs, and as candidate input features to the forecast
+  heads.
+- Output: a span table and a map of the top-ranked spans, each with an
+  encroachment probability and an expected time to encroachment.
 
-Regression: global mean, global median, start-height ring isotonic fit, and
-the Stage 1 growth model.
+## Data roles
 
-Ranking: random, cyclic by time since last inspection, current-height-first,
-static risk from fire-threat tier and terrain, span length alone, and distance
-to conductor alone. Span length is included because longer spans contain more
-trees and a ranker that does not beat it has no value.
+| Source | Role | Prohibited use |
+| --- | --- | --- |
+| Sonoma 2013, 2022, 2023 airborne LiDAR | Label source and label-quality truth | Any model feature at or after its own epoch |
+| Landsat 5/7/8 | As-of predictor history to `t0` | Any observation dated after the cutoff |
+| USGS 3DEP | Terrain predictors and site quality | Substituting for a co-registration check |
+| TerraClimate | Climate normals and climatic water deficit | None beyond standard predictor use |
+| LANDFIRE / CDFW Sonoma vegetation map | Vegetation type stratification | Assuming species purity at 10 m |
+| GEDI02_A Version 2 | Independent cross-check and gap fill | Training target |
+| CAL FIRE FRAP, MTBS | Disturbance history before `t0` | Treating absence from one source as proof of stability |
+| CEC transmission lines, OpenStreetMap power lines | Span construction and voltage cross-check | Engineering clearance or causation claims |
+| Lang et al. 2023, Meta/WRI, GLAD products | Baselines and candidate features | Substituting for the airborne LiDAR label |
+
+Truth isolation is enforced in continuous integration by
+`tests/test_truth_isolation.py`, which fails if any feature or model module
+imports the LiDAR package or references a truth path at or after its own
+epoch.
+
+## Hypotheses
+
+### F1: forecast skill
+
+An as-of feature model (LiDAR t0 structure, terrain, optical history to t0,
+climate, vegetation type, fire history) beats a t0-structure-only baseline at
+cell level, on mean absolute error and quantile coverage, under spatial block
+cross-validation with a held-out region. Falsified if the interval on the
+error difference includes zero.
+
+### F2: span ranking
+
+Span ranking by predicted encroachment probability and expected time achieves
+higher recall at 1, 2 and 10 percent of ranked corridor length than cyclic,
+current-height-first, random and span-length allocation. Falsified if the
+interval on the difference includes zero against any of the four.
+
+### F3: satellite contribution
+
+Adding optical history to t0 improves forecast skill (F1's metrics) beyond a
+LiDAR-t0-structure-only baseline. This restates the retrospective Landsat
+result above in a forecast-valid form, using only pre-cutoff imagery.
+Falsified if the interval on the improvement includes zero.
+
+### F4: existing products do not substitute
+
+Existing global canopy height and forest-change products (Lang et al. 2023,
+Meta/WRI, GLAD), used as either differenced baselines or candidate features,
+do not match the as-of forecast model's span-ranking recall. Falsified if any
+product-based approach matches or exceeds it.
+
+### H1: error decay (label quality, measured)
+
+`sigma_n(s)` decreases with aggregation scale more slowly than the inverse
+square root of the cell count, because measurement error is spatially
+correlated. Measured and confirmed: fitted decay exponent 0.054 against 0.5
+for spatially independent error, over the four admitted scales in the
+2022-2023 pair. This is a label-quality statement, not a forecast hypothesis,
+and is retained because it justifies working at 10 m and 30 m rather than
+requiring coarser aggregation.
 
 ## Ablations
 
 | ID | Isolates |
 | --- | --- |
 | A1 | Fire, by refitting on unburned cells with a buffer |
-| A2 | Spectral fire detection, by adding burn severity to Stage 1 |
+| A2 | Spectral fire detection, by adding burn severity to the growth head |
 | A3 | Species encoded through phenology, by per-alliance centring and leave-one-alliance-out |
 | A4 | Terrain, by a terrain-only baseline |
 | A5 | Topographic illumination correction |
 | A6 | View geometry, by single-orbit refit and orbit permutation |
-| A7 | Spatial autocorrelation, by comparing the three validation regimes |
+| A7 | Spatial autocorrelation, by comparing spatial-block and naive validation |
 | A8 | Anchor artifact, ring against centre |
-| A9 | Anchor dominance, by an anchor-free Stage 2 |
-| A10 | Static mapping posing as change modelling, by temporal shuffle |
-| A11 | Predictor chronology, Sentinel-2 alone against Sentinel-2 with Landsat |
-| A12 | Co-registration, by recomputing change under one-pixel shifts |
+| A9 | Anchor dominance, by an anchor-free growth head |
+| A10 | Static mapping posing as forecasting, by temporal shuffle of the as-of cutoff |
+| A11 | Predictor chronology, Landsat alone against Landsat with additional bands |
+| A12 | Co-registration, by recomputing labels under one-pixel shifts |
 | A13 | Point density, by comparing decimated and non-decimated pipelines |
 | A14 | Spatial structure masquerading as signal, by replacing the satellite block with a matched Gaussian random field |
 
 A10 and A14 are blocking. Both run before the remaining ablations. If the
 temporal shuffle does not degrade error, the model carries no temporal
-information. If the matched random field reproduces the satellite gain, H3 is
-an artifact. Either outcome is reported as the result.
-
-## Evaluation outputs
-
-- Regression: mean absolute error primary; root mean squared error, signed
-  bias and coefficient of determination secondary. Reported by height class,
-  vegetation class, disturbance status and slope band.
-- Ranking: recall at 10 percent of ranked corridor length primary, reported
-  absolutely and as lift over the cyclic baseline. Secondary are the
-  normalised partial area under the gain curve to 20 percent, precision at 1,
-  2 and 10 percent, area under the precision-recall curve reported alongside
-  prevalence, inspection burden per true positive found, and Spearman rank
-  correlation.
-- Calibration: reliability diagrams, expected calibration error, Brier
-  decomposition, and conformal coverage per stratum.
-- Cost: expected cost avoided as a sensitivity sweep over the ratio of miss
-  cost to inspection cost from 10 to 10,000. No absolute currency figure is
-  reported, because unit costs are not available to this study.
-- Every experiment records the config hash, seed, metrics, data hashes and
-  commit.
+information and is not forecasting. If the matched random field reproduces
+the satellite gain, F3 is an artifact of spatial structure rather than
+signal. Either outcome is reported as the result.
 
 ## Falsification and claim limits
 
-The primary claim fails if the detectability boundary cannot be located, if
-the satellite contribution does not survive the temporal shuffle and matched
-random field controls, or if apparent improvement disappears under spatial
+The primary claim fails if span-level ranking does not beat the operational
+baselines under spatial block cross-validation with a held-out region, if the
+satellite contribution does not survive the temporal shuffle and matched
+random field controls, or if apparent skill disappears under spatial
 blocking. A useful negative result is reported as such.
 
 No result from this design establishes regulatory clearance, tree-failure
@@ -393,16 +385,17 @@ observed. NERC FAC-003-4 binds lines at 200 kV and above, so only the 230 kV
 lines here fall in its scope; the 60 and 115 kV lines are governed by CPUC
 General Order 95 and Public Resources Code 4293.
 
-## Pending decisions requiring data
+## Decision log
 
-- Admission of the 2007 epoch, from the epoch screen.
-- Final spatial block size, from training residuals only.
-- Sample tile count: resolved. The seam is exhausted at 284 of 287
-  candidate tiles; 52 admitted tiles is the ceiling this pair can supply.
-- Whether the co-covered seam carries canopy at all: resolved. It does.
-  Admitted tiles include median heights up to 17 m and above-10 m canopy
-  fractions up to 69 percent.
-- Whether any acquisition pair with wide co-coverage exists, which would
-  extend the measured ladder above 200 m.
+| Date | Decision | Reason |
+| --- | --- | --- |
+| 2026-09-22 | Adopt airborne LiDAR change as the primary label, at a ladder of scales and baselines | The only formulation in the available data where signal exceeds the measurement noise floor; see the label-quality section above. |
+| 2026-09-24 | Unlock the design and reframe from a detectability benchmark to a span-level encroachment forecast | An independent review found the retrospective Landsat model used end-of-period imagery and the outcome differences themselves, valid as attribution but not as forecast; utilities need span-level, ranked, backtested, forward-looking risk, and block-mean height change is not the clearance-relevant quantity. |
+
+## Open items
+
+- Admission of the 2007 LiDAR epoch, pending the epoch screen.
+- Final spatial block size and buffer, from training residuals only.
+- Crown or local-maximum label layer, not yet built.
 - Whether the open fire-incident join carries enough events to report.
 - Target journal and its disclosure policy.

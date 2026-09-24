@@ -2,10 +2,10 @@
 
 [![CI](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml)
 
-CanopyGuard-AI measures the spatial scale and temporal baseline at which open
-satellite time series recover airborne-LiDAR-measured canopy height change,
-and tests whether that signal supports maintenance prioritization on
-transmission corridor spans.
+CanopyGuard-AI forecasts, from an airborne LiDAR survey at t0 and open data
+available up to t0, which transmission-corridor spans will carry vegetation
+within clearance distance by t0 + k years, and ranks spans against cyclic,
+current-height-first and random allocation.
 
 The project is built as a reproducible research pipeline, not an application. Each stage reads files from disk and writes documented outputs that can be rerun independently.
 
@@ -14,37 +14,41 @@ New to the project, remote sensing, or machine learning? Start with
 
 ## Research goal
 
-The goal is a defensible journal paper. The predeclared research question,
-hypotheses, baselines, and evaluation rules are in
-[`reports/research_design.md`](reports/research_design.md). The current
-manuscript direction is:
+The goal is a defensible journal paper. The research question, hypotheses,
+baselines, and evaluation rules are in
+[`reports/research_design.md`](reports/research_design.md) and are revised as
+evidence accumulates. The current manuscript direction is:
 
-> Detectability limits of open optical time series for canopy height change, benchmarked against repeat airborne LiDAR in power-line corridors.
+> Span-level forecasting of vegetation encroachment on transmission corridors from airborne LiDAR and open earth-observation data, ranked against operational allocation baselines.
 
 ## Data roles
 
-- Sonoma County 2013, 2022 and 2023 airborne LiDAR: target and independent
-  truth. The 2022 and 2023 pair is one year apart and measures the detection
-  noise floor.
-- Sentinel-2 from 2017 and Landsat 8 from 2013: temporal predictors.
+- Sonoma County 2013, 2022 and 2023 airborne LiDAR: label source and
+  label-quality truth. The 2022 and 2023 pair is one year apart and measures
+  the detection noise floor.
+- Landsat 5/7/8 history to the forecast cutoff: as-of temporal predictors.
 - USGS 3DEP: terrain predictors and site quality.
-- Sonoma vegetation map: alliance stratification.
+- LANDFIRE / Sonoma vegetation map: vegetation type stratification.
+- TerraClimate: climate normals and climatic water deficit.
+- CAL FIRE FRAP, MTBS: disturbance history before the cutoff.
 - GEDI: independent cross-check, not a training target.
-- California Energy Commission transmission lines: span construction and
-  aggregation context only.
+- OpenStreetMap power lines, cross-checked against California Energy
+  Commission transmission lines: span construction and voltage.
 
-LiDAR never enters model features. `tests/test_truth_isolation.py` fails the
-build if a feature or model module imports the LiDAR package or references a
-truth path.
+No source dated after its forecast cutoff enters a feature for that cutoff.
+`tests/test_truth_isolation.py` fails the build if a feature or model module
+imports the LiDAR package or references a truth path at or after its own
+epoch.
 
 ## Pipeline
 
 ```text
-LiDAR epochs -> matched CHMs -> co-registration -> noise floor -> truth
-Sentinel-2 + Landsat + terrain -> composites -> texture -> features
-truth + features -> growth model -> residual model -> detectability surface
-                                                   -> product benchmark
-                                                   -> span ranking -> figures
+LiDAR epochs -> matched CHMs -> co-registration -> label-quality noise floor
+LiDAR t0 structure + terrain + Landsat history + climate + fire + veg type
+                                        -> as-of feature store (per cutoff)
+feature store -> disturbance hazard head + conditional growth head
+              -> product benchmark
+              -> corridor spans -> span ranking -> output table and map
 ```
 
 Every arrow is a file under `data/interim` or `data/processed`. Root data directories are present in git with `.gitkeep` files, but real data is ignored by git and should be tracked with DVC.
