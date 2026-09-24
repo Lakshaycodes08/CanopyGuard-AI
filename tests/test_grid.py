@@ -80,3 +80,14 @@ def test_tile_grid_geometry_matches_the_tile_size():
     )
     assert 230 <= grid["width"] <= 270
     assert 230 <= grid["height"] <= 270
+
+
+def test_grid_snaps_origin_and_extent_to_the_global_cell():
+    from canopyguard.lidar.grid import grid_geometry
+
+    grid = grid_geometry((500007.3, 4270011.0, 500498.2, 4270505.5), 1.0, 30.0)
+    assert (grid["origin_x"], grid["origin_y"]) == (499980.0, 4269990.0)
+    assert grid["width"] % 30 == 0 and grid["height"] % 30 == 0
+    assert grid["origin_x"] + grid["width"] >= 500498.2
+    with pytest.raises(ValueError, match="multiple of the resolution"):
+        grid_geometry((0.0, 0.0, 10.0, 10.0), 1.0, 2.5)

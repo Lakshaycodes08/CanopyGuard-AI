@@ -293,3 +293,31 @@ def test_epoch_unit_stages_convert_only_declared_epochs():
     assert epoch_unit_stages(config, "2022") == []
     with pytest.raises(ValueError, match="No epoch named"):
         epoch_unit_stages(config, "2030")
+
+
+def test_corridor_tiles_are_always_built(lidar_config, resource_boxes):
+    from canopyguard.lidar.plan import corridor_tiles
+
+    line = {"lon": [-122.85, -122.80], "lat": [38.60, 38.60]}
+    plan = change_plan(
+        lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 5,
+        corridor=([line], 100.0),
+    )
+    assert plan["required_tiles"] >= 8
+    assert plan["tile_count"] == plan["required_tiles"] + 5
+    forced = [tuple(t["box"]) for t in plan["tiles"][: plan["required_tiles"]]]
+    for west, south, east, north in forced:
+        assert south - 0.002 <= 38.60 <= north + 0.002
+    assert corridor_tiles(forced, [], 100.0, "EPSG:6339") == []
+    for tile in plan["tiles"]:
+        assert tile["grid"]["origin_x"] % 30 == 0
+        assert tile["grid"]["width"] % 30 == 0
+
+
+def test_corridor_only_plan_draws_nothing_else(lidar_config, resource_boxes):
+    line = {"lon": [-122.85, -122.80], "lat": [38.60, 38.60]}
+    plan = change_plan(
+        lidar_config, STUDY_BOX, ("2013", "2022"), resource_boxes, 0,
+        corridor=([line], 100.0),
+    )
+    assert plan["tile_count"] == plan["required_tiles"]

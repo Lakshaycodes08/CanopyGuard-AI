@@ -29,6 +29,7 @@ from canopyguard.lidar.coreg import (
     residual_rmse,
 )
 from canopyguard.lidar.difference import apply_mask, difference_ladder
+from canopyguard.lidar.labels import cell_labels
 from canopyguard.lidar.noise_floor import (
     canopy_height,
     height_summary,
@@ -259,6 +260,27 @@ def surface_table(
     return table
 
 
+def spread(items: list[Any], count: int) -> list[Any]:
+    """At most `count` items taken at even intervals across the list."""
+    if count < 1:
+        raise ValueError("Count must be positive")
+    if len(items) <= count:
+        return list(items)
+    step = len(items) / count
+    return [items[int(i * step)] for i in range(count)]
+
+
+def concatenate_tables(tables: list[dict[str, NDArray]]) -> dict[str, NDArray]:
+    """Row-wise union of tables that share their columns."""
+    if not tables:
+        return {}
+    keys = list(tables[0])
+    for table in tables:
+        if list(table) != keys:
+            raise ValueError("Tables must share their columns")
+    return {key: np.concatenate([table[key] for table in tables]) for key in keys}
+
+
 def measure_pair(
     plan: dict[str, Any],
     out_dir: str | Path,
@@ -270,7 +292,7 @@ def measure_pair(
     The noise-floor pair bias is not removed here. It belongs to that pair,
     and this pair carries its own check on bare ground.
     """
-    from canopyguard.lidar.gridio import write_grid
+    from canopyguard.lidar.gridio import read_grid, write_grid
 
     settings = config["coregistration"]
     resolution = config["chm"]["resolution_m"]
@@ -281,12 +303,21 @@ def measure_pair(
     years = baseline_years(first_epoch["start"], second_epoch["start"])
 
     loaded, verdicts = load_pairs(
-        plan, out_dir, epochs, config["noise_floor"]["tile_admission"]
+        plan,
+        out_dir,
+        epochs,
+        config["noise_floor"]["tile_admission"],
+        keep_arrays=False,
     )
     if not loaded:
         raise ValueError("No tile passed admission")
 
-    check = terrain_agreement([tile["terrain"] for tile in loaded])
+    sample = spread(loaded, int(rules.get("coreg_max_tiles", 60)))
+    terrain = [
+        (read_grid(t["paths"][0]["dtm"])[0], read_grid(t["paths"][1]["dtm"])[0])
+        for t in sample
+    ]
+    check = terrain_agreement(terrain)
     if abs(check["scale"] - 1.0) > float(rules["max_terrain_scale_error"]):
         raise ValueError(
             "Terrain of the two epochs differs in scale before co-registration: "
@@ -295,24 +326,30 @@ def measure_pair(
         )
 
     shift = align_pooled(
-        [tile["terrain"] for tile in loaded],
+        terrain,
         resolution,
         settings["min_slope_deg"],
         settings["max_slope_deg"],
         settings["max_iterations"],
         settings["convergence_tolerance_m"],
     )
+    shift["tiles"] = float(len(sample))
+    del terrain
 
     limit = float(rules["disturbance_limit_m"])
+    stride = max(1, len(loaded) // 30)
     changes: list[NDArray[np.float64]] = []
     bare: list[NDArray[np.bool_]] = []
     heights: list[dict[str, Any]] = []
+    labels: list[dict[str, NDArray]] = []
     deltas_all: list[dict[float, NDArray[np.float64]]] = []
     deltas_canopy: list[dict[float, NDArray[np.float64]]] = []
     for tile in loaded:
-        terrain_a, terrain_b = tile["terrain"]
-        surface_a, surface_b = tile["surface"]
         first, second = tile["paths"]
+        terrain_a, _ = read_grid(first["dtm"])
+        surface_a, _ = read_grid(first["dsm"])
+        terrain_b, _ = read_grid(second["dtm"])
+        surface_b, _ = read_grid(second["dsm"])
 
         height_a = canopy_height(surface_a, terrain_a, config)
         height_b = apply_horizontal_shift(
@@ -331,10 +368,24 @@ def measure_pair(
                 ),
             }
         )
+        if "label_cell_m" in rules:
+            table = cell_labels(
+                height_a,
+                height_b,
+                tile["profile"]["transform"],
+                float(rules["label_cell_m"]),
+                float(aggregation["min_valid_fraction"]),
+                float(rules["canopy_min_height_m"]),
+                limit,
+            )
+            table["tile"] = np.full(table["cell_id"].size, int(tile["index"]))
+            labels.append(table)
 
-        changes.append((height_b - height_a).ravel())
+        changes.append((height_b - height_a).ravel()[::stride])
         bare.append(
-            bare_mask(height_a, height_b, float(rules["bare_max_height_m"])).ravel()
+            bare_mask(height_a, height_b, float(rules["bare_max_height_m"])).ravel()[
+                ::stride
+            ]
         )
         deltas_all.append(
             difference_ladder(
@@ -366,6 +417,8 @@ def measure_pair(
         "shift": shift,
         "tiles": verdicts,
         "heights": heights,
+        "labels": concatenate_tables(labels),
+        "summary_stride": float(stride),
         "bare_floor": bare_floor(change, np.concatenate(bare)),
         "disturbance": disturbance(change, limit),
         "surface": surface_table(

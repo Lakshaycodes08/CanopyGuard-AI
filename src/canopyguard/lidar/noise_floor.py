@@ -232,8 +232,13 @@ def load_pairs(
     out_dir: str | Path,
     epochs: tuple[str, str],
     rules: dict[str, Any],
+    keep_arrays: bool = True,
 ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
-    """Read both surfaces of both epochs and admit the tiles worth using."""
+    """Read both surfaces of both epochs and admit the tiles worth using.
+
+    With `keep_arrays` false only paths and profiles are kept, so a large
+    sample can be admitted without holding every surface in memory.
+    """
     from canopyguard.lidar.gridio import read_grid
 
     start, end = epochs
@@ -258,15 +263,11 @@ def load_pairs(
         verdicts.append(verdict)
         if not verdict["admitted"]:
             continue
-        loaded.append(
-            {
-                "index": index,
-                "profile": profile,
-                "paths": (first, second),
-                "terrain": (terrain_a, terrain_b),
-                "surface": (surface_a, surface_b),
-            }
-        )
+        entry = {"index": index, "profile": profile, "paths": (first, second)}
+        if keep_arrays:
+            entry["terrain"] = (terrain_a, terrain_b)
+            entry["surface"] = (surface_a, surface_b)
+        loaded.append(entry)
     return loaded, verdicts
 
 

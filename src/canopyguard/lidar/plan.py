@@ -5,10 +5,12 @@ from __future__ import annotations
 import math
 from typing import Any
 
+import numpy as np
+
 from canopyguard.lidar.chm import vertical_scale_stage
 from canopyguard.lidar.ept import reader_stage
 from canopyguard.lidar.footprint import intersect
-from canopyguard.lidar.grid import tile_grid_geometry
+from canopyguard.lidar.grid import project_box, tile_grid_geometry
 from canopyguard.lidar.harmonize import sample_radius_for, screen_epochs
 from canopyguard.lidar.sources import co_covered_tiles, footprint, union_box
 from canopyguard.lidar.tiles import sample_area_km2, spatial_stratum, stratified_sample
@@ -234,12 +236,18 @@ def change_tiles(
     study_box: Box,
     footprints: dict[str, list[Box]],
 ) -> list[Box]:
-    """Every change tile inside the study box that both epochs supply in full."""
+    """Every change tile inside the study box that both epochs supply in full.
+
+    Delivery files of one acquisition abut, so coverage is their union and a
+    cell straddling two files is covered. Built surfaces are admitted again on
+    their actual coverage.
+    """
     return co_covered_tiles(
         [footprints[epoch] for epoch in sorted(footprints)],
         tuple(float(value) for value in study_box),
         float(lidar_config["change"]["tile_size_m"]),
-        int(lidar_config["tiers"]["coverage_cells_per_tile"]),
+        int(lidar_config["change"].get("coverage_cells_per_tile", 10)),
+        union=True,
     )
 
 
@@ -252,6 +260,39 @@ def epoch_unit_stages(lidar_config: dict[str, Any], name: str) -> list[dict[str,
     raise ValueError(f"No epoch named: {name}")
 
 
+def corridor_tiles(
+    candidates: list[Box],
+    lines: list[dict[str, Any]],
+    buffer_m: float,
+    crs: str,
+) -> list[Box]:
+    """Candidate tiles lying within the buffer of any line.
+
+    Lines are projected, densified at half the buffer and tested against each
+    projected tile box expanded by the buffer, so the test errs towards
+    inclusion by at most a quarter of the buffer.
+    """
+    from pyproj import Transformer
+
+    from canopyguard.data.osm_power import densify, near_box
+
+    if buffer_m <= 0:
+        raise ValueError("Buffer must be positive")
+    transformer = Transformer.from_crs("EPSG:4326", crs, always_xy=True)
+    points = []
+    for line in lines:
+        xs, ys = transformer.transform(line["lon"], line["lat"])
+        points.append(densify(list(zip(xs, ys, strict=True)), buffer_m / 2.0))
+    if not points:
+        return []
+    cloud = np.vstack(points)
+    return [
+        tile
+        for tile in candidates
+        if near_box(cloud, project_box(tile, crs), buffer_m)
+    ]
+
+
 def change_plan(
     lidar_config: dict[str, Any],
     study_box: Box,
@@ -259,11 +300,16 @@ def change_plan(
     footprints_by_resource: dict[str, list[Box]],
     tile_count: int,
     seed: int | None = None,
+    required: list[Box] | None = None,
+    corridor: tuple[list[dict[str, Any]], float] | None = None,
 ) -> dict[str, Any]:
     """Tiles, reader stages, raster grids and sampling radius for a change pair.
 
     An epoch published as several resources gets one reader per resource that
     meets the tile, and the readers are merged when the pipeline is built.
+    Candidates listed in `required`, and with `corridor` given as lines and a
+    buffer every candidate near a line, are always built; `tile_count` further
+    tiles are drawn from the remaining candidates.
     """
     results = screen_epochs(lidar_config)
     radius = sample_radius_for(lidar_config, results)
@@ -278,12 +324,26 @@ def change_plan(
     if not candidates:
         raise ValueError("No tile is covered in full by both epochs of the pair")
 
-    extent, side, chosen = draw_tiles(lidar_config, candidates, tile_count, seed)
     crs = lidar_config["harmonization"]["target_crs"]
+    wanted = {tuple(tile) for tile in (required or [])}
+    if corridor is not None:
+        lines, buffer_m = corridor
+        wanted |= {
+            tuple(tile) for tile in corridor_tiles(candidates, lines, buffer_m, crs)
+        }
+    forced = [tile for tile in candidates if tuple(tile) in wanted]
+    rest = [tile for tile in candidates if tuple(tile) not in wanted]
+    if tile_count > 0 and rest:
+        extent, side, drawn = draw_tiles(lidar_config, rest, tile_count, seed)
+    else:
+        extent, side, drawn = union_box(candidates), 0, []
+    chosen = forced + drawn
     resolution = float(lidar_config["chm"]["resolution_m"])
+    snap = lidar_config["change"].get("grid_snap_m")
 
     return {
         "pair": [str(epoch) for epoch in pair],
+        "required_tiles": len(forced),
         "study_box": [float(value) for value in study_box],
         "coverage_box": list(extent),
         "tile_size_m": float(lidar_config["change"]["tile_size_m"]),
@@ -298,7 +358,7 @@ def change_plan(
             {
                 "index": index,
                 "box": list(tile),
-                "grid": tile_grid_geometry(tile, crs, resolution),
+                "grid": tile_grid_geometry(tile, crs, resolution, snap),
                 "readers": {
                     epoch: [
                         reader_stage(name, tile)

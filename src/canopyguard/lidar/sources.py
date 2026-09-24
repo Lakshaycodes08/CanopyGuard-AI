@@ -89,12 +89,15 @@ def cell_steps(box: Box, tile_size_m: float, cells_per_tile: int) -> tuple[float
 
 
 def coverage_mask(
-    boxes: list[Box], box: Box, steps: tuple[float, float]
+    boxes: list[Box], box: Box, steps: tuple[float, float], union: bool = False
 ) -> NDArray[np.bool_]:
     """Assay cells lying wholly inside at least one delivered file.
 
     Partial cover is treated as no cover, so a tile assembled from covered
-    cells is one the acquisition can supply in full.
+    cells is one the acquisition can supply in full. With `union` a cell is
+    covered when its centre lies inside any file, so a cell straddling two
+    abutting delivery files counts as covered; interior coverage of a single
+    acquisition is then not broken along every delivery boundary.
     """
     west, south, east, north = box
     if west >= east or south >= north:
@@ -109,11 +112,14 @@ def coverage_mask(
     if mask.size == 0:
         return mask
 
+    shift = 0.5 if union else 0.0
     for left, bottom, right, top in boxes:
-        first_column = max(0, math.ceil((left - west) / longitude_step))
-        last_column = min(columns, math.floor((right - west) / longitude_step))
-        first_row = max(0, math.ceil((bottom - south) / latitude_step))
-        last_row = min(rows, math.floor((top - south) / latitude_step))
+        first_column = max(0, math.ceil((left - west) / longitude_step - shift))
+        last_column = min(
+            columns, math.floor((right - west) / longitude_step + shift)
+        )
+        first_row = max(0, math.ceil((bottom - south) / latitude_step - shift))
+        last_row = min(rows, math.floor((top - south) / latitude_step + shift))
         if last_column > first_column and last_row > first_row:
             mask[first_row:last_row, first_column:last_column] = True
     return mask
@@ -156,10 +162,11 @@ def co_covered_tiles(
     box: Box,
     tile_size_m: float,
     cells_per_tile: int = 5,
+    union: bool = False,
 ) -> list[Box]:
     """Tiles inside a search box that every acquisition supplies in full."""
     steps = cell_steps(box, tile_size_m, cells_per_tile)
-    masks = [coverage_mask(boxes, box, steps) for boxes in footprints]
+    masks = [coverage_mask(boxes, box, steps, union) for boxes in footprints]
     return covered_tiles(masks, box, steps, cells_per_tile)
 
 

@@ -131,6 +131,13 @@ change:
   bare_max_height_m: 1.0
   disturbance_limit_m: 3.0
   max_terrain_scale_error: 0.01
+  grid_snap_m: 30
+  coverage_cells_per_tile: 10
+  label_cell_m: 10
+  coreg_max_tiles: 60
+  corridor_buffer_m: 100
+  background_tiles: 150
+  power_kinds: [line]
   change_note: >
     Long-baseline pairs are measured inside the study box, where both epochs
     cover the ground in full. The 2013 acquisition is served as three
@@ -143,7 +150,12 @@ change:
     against the other, must have unit slope within the stated error; a failure
     is a unit fault. A constant offset is a datum difference, solved by
     co-registration and cancelled inside each canopy height. An epoch stored
-    in another vertical unit carries `z_to_metres`.
+    in another vertical unit carries `z_to_metres`. Tile grids are snapped to
+    `grid_snap_m`, so 10 m label cells and 30 m Landsat cells fall on one
+    global grid. With corridor selection every candidate tile within the
+    buffer of an OpenStreetMap power line is built, plus `background_tiles`
+    drawn from the rest. Co-registration uses at most `coreg_max_tiles`
+    tiles spread across the sample.
 
 admission_screen:
   min_density_pts_m2: 8.0

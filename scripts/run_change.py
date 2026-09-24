@@ -5,9 +5,11 @@ import json
 from concurrent.futures import ProcessPoolExecutor
 from pathlib import Path
 
+import numpy as np
 from run_noise_floor import _build_job, _build_log, _guard_plan, _signature
 
 from canopyguard.config import load_config
+from canopyguard.data.osm_power import fetch_power_lines, parse_overpass, spans
 from canopyguard.lidar.change import measure_pair
 from canopyguard.lidar.plan import change_plan, pair_projects, resource_footprints
 
@@ -24,6 +26,7 @@ def main() -> int:
     parser.add_argument("--seed", type=int, default=None)
     parser.add_argument("--out", default="/content/change")
     parser.add_argument("--workers", type=int, default=1)
+    parser.add_argument("--corridor", action="store_true")
     args = parser.parse_args()
 
     pair = tuple(args.pair.split("-"))
@@ -34,7 +37,16 @@ def main() -> int:
     study_box = tuple(float(bbox[key]) for key in ("west", "south", "east", "north"))
     footprints = _footprints(config, pair, out)
     count = args.tiles or int(config["change"]["tile_count"])
-    plan = change_plan(config, study_box, pair, footprints, count, args.seed)
+    corridor = None
+    if args.corridor:
+        lines = _power_lines(config, study_box, out)
+        corridor = (lines, float(config["change"]["corridor_buffer_m"]))
+        count = args.tiles if args.tiles is not None else int(
+            config["change"]["background_tiles"]
+        )
+    plan = change_plan(
+        config, study_box, pair, footprints, count, args.seed, corridor=corridor
+    )
     config["harmonization"]["sample_radius_m"] = plan["sample_radius_m"]
     plan["build_signature"] = _signature(plan, config)
     _guard_plan(out, plan)
@@ -46,7 +58,10 @@ def main() -> int:
         f"candidates {plan['candidate_tiles']} tiles of "
         f"{plan['tile_size_m']:.0f} m, {plan['candidate_area_km2']:.1f} km2"
     )
-    print(f"drawn {plan['tile_count']} tiles, {plan['sample_area_km2']:.1f} km2")
+    print(
+        f"drawn {plan['tile_count']} tiles ({plan['required_tiles']} on corridors), "
+        f"{plan['sample_area_km2']:.1f} km2"
+    )
     print(f"sampling radius {plan['sample_radius_m']:.4f} m")
     print("\ntile epoch      retained          ground   ground%   scan angle")
 
@@ -69,11 +84,31 @@ def main() -> int:
     )
 
     result = measure_pair(plan, out, pair, config)
+    labels = result.pop("labels")
+    if labels:
+        np.savez_compressed(out / f"labels_{args.pair}.npz", **labels)
+        print(f"labels {labels['cell_id'].size:,} cells written")
     (out / f"change_{args.pair}.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
     )
     _report(result)
     return 0
+
+
+def _power_lines(config: dict, study_box: tuple, out: Path) -> list[dict]:
+    """OpenStreetMap power lines in the study box, fetched once and cached."""
+    cache = out / "power_lines.json"
+    kinds = tuple(config["change"]["power_kinds"])
+    if cache.exists():
+        payload = json.loads(cache.read_text(encoding="utf-8"))
+    else:
+        payload = fetch_power_lines(study_box, kinds)
+        cache.write_text(json.dumps(payload), encoding="utf-8")
+    lines = parse_overpass(payload)
+    pieces = spans(lines)
+    (out / "spans.json").write_text(json.dumps(pieces), encoding="utf-8")
+    print(f"power lines {len(lines)}, spans {len(pieces)}")
+    return lines
 
 
 def _footprints(config: dict, pair: tuple[str, ...], out: Path) -> dict[str, list]:

@@ -41,26 +41,36 @@ def project_box(box: Box, target_crs: str, samples_per_edge: int = 21) -> Box:
     return (min(xs), min(ys), max(xs), max(ys))
 
 
-def grid_geometry(box: Box, resolution_m: float) -> dict[str, Any]:
+def grid_geometry(
+    box: Box, resolution_m: float, snap_m: float | None = None
+) -> dict[str, Any]:
     """Origin, width and height of the grid covering a projected box.
 
-    The origin is the lower left corner, which is what the raster writer takes,
-    and it is snapped outward to a multiple of the resolution, so any two tiles
-    and any two epochs share cell boundaries exactly.
+    The origin is the lower left corner, which is what the raster writer takes.
+    Origin and extent are snapped outward to a multiple of `snap_m` (by default
+    the resolution), so any two tiles and any two epochs share cell boundaries
+    exactly, and with a snap that is a multiple of every aggregation cell the
+    aggregated cells of every tile fall on one global grid.
     """
     min_x, min_y, max_x, max_y = box
     if min_x >= max_x or min_y >= max_y:
         raise ValueError("Require min < max on both axes")
     if resolution_m <= 0:
         raise ValueError("Resolution must be positive")
+    snap = float(snap_m) if snap_m else float(resolution_m)
+    ratio = snap / resolution_m
+    if snap <= 0 or abs(ratio - round(ratio)) > 1e-9:
+        raise ValueError("Snap must be a positive multiple of the resolution")
 
-    origin_x = math.floor(min_x / resolution_m) * resolution_m
-    origin_y = math.floor(min_y / resolution_m) * resolution_m
+    origin_x = math.floor(min_x / snap) * snap
+    origin_y = math.floor(min_y / snap) * snap
+    extent_x = math.ceil((max_x - origin_x) / snap) * snap
+    extent_y = math.ceil((max_y - origin_y) / snap) * snap
     return {
         "origin_x": float(origin_x),
         "origin_y": float(origin_y),
-        "width": int(math.ceil((max_x - origin_x) / resolution_m)),
-        "height": int(math.ceil((max_y - origin_y) / resolution_m)),
+        "width": int(round(extent_x / resolution_m)),
+        "height": int(round(extent_y / resolution_m)),
         "resolution_m": float(resolution_m),
     }
 
@@ -77,7 +87,7 @@ def grid_box(grid: dict[str, Any]) -> Box:
 
 
 def tile_grid_geometry(
-    box: Box, target_crs: str, resolution_m: float
+    box: Box, target_crs: str, resolution_m: float, snap_m: float | None = None
 ) -> dict[str, Any]:
     """Grid a geographic tile is rasterised onto in the working frame."""
-    return grid_geometry(project_box(box, target_crs), resolution_m)
+    return grid_geometry(project_box(box, target_crs), resolution_m, snap_m)

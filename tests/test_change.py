@@ -153,3 +153,62 @@ def test_terrain_agreement_reports_an_offset_without_a_scale_fault():
 def test_terrain_agreement_needs_a_shared_cell():
     with pytest.raises(ValueError, match="No terrain cell"):
         terrain_agreement([(np.array([[np.nan]]), np.array([[1.0]]))])
+
+
+def test_measure_pair_streams_tiles_and_writes_labels(tmp_path, monkeypatch):
+    from canopyguard.config import load_config
+    from canopyguard.lidar import gridio
+    from canopyguard.lidar.change import measure_pair
+    from canopyguard.lidar.noise_floor import surface_paths
+
+    config = load_config("configs/lidar.yaml")
+    store = {}
+    transform = (1.0, 0.0, 510000.0, 0.0, -1.0, 4270020.0)
+
+    def read(path):
+        return store[str(path)].copy(), {"transform": transform}
+
+    def write(path, array, profile):
+        store[str(path)] = np.asarray(array, dtype=np.float64)
+        return path
+
+    monkeypatch.setattr(gridio, "read_grid", read)
+    monkeypatch.setattr(gridio, "write_grid", write)
+    rng = np.random.default_rng(1)
+    y, x = np.mgrid[0:210, 0:210].astype(float)
+    tiles = []
+    for index in range(3):
+        ground = 100 + 0.3 * x + 0.2 * y + 5 * np.sin(x / 7) + index
+        canopy = np.clip(rng.normal(8, 4, ground.shape), 0, None)
+        for epoch, growth in (("2013", 0.0), ("2022", 1.0)):
+            paths = surface_paths(tmp_path, epoch, index)
+            store[str(paths["dtm"])] = ground
+            store[str(paths["dsm"])] = ground + canopy + growth
+            for kind in ("dtm", "dsm"):
+                paths[kind].write_bytes(b"x")
+        tiles.append({"index": index})
+    result = measure_pair({"tiles": tiles}, tmp_path, ("2013", "2022"), config)
+    labels = result["labels"]
+    assert labels["cell_id"].size == 3 * 441
+    assert np.nanmedian(labels["mean_change"]) == pytest.approx(1.0, abs=0.05)
+    assert sorted(set(labels["tile"].tolist())) == [0, 1, 2]
+    assert result["summary_stride"] == 1.0
+
+
+def test_spread_takes_even_intervals():
+    from canopyguard.lidar.change import spread
+
+    assert spread(list(range(10)), 3) == [0, 3, 6]
+    assert spread([1, 2], 5) == [1, 2]
+    with pytest.raises(ValueError, match="positive"):
+        spread([1], 0)
+
+
+def test_concatenate_tables_requires_shared_columns():
+    from canopyguard.lidar.change import concatenate_tables
+
+    joined = concatenate_tables([{"a": np.array([1])}, {"a": np.array([2, 3])}])
+    assert joined["a"].tolist() == [1, 2, 3]
+    assert concatenate_tables([]) == {}
+    with pytest.raises(ValueError, match="share their columns"):
+        concatenate_tables([{"a": np.array([1])}, {"b": np.array([1])}])
