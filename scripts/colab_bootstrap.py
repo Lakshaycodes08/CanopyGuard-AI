@@ -1,12 +1,30 @@
 from __future__ import annotations
 
 import os
+import platform
 import shutil
 import subprocess
 import sys
 import tarfile
 import urllib.request
 from pathlib import Path
+
+
+def _micromamba_platform() -> str:
+    """Micromamba's release channel name for the machine running this script.
+
+    Defaults assume Colab (linux-64). A native run on another OS/arch, such
+    as this project's own laptop fallback, needs the matching build or the
+    downloaded binary just fails to exec.
+    """
+    system = platform.system()
+    machine = platform.machine()
+    if system == "Linux":
+        return "linux-aarch64" if machine in ("aarch64", "arm64") else "linux-64"
+    if system == "Darwin":
+        return "osx-arm64" if machine == "arm64" else "osx-64"
+    raise SystemExit(f"no known micromamba build for {system}/{machine}")
+
 
 REPO = os.environ.get("REPO", "https://github.com/Lakshaycodes08/CanopyGuard-AI.git")
 BRANCH = os.environ.get("BRANCH", "feat/lidar-truth-pipeline")
@@ -19,8 +37,12 @@ OUT = Path(os.environ.get("OUT", "/content/truth"))
 SCRIPT = os.environ.get("SCRIPT", "run_noise_floor.py")
 PAIR = os.environ.get("PAIR", "")
 EXTRA_ARGS = os.environ.get("EXTRA_ARGS", "")
-MAMBA_URL = "https://micro.mamba.pm/api/micromamba/linux-64/latest"
-MAMBA = Path("/content/bin/micromamba")
+DUMP_FILES = [name for name in os.environ.get("DUMP_FILES", "").split(",") if name]
+MAMBA_URL = os.environ.get(
+    "MAMBA_URL",
+    f"https://micro.mamba.pm/api/micromamba/{_micromamba_platform()}/latest",
+)
+MAMBA = Path(os.environ.get("MAMBA_PATH", "/content/bin/micromamba"))
 PROJ_DATA = ENV_PREFIX / "share" / "proj"
 
 
@@ -213,7 +235,35 @@ def main() -> int:
     assert process.stdout is not None
     for line in process.stdout:
         print(line.rstrip(), flush=True)
-    return process.wait()
+    code = process.wait()
+    if code == 0:
+        dump_outputs()
+    return code
+
+
+def dump_outputs() -> None:
+    """Print small result files as base64, framed by grep-able markers.
+
+    A follow-up command issued right after this long exec call returns has
+    reliably hit a stale-connection error in practice, even while `colab
+    status` still shows the session alive. Printing the files here instead
+    puts them on the same stdout stream that already carried hours of output
+    without trouble, so the caller can pull them out of its own saved log
+    with no second round trip to the VM.
+    """
+    import base64
+
+    for name in DUMP_FILES:
+        path = OUT / name
+        if not path.exists():
+            print(f"=== dump {name} missing ===", flush=True)
+            continue
+        payload = base64.b64encode(path.read_bytes()).decode("ascii")
+        print(f"=== dump {name} base64 {len(payload)} bytes ===", flush=True)
+        width = 4096
+        for start in range(0, len(payload), width):
+            print(payload[start : start + width], flush=True)
+        print(f"=== dump {name} end ===", flush=True)
 
 
 if __name__ == "__main__":
