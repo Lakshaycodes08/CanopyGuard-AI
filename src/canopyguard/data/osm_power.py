@@ -13,7 +13,18 @@ from typing import Any
 import numpy as np
 from numpy.typing import ArrayLike, NDArray
 
-OVERPASS_URL = "https://overpass-api.de/api/interpreter"
+OVERPASS_URLS = (
+    "https://overpass-api.de/api/interpreter",
+    "https://overpass.kumi.systems/api/interpreter",
+    "https://overpass.private.coffee/api/interpreter",
+)
+HEADERS = {
+    "User-Agent": (
+        "CanopyGuard-AI/1.0 (+https://github.com/Lakshaycodes08/CanopyGuard-AI)"
+    ),
+    "Accept": "application/json",
+    "Content-Type": "application/x-www-form-urlencoded",
+}
 SUPPORTS = {"tower", "pole", "portal", "terminal"}
 
 
@@ -141,15 +152,37 @@ def near_box(
 def fetch_power_lines(
     bbox: tuple[float, float, float, float],
     kinds: tuple[str, ...] = ("line",),
-    url: str = OVERPASS_URL,
+    urls: tuple[str, ...] = OVERPASS_URLS,
     timeout_s: int = 180,
+    attempts: int = 2,
+    opener: Any = None,
 ) -> dict[str, Any]:
-    """Overpass response for the power ways inside a box."""
+    """Overpass response for the power ways inside a box.
+
+    The public endpoints refuse requests without an identifying user agent,
+    so one is always sent. Each endpoint is tried in turn, `attempts` times,
+    and every failure is reported if none answers.
+    """
     import json
+    import time
     import urllib.parse
     import urllib.request
 
     body = urllib.parse.urlencode({"data": overpass_query(bbox, kinds, timeout_s)})
-    request = urllib.request.Request(url, data=body.encode("utf-8"))
-    with urllib.request.urlopen(request, timeout=timeout_s + 30) as response:
-        return json.loads(response.read().decode("utf-8"))
+    send = opener or urllib.request.urlopen
+    failures = []
+    for url in urls:
+        for attempt in range(attempts):
+            request = urllib.request.Request(
+                url, data=body.encode("utf-8"), headers=HEADERS
+            )
+            try:
+                with send(request, timeout=timeout_s + 30) as response:
+                    payload = json.loads(response.read().decode("utf-8"))
+                if "elements" not in payload:
+                    raise ValueError("response has no elements")
+                return payload
+            except Exception as error:  # noqa: BLE001
+                failures.append(f"{url} attempt {attempt + 1}: {error}")
+                time.sleep(2.0 * (attempt + 1) if opener is None else 0.0)
+    raise RuntimeError("No Overpass endpoint answered:\n" + "\n".join(failures))

@@ -69,3 +69,48 @@ def test_near_box_uses_the_buffer():
     points = np.array([[0.0, 0.0]])
     assert near_box(points, (50.0, -10.0, 60.0, 10.0), 50.0)
     assert not near_box(points, (51.0, -10.0, 60.0, 10.0), 50.0)
+
+
+class _Response:
+    def __init__(self, body):
+        self.body = body
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args):
+        return False
+
+    def read(self):
+        return self.body
+
+
+def test_fetch_sends_a_user_agent_and_falls_back(monkeypatch):
+    from canopyguard.data.osm_power import fetch_power_lines
+
+    seen = []
+
+    def opener(request, timeout):
+        seen.append((request.full_url, request.get_header("User-agent")))
+        if "first" in request.full_url:
+            raise OSError("HTTP Error 406: Not Acceptable")
+        return _Response(b'{"elements": []}')
+
+    payload = fetch_power_lines(
+        (-122.9, 38.4, -122.7, 38.8), urls=("https://first", "https://second"),
+        opener=opener,
+    )
+    assert payload == {"elements": []}
+    assert all(agent.startswith("CanopyGuard-AI") for _, agent in seen)
+    assert [url for url, _ in seen] == ["https://first"] * 2 + ["https://second"]
+
+
+def test_fetch_reports_every_failure():
+    from canopyguard.data.osm_power import fetch_power_lines
+
+    def opener(request, timeout):
+        raise OSError("blocked")
+
+    with pytest.raises(RuntimeError, match="No Overpass endpoint answered"):
+        fetch_power_lines((-122.9, 38.4, -122.7, 38.8), urls=("https://a",),
+                          opener=opener)

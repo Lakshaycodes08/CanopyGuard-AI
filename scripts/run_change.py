@@ -27,6 +27,7 @@ def main() -> int:
     parser.add_argument("--out", default="/content/change")
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--corridor", action="store_true")
+    parser.add_argument("--lines", default=None)
     args = parser.parse_args()
 
     pair = tuple(args.pair.split("-"))
@@ -39,7 +40,7 @@ def main() -> int:
     count = args.tiles or int(config["change"]["tile_count"])
     corridor = None
     if args.corridor:
-        lines = _power_lines(config, study_box, out)
+        lines = _power_lines(config, study_box, out, args.lines)
         corridor = (lines, float(config["change"]["corridor_buffer_m"]))
         count = args.tiles if args.tiles is not None else int(
             config["change"]["background_tiles"]
@@ -95,11 +96,20 @@ def main() -> int:
     return 0
 
 
-def _power_lines(config: dict, study_box: tuple, out: Path) -> list[dict]:
-    """OpenStreetMap power lines in the study box, fetched once and cached."""
+def _power_lines(
+    config: dict, study_box: tuple, out: Path, source: str | None
+) -> list[dict]:
+    """OpenStreetMap power lines in the study box, fetched once and cached.
+
+    A saved Overpass response given with --lines is used without network
+    access, and so is the copy kept beside the surfaces after a first fetch.
+    """
     cache = out / "power_lines.json"
     kinds = tuple(config["change"]["power_kinds"])
-    if cache.exists():
+    if source:
+        payload = json.loads(Path(source).read_text(encoding="utf-8"))
+        cache.write_text(json.dumps(payload), encoding="utf-8")
+    elif cache.exists():
         payload = json.loads(cache.read_text(encoding="utf-8"))
     else:
         payload = fetch_power_lines(study_box, kinds)
