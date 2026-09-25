@@ -31,6 +31,13 @@ characterisation of the underlying LiDAR truth. It is not a claim of
 first-ever vegetation detection, a compliance determination, or a hazard-tree
 identification.
 
+`k` up to 1 year is validated by the out-of-time check below. `k` of 2 or 3
+years is a stated goal, not yet backed by ground truth: only one LiDAR
+interval (2022 to 2023) exists with outcomes on both sides of a cutoff, and no
+conductor geometry is available to place the clearance envelope itself, only
+span-level line geometry from OpenStreetMap (see Data roles). Treat the 2 and
+3 year horizon as conditional until a longer-baseline epoch is admitted.
+
 ## Unit of analysis
 
 - Cell grid: global 10 m grid in EPSG:6339. A cell's stable identifier is the
@@ -378,8 +385,11 @@ causation, wildfire causation, or utility-grade safety certification.
 Satellite-derived canopy height at 10 m carries an error of approximately 6 m,
 several times the 1.22 m clearance threshold binding these voltage classes in
 the High Fire-Threat District, so no span may be declared compliant or
-non-compliant from this product. No reduction in outages, ignitions or cost is
-claimed, because no outage or work-order records are available. Hazard trees
+non-compliant from this product. No conductor geometry is available either;
+OpenStreetMap span geometry places a line corridor, not a conductor position
+or sag, so the clearance envelope itself is approximate. No reduction in
+outages, ignitions or cost is claimed, because no outage or work-order
+records are available. Hazard trees
 are not identified, because their structural and species attributes are not
 observed. NERC FAC-003-4 binds lines at 200 kV and above, so only the 230 kV
 lines here fall in its scope; the 60 and 115 kV lines are governed by CPUC
@@ -391,6 +401,7 @@ General Order 95 and Public Resources Code 4293.
 | --- | --- | --- |
 | 2026-09-22 | Adopt airborne LiDAR change as the primary label, at a ladder of scales and baselines | The only formulation in the available data where signal exceeds the measurement noise floor; see the label-quality section above. |
 | 2026-09-24 | Unlock the design and reframe from a detectability benchmark to a span-level encroachment forecast | An independent review found the retrospective Landsat model used end-of-period imagery and the outcome differences themselves, valid as attribution but not as forecast; utilities need span-level, ranked, backtested, forward-looking risk, and block-mean height change is not the clearance-relevant quantity. |
+| 2026-09-25 | Mark the 2 and 3 year forecast horizon conditional, and note conductor geometry is not available | A review found the stated one-to-three year horizon has ground truth for only one interval (2022 to 2023), and the clearance envelope is placed from OpenStreetMap line geometry, not conductor position or sag. |
 
 ## Open items
 
