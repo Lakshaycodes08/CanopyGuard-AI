@@ -2,9 +2,10 @@
 
 [![CI](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml/badge.svg)](https://github.com/Lakshaycodes08/CanopyGuard-AI/actions/workflows/ci.yml)
 
-CanopyGuard-AI tests whether open satellite time series can forecast canopy
-height well enough to improve vegetation-risk prioritization and maintenance
-scheduling near power-line corridors.
+CanopyGuard-AI forecasts, from an airborne LiDAR survey at t0 and open data
+available up to t0, which transmission-corridor spans will carry vegetation
+within clearance distance by t0 + k years, and ranks spans against cyclic,
+current-height-first and random allocation.
 
 The project is built as a reproducible research pipeline, not an application. Each stage reads files from disk and writes documented outputs that can be rerun independently.
 
@@ -13,42 +14,79 @@ New to the project, remote sensing, or machine learning? Start with
 
 ## Research goal
 
-The goal is a defensible journal paper. The predeclared research question,
-hypotheses, baselines, and evaluation rules are in
-[`reports/research_design.md`](reports/research_design.md). The current
-manuscript direction is:
+The goal is a defensible journal paper. The research question, hypotheses,
+baselines, and evaluation rules are in
+[`reports/research_design.md`](reports/research_design.md) and are revised as
+evidence accumulates. The current manuscript direction is:
 
-> Data-driven vegetation risk forecasting and maintenance prioritization near power-line corridors using satellite time series, LiDAR validation, and optimization.
+> Span-level forecasting of vegetation encroachment on transmission corridors from airborne LiDAR and open earth-observation data, ranked against operational allocation baselines.
 
 ## Data roles
 
-- California Energy Commission transmission lines: approximate corridor
-  context only.
-- Sentinel-2: temporal signal.
-- GEDI: sparse canopy reference.
-- Sonoma County 2013 and 2022 LiDAR-derived canopy products: independent
-  validation truth.
+- Sonoma County 2013, 2022 and 2023 airborne LiDAR: label source and
+  label-quality truth. The 2022 and 2023 pair is one year apart and measures
+  the detection noise floor.
+- Landsat 5/7/8 history to the forecast cutoff: as-of temporal predictors.
+- USGS 3DEP: terrain predictors and site quality.
+- LANDFIRE / Sonoma vegetation map: vegetation type stratification.
+- TerraClimate: climate normals and climatic water deficit.
+- CAL FIRE FRAP, MTBS: disturbance history before the cutoff.
+- GEDI: independent cross-check, not a training target.
+- OpenStreetMap power lines, cross-checked against California Energy
+  Commission transmission lines: span construction and voltage.
 
-LiDAR should stay out of model features unless a specific experiment explicitly justifies otherwise. It is the main independent validation source.
+No source dated after its forecast cutoff enters a feature for that cutoff.
+`tests/test_truth_isolation.py` fails the build if a feature or model module
+imports the LiDAR package or references a truth path at or after its own
+epoch.
 
 ## Pipeline
 
 ```text
-CEC corridor context
-Sentinel-2 time series       -> features -> forecasting -> risk -> scheduling -> figures
-GEDI sparse reference
-Repeat Sonoma LiDAR truth    -> independent evaluation
+LiDAR epochs -> matched CHMs -> co-registration -> label-quality noise floor
+LiDAR t0 structure + terrain + Landsat history + climate + fire + veg type
+                                        -> as-of feature store (per cutoff)
+feature store -> disturbance hazard head + conditional growth head
+              -> product benchmark
+              -> corridor spans -> span ranking -> output table and map
 ```
 
 Every arrow is a file under `data/interim` or `data/processed`. Root data directories are present in git with `.gitkeep` files, but real data is ignored by git and should be tracked with DVC.
 
 ## Dependency strategy
 
-`environment.yml` is the canonical environment file. Use conda because the project will need geospatial packages such as GDAL, PDAL, rasterio, and related compiled dependencies.
+`environment.yml` is the canonical dependency source and is what CI installs
+from. Use conda because the geospatial stack relies on compiled packages.
 
-```powershell
-conda env create -f environment.yml
-conda activate canopyguard-ai
+A plain virtual environment also works for day-to-day development, since
+every dependency in `pyproject.toml` ships a wheel and needs no compiler:
+
+```bash
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+make check
+```
+
+`python -m venv` and `pip` work identically if uv is not installed. Keep
+`pyproject.toml` a subset of `environment.yml`, not an independent source: a
+dependency belongs in `environment.yml` first.
+
+Optional extras: `.[models]` adds SciPy, scikit-learn and LightGBM for the
+modelling stage. LightGBM needs an OpenMP runtime on macOS, so install that
+extra only when the modelling stage begins.
+
+`environment-lidar.yml` is separate and carries PDAL and GDAL. It is used
+only for the step that turns LiDAR point clouds into canopy height rasters.
+That step reads USGS 3DEP cloud-optimised point clouds over HTTPS by bounding
+box, so no point-cloud file is downloaded, and it normally runs on a hosted
+notebook rather than a laptop. Its outputs are small rasters consumed by the
+working environment.
+
+```bash
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 python -m pytest
 ```
 
@@ -56,24 +94,18 @@ Do not add a second dependency source unless there is a concrete reason. A local
 
 ## Checks
 
-On Windows:
-
-```powershell
-conda activate canopyguard-ai
-.\scripts\check.ps1
-npm audit
-```
-
-On systems with Make:
-
 ```bash
+source .venv/bin/activate
 make check
 npm audit
 ```
 
+On Windows without Make, `scripts/check.ps1` runs the same steps.
+
 The confirmed study area is northern Sonoma County. The first DVC stage records
-the Sentinel-2 tile-10SEH catalogue manifest. Raster download and cube assembly
-will run on shared NSUT infrastructure after access is confirmed.
+the Sentinel-2 tile-10SEH catalogue manifest. Processing is scoped to a
+corridor buffer plus a stratified tile sample, roughly 64 km2, and every
+required result runs on CPU.
 
 ## DVC
 
@@ -84,7 +116,7 @@ pending. The access checklist and capacity estimate are in
 
 After choosing storage, configure it with a command such as:
 
-```powershell
+```bash
 dvc remote add -d storage <remote-url>
 ```
 
@@ -107,7 +139,7 @@ Project prose should stay plain ASCII unless a technical term requires otherwise
 
 Run:
 
-```powershell
+```bash
 python scripts/check_text_hygiene.py
 ```
 
@@ -116,12 +148,13 @@ python scripts/check_text_hygiene.py
 
 New contributors should follow `CONTRIBUTING.md`. The short version is:
 
-```powershell
+```bash
 git clone https://github.com/Lakshaycodes08/CanopyGuard-AI.git
 cd CanopyGuard-AI
-conda env create -f environment.yml
-conda activate canopyguard-ai
-.\scripts\check.ps1
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
+make check
 ```
 
 The expected empty data folders are tracked with `.gitkeep` files, so a fresh clone includes `data/raw`, `data/interim`, and `data/processed`.
