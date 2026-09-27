@@ -1,13 +1,16 @@
-scheduling:
-  horizon_months: 12
-  budget_units: 100
-  objective: maximize_risk_reduction
+spans:
+  segment_length_m: 100
+  buffer_m: [30, 60]
+  voltage_kv: [60, 115, 230]
 
-constraints:
-  max_segments_per_month: 25
-  require_contiguous_work_blocks: false
+budgets:
+  ranked_length_fractions: [0.01, 0.02, 0.05, 0.10, 0.20]
+  headline_fraction: 0.10
 
 baselines:
-  - highest_risk_first
-  - random_priority
-
+  - random
+  - cyclic_time_since_inspection
+  - current_height_first
+  - static_risk
+  - span_length
+  - distance_to_conductor

@@ -98,6 +98,20 @@ The predeclared Phase 0 filter retained `quality_flag = 1`,
 63,942 footprints across 54 acquisition dates and 54 orbits, far above the
 minimum screen of 500 footprints and three dates.
 
+This count is the result of a catalogue and table query. No GEDI granule has
+been downloaded into the data workspace. The Phase 0 filter is deliberately
+weak and accepts any sensitivity value. The consensus filter set adopted for
+analysis adds night-only acquisition, full-power beams, sensitivity at or
+above 0.95 in closed conifer, and a 30 degree slope limit. Compounding those
+rates against 63,942 gives an expected retained sample of order 3,000 to
+6,000 over 533 km2, which is roughly 6 footprints per km2. Published
+stand-level growth work requires at least 40 footprints per km2. The
+sensitivity threshold also biases retention toward shorter and less dense
+canopy, which is the opposite of the tall stands of operational interest. The
+Phase 0 pass therefore stands as a feasibility gate for canopy height
+reference data, and GEDI is used as an independent cross-check rather than as
+a training target.
+
 Spatial coverage also passes. There were 29,866 quality footprints inside the
 exact 2017-2022 MTBS perimeters for Tubbs, Kincade, Walbridge, and Pocket, and
 2,132 inside the southern comparison box. A conservative robustness subset
@@ -186,7 +200,7 @@ engineering truth.
 | OpenTopography account access | PASS - registered academic user and data access confirmed by user screenshot on 2026-09-12 |
 | DVC remote | PENDING STORAGE DECISION |
 | Experiment tracker | PENDING TOOL DECISION |
-| NSUT HPC details | PENDING ADMIN CONFIRMATION |
+| Compute | PASS - every required result runs on CPU within the scoped processing footprint |
 
 ## Phase 0 exit condition
 

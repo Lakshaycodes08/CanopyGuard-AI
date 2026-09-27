@@ -1,0 +1,258 @@
+epochs:
+  - name: "2013"
+    datasets:
+      - USGS_LPC_CA_Sonoma_A2_2013_LAS_2017
+      - USGS_LPC_CA_Sonoma_A3_2013_LAS_2017
+      - USGS_LPC_CA_Sonoma_A4_2013_LAS_2017
+    z_to_metres: 0.30480060960121924
+    z_note: >
+      Elevations are served in US survey feet with a constant offset. Against
+      2022 terrain on two tiles the fitted slope was 3.284 and 3.285 and the
+      intercept -31 to -33 ft. The offset is removed by co-registration.
+    collection: OT.092014.2871.1
+    start: "2013-09-28"
+    end: "2013-11-26"
+    nominal_density_pts_m2: 13.73
+    vertical_datum: NAVD88
+    geoid: GEOID12A
+    role: long_baseline_start
+    admitted: null
+  - name: "2022"
+    dataset: CA_NorthernCA_1_B22
+    start: "2022-09-13"
+    end: "2022-11-11"
+    nominal_density_pts_m2: 21.51
+    vertical_datum: NAVD88
+    geoid: GEOID18
+    role: reference
+    admitted: null
+    source_files: 4361
+  - name: "2023"
+    dataset: CA_NorthCoastRanges_2_B23
+    start: "2023-09-16"
+    end: "2023-12-15"
+    nominal_density_pts_m2: 21.32
+    vertical_datum: NAVD88
+    geoid: GEOID18
+    role: noise_floor_pair
+    admitted: null
+    source_files: 8541
+  - name: "2007"
+    dataset: EarthScope_Northern_California
+    collection: OT.052008.32610.1
+    start: "2007-03-21"
+    end: "2007-04-17"
+    nominal_density_pts_m2: null
+    vertical_datum: null
+    geoid: null
+    role: optional_long_baseline
+    admitted: false
+    exclusion_reason: >
+      Spring acquisition. Deciduous canopy is not comparable with the autumn
+      epochs. Admissible for conifer alliances only if the screen passes.
+
+reference_epoch: "2022"
+
+noise_floor:
+  epoch_pair: ["2022", "2023"]
+  calibration_area: co_covered_delivery_tiles
+  may_extend_outside_study_bbox: true
+  stratify_to_match: [vegetation_group, slope_band, canopy_height_class]
+  min_stable_cells_per_stratum: 2000
+  search_box: [-123.40, 38.10, -122.30, 38.90]
+  coverage_source: ept_source_manifest
+  coverage_note: >
+    The two work units abut rather than overlap. Their 1 km delivery tile
+    grids are offset by about half a tile, so co-coverage is a seam at most
+    507 m wide and about 51 km2 in total. Tiles are derived from the source
+    manifests at run time rather than from a bounding box, because a box drawn
+    around the seam contains mostly single-epoch ground. A manifest bound is
+    the box of a delivered file's points, not its flown polygon, so the seam
+    figure is an upper bound and tile admission is checked again on the built
+    surfaces.
+  tile_admission:
+    min_valid_fraction: 0.5
+    min_coverage_agreement: 0.8
+    admission_note: >
+      The raster writer produces a file even when no point reaches it, so a
+      tile outside one acquisition looks built. A tile inside both can still
+      carry a tenth of the returns in one epoch, which lowers the surface
+      maximum in that epoch alone, so the two coverages are compared as well
+      as counted.
+  stable_change_limit_m: 3.0
+  stable_note: >
+    The floor is measured on stable cells. A 1 m cell whose height changes by
+    more than the limit between the two epochs is treated as disturbed and
+    excluded from both epochs before aggregation. Felled and fallen trees
+    otherwise dominate the mean and keep the spread from falling with scale.
+  gate:
+    max_mean_one_year_change_m: 1.5
+    mean_note: >
+      The lower bound is minus the detection limit at the finest admitted
+      scale. One year of growth and a sensor bias of a few centimetres cannot
+      be separated, so a mean inside the detection limit is accepted.
+    max_shift_m: 1.5
+    sigma_reference_scale_m: 100
+    reference_note: >
+      Where the sample cannot admit the reference scale, its spread is taken
+      from the decay fit over at least three admitted scales and reported as
+      extrapolated.
+    max_sigma_at_reference_m: 2.0
+  measured:
+    run_date: "2026-09-24"
+    tiles_admitted: 52
+    stable_fraction: 0.936
+    bias_m: -0.08
+    sigma_m:
+      10: 0.120
+      20: 0.107
+      30: 0.101
+      50: 0.102
+    lod95_m:
+      10: 0.235
+      20: 0.210
+      30: 0.199
+      50: 0.199
+    sigma_reference_m: 0.092
+    sigma_reference_source: extrapolated
+    decay_exponent: 0.054
+    measured_note: >
+      Values come from the 2022-2023 pair on stable cells and are an upper
+      bound for interior coverage, since the seam is the worst geometry of
+      either acquisition. bias_m is specific to this pair and is removed
+      from pair differences with lidar.difference.remove_bias before
+      comparison against the limit of detection.
+
+change:
+  pairs: [["2013", "2022"], ["2013", "2023"]]
+  tile_size_m: 500
+  tile_count: 60
+  canopy_min_height_m: 2.0
+  bare_max_height_m: 1.0
+  disturbance_limit_m: 3.0
+  max_terrain_scale_error: 0.01
+  grid_snap_m: 30
+  coverage_cells_per_tile: 10
+  label_cell_m: 10
+  coreg_max_tiles: 60
+  corridor_buffer_m: 100
+  background_tiles: 150
+  power_kinds: [line]
+  change_note: >
+    Long-baseline pairs are measured inside the study box, where both epochs
+    cover the ground in full. The 2013 acquisition is served as three
+    resources, which are read together and merged for each tile. Cells low in
+    both epochs give the pair its own stable-ground check, since the
+    2022-2023 floor is an upper bound measured on a different pair. Cells
+    changing by more than the disturbance limit are reported; those losing
+    more than it are left out of the canopy stratum, while growth beyond it is
+    kept as signal. Before co-registration the terrain of one epoch, fitted
+    against the other, must have unit slope within the stated error; a failure
+    is a unit fault. A constant offset is a datum difference, solved by
+    co-registration and cancelled inside each canopy height. An epoch stored
+    in another vertical unit carries `z_to_metres`. Tile grids are snapped to
+    `grid_snap_m`, so 10 m label cells and 30 m Landsat cells fall on one
+    global grid. With corridor selection every candidate tile within the
+    buffer of an OpenStreetMap power line is built, plus `background_tiles`
+    drawn from the rest. Co-registration uses at most `coreg_max_tiles`
+    tiles spread across the sample.
+
+admission_screen:
+  min_density_pts_m2: 8.0
+  min_area_retained_after_clip: 0.80
+  leaf_on_months: [9, 10, 11, 12]
+  require_ground_classification: true
+  require_declared_vertical_datum: true
+
+harmonization:
+  target_crs: EPSG:6339
+  target_vertical: NAVD88
+  max_scan_angle_deg: 15.0
+  decimate_to_sparsest_admitted: true
+  decimation_method: poisson_disk
+  sample_radius_m: null
+  sample_radius_note: >
+    Derived at run time from the sparsest admitted epoch density. Left null in
+    the config so it cannot drift from the epochs actually admitted.
+  drop_classes: [7, 9, 12, 18]
+  drop_class_flags: true
+  drop_class_flags_note: >
+    Withheld and overlap are flags, not classification values, so a filter on
+    Classification does not reach them. Overlap returns are the
+    edge-of-swath returns of an adjacent strip, and two acquisitions do not
+    overlap in the same places.
+  stats_dimensions: [Z, ScanAngleRank, GpsTime, NumberOfReturns]
+
+chm:
+  resolution_m: 1.0
+  ground_algorithm: smrf
+  smrf:
+    scalar: 1.25
+    slope: 0.15
+    threshold: 0.5
+    window: 18.0
+  height_above_ground: hag_delaunay
+  dtm_output_type: idw
+  dsm_output_type: max
+  dsm_binmode: true
+  dtm_binmode: false
+  binmode_note: >
+    A point contributes to the surface cell it falls in. Gathering within a
+    search radius turns a canopy apex into a plateau and makes the maximum
+    depend on point density. The ground surface keeps the radius so that cells
+    holding no ground return are interpolated rather than left empty.
+  pit_free_layers_m: [0, 2, 5, 10, 15, 20, 25, 30]
+  clamp_min_m: 0.0
+  clamp_max_m: 120.0
+
+coregistration:
+  method: nuth_kaab
+  surface: dtm
+  reference_epoch: "2022"
+  scope: pooled_over_sample
+  scope_note: >
+    One offset is solved from every tile at once. The offset is a property of
+    the acquisition pair, and a 250 m tile spans too narrow a range of aspect
+    to resolve it alone.
+  min_slope_deg: 5.0
+  max_slope_deg: 45.0
+  slope_band_note: >
+    Flat ground carries no horizontal information and very steep ground is
+    noisy. The solver is fitted on the bare-earth surface inside this band.
+  max_iterations: 30
+  convergence_tolerance_m: 0.01
+  max_accepted_shift_m: 5.0
+
+aggregation:
+  scales_m: [10, 20, 30, 50, 100, 200]
+  statistic: mean
+  min_valid_fraction: 0.5
+  min_cells_per_scale: 200
+  min_cells_note: >
+    The relative standard error of a spread estimate from n values is of order
+    one over the square root of twice n, so 200 cells give about 5 percent. A
+    scale below the minimum is measured and reported but does not enter the
+    gate or the decay fit.
+  ladder_note: >
+    A scale wider than the calibration tile cannot be measured. The widest
+    co-covered square the epoch pair admits is about 500 m and there is one of
+    them, so the ladder stops at 200 m and coarser scales are extrapolated
+    from the fitted decay exponent and reported as extrapolated. A 250 m tile
+    yields one cell at 200 m, so that scale needs the sample to carry at least
+    min_cells_per_scale tiles before it says anything.
+
+tiers:
+  corridor_buffer_m: 60
+  sample_tile_size_m: 250
+  sample_tile_count: 120
+  coverage_cells_per_tile: 5
+  tile_size_note: >
+    Set by the width of the co-coverage seam. No 750 m or 1000 m square lies
+    wholly inside both acquisitions anywhere in the search box.
+  sample_radius_note: >
+    The thinning target is the sparsest admitted epoch, which is 2013 and is
+    not in the noise-floor pair. The floor is measured at the density the
+    production comparison runs at, not at the density the pair could support.
+  stratify_by: [vegetation_group, slope_band, burn_state]
+  slope_bands_deg: [[0, 15], [15, 30], [30, 90]]
+  seed: 42

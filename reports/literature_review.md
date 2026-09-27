@@ -39,6 +39,7 @@ left for CanopyGuard-AI?
 | [Sokolovsky et al. (2026)](https://arxiv.org/abs/2608.18611) | Model vegetation and lightning probability of failure at utility-asset scale. | Geospatial features, MODIS NDVI, utility records, LightGBM, and explainability in a cloud pipeline. | Reports cross-validated discrimination but explicitly does not test strict forward-time forecasting or geographic transfer. | Demonstrates scalable operational asset-risk modeling and exposes the weakness of geolocation-unaware splits. | A recent preprint using confidential utility data, coarse MODIS vegetation, and non-temporal cross-validation. | Does our chronological and spatially blocked open evaluation change the conclusions? |
 | [Ding et al. (2026)](https://slgc.nefu.edu.cn/EN/abstract/abstract2639.shtml) | Integrate UAV image measurement, vegetation risk assessment, and clearance scheduling. | ResNet-50 segmentation, multimodal risk grading, clustering, and vehicle routing. | Reports 86.7 percent vegetation classification accuracy, 65.88 percent IoU, 89.3 percent overall risk accuracy, and a 21 percent maintenance-cost reduction. | Directly occupies the broad measurement-assessment-scheduling integration claim. | Relies on UAV imagery and field data; the accessible record does not establish open data, independent repeat-LiDAR validation, or spatially blocked future evaluation. | What is scientifically new beyond replacing proprietary inputs with open ones? |
 | [Wanik et al. (2017)](https://doi.org/10.1016/j.epsr.2017.01.039) | Test whether vegetation management, LiDAR tree proximity, and infrastructure data improve Hurricane Sandy outage prediction. | A LiDAR-derived ProxPix layer and utility attributes feed repeatedly balanced Random Forest models on 0.5 km cells. | Models with added vegetation and infrastructure evidence improved by about 5 to 13 percent, depending on metric and inputs. | Operationally links fine vegetation structure to outage occurrence. | One storm and utility territory, confidential operational data, and no future canopy-height forecast. | Can an open proxy study remain operationally relevant without outage labels? |
+| [Zimmer et al. (2026)](https://doi.org/10.48550/arXiv.2602.21421) | Estimate canopy height over space and time (ECHOSAT) at 10 m resolution from multi-sensor satellite time series and GEDI. | Vision transformer with self-supervised growth loss processing Sentinel-2 time series and GEDI sparse heights. | Cross-sectional accuracy against spaceborne LiDAR and static airborne LiDAR across Europe. | Direct evidence that satellite time series plus GEDI can model temporal height with self-supervised loss constraints. | No repeat airborne LiDAR validation for temporal growth; no infrastructure corridor evaluation; no maintenance scheduling connection. | Does the self-supervised loss capture actual growth or optical seasonal variation, and does it transfer to corridor risk? |
 
 ## What the literature already occupies
 
@@ -51,10 +52,11 @@ one, and Jumbo and Moghaddass already connect image-derived risk to routing and
 crew allocation.
 
 Sentinel-2 plus GEDI canopy-height mapping is also mature. Lang et al. establish
-a global single-year probabilistic model, and Pauls et al. extend the idea to
-monthly time-series inputs and annual height maps. Recent local work further
-shows that quality filtering, spatial alignment, seasonal features, and local
-calibration can change the result substantially.
+a global single-year probabilistic model, Pauls et al. extend the idea to
+monthly time-series inputs and annual height maps, and Zimmer et al. (2026,
+ECHOSAT) train a vision transformer with self-supervised growth loss across
+multi-sensor satellite time series and GEDI. The project therefore must not
+claim the first temporal Sentinel-2 plus GEDI canopy-height model.
 
 The broad end-to-end integration claim is now occupied as well. Jumbo and
 Moghaddass connect image-derived risk to routing, Ding et al. report an explicit
@@ -129,8 +131,8 @@ with disagreeing evidence remain uncertain rather than being labelled stable.
    repeat LiDAR, biological priors, and maintenance optimization.
 4. Calibrate and validate the disturbance-screening thresholds on labelled
    Sonoma audit samples.
-5. Revisit the locked research question only if new evidence falsifies its
-   open-evaluation contribution.
+5. Revisit the research question if new evidence falsifies its span-level
+   forecast contribution.
 
 ## Rerun inputs
 

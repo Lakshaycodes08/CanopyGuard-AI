@@ -1,0 +1,17 @@
+{
+  "bbox_wgs84": [
+    -123.39,
+    38.48,
+    -122.36,
+    38.93
+  ],
+  "config_sha256": "dafc6a00a1fb8c94df8dcf7e8d0dde320c52b39bdd6dda277431341bfa1c3cd5",
+  "crs": "EPSG:4326",
+  "fetch_utc": "2026-09-22T18:40:16.173453+00:00",
+  "git_commit": "8733068c1fab90f51c0429e3299e068eec8eb7ef",
+  "http_status": 200,
+  "row_count": 10,
+  "script_name": "scripts/fetch_lidar.py",
+  "sha256": "004ac41c959bc724b69f3dd154f7d6cd33a8557767d8d2fdd70031b16984106f",
+  "source_url": "https://portal.opentopography.org/API/otCatalog"
+}

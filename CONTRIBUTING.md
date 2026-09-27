@@ -4,22 +4,29 @@ This project is a Python research pipeline. Keep setup boring and reproducible.
 
 ## First-time setup
 
-Use conda. `environment.yml` is the canonical dependency source.
+`pyproject.toml` is the canonical dependency source. Every working
+dependency ships a wheel, so no compiler and no conda are required.
 
-```powershell
+```bash
 git clone https://github.com/Lakshaycodes08/CanopyGuard-AI.git
 cd CanopyGuard-AI
-conda env create -f environment.yml
-conda activate canopyguard-ai
+uv venv --python 3.11 --seed
+source .venv/bin/activate
+uv pip install -e ".[dev]"
 python -m pytest
 ```
 
-If the environment already exists after pulling updates, refresh it:
+`python -m venv .venv` and `pip install -e ".[dev]"` work identically if uv is
+not installed. After pulling updates, rerun the install command to pick up
+dependency changes.
 
-```powershell
-conda activate canopyguard-ai
-conda env update -f environment.yml --prune
-```
+The `models` extra adds SciPy, scikit-learn and LightGBM for the modelling
+stage. LightGBM needs an OpenMP runtime on macOS, so install that extra only
+when the modelling stage begins.
+
+`environment-lidar.yml` is a separate conda environment carrying PDAL and
+GDAL. It is used only for the step that turns LiDAR point clouds into canopy
+height rasters, which normally runs on a hosted notebook.
 
 ## Expected folders after clone
 
@@ -41,27 +48,19 @@ Real data files inside `data/` are ignored by git. Use DVC once a storage remote
 
 ## Local checks before pushing
 
-On Windows:
-
-```powershell
-conda activate canopyguard-ai
-.\scripts\check.ps1
-npm audit
-```
-
-On Linux or macOS:
-
 ```bash
-conda activate canopyguard-ai
+source .venv/bin/activate
 make check
 npm audit
 ```
+
+On Windows without Make, `scripts/check.ps1` runs the same steps.
 
 ## DVC
 
 DVC is initialized, but no remote is configured yet. Do not commit raw data or large model artifacts. After storage is chosen, set the remote with:
 
-```powershell
+```bash
 dvc remote add -d storage <remote-url>
 ```
 

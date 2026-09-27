@@ -1,455 +1,293 @@
 # CanopyGuard-AI from scratch
 
-Updated: 2026-09-15
+Technical onboarding. Read `reports/research_design.md` first for the current
+design. This document explains the concepts and the pipeline that implement
+it.
 
-Audience: a teammate who is new to machine learning, remote sensing, and the
-current repository.
+## 1. Problem
 
-## 1. The project in one sentence
+Given an airborne LiDAR survey at `t0` and open data available up to `t0`,
+forecast which transmission-corridor spans will carry vegetation within
+clearance distance by `t0 + k` years, and rank spans better than cyclic,
+current-height-first and random allocation.
 
-CanopyGuard-AI tests whether open satellite observations can help forecast
-future tree-canopy height near approximate power-line corridors, and whether
-that forecast can improve research-grade maintenance prioritization.
+The forecast and span ranking are the spine. Label-quality measurement (the
+LiDAR noise floor and the detectability of canopy change) is a supporting
+result inside methods, not the primary contribution.
 
-This is a scientific study, not a utility safety system. Its outputs cannot
-certify clearance, predict a particular tree failure, or replace an engineering
-survey.
+## 2. Why the target is canopy height change
 
-## 2. The central idea
+Canopy height is easy to map and hard to map well. Growth is the opposite: it
+is the quantity of operational interest and it is small.
 
-Imagine trying to monitor a large forest every month:
+Annual height increment for the mapped Sonoma alliances is 0.075 to 0.61 m.
+Quality-filtered GEDI RH98 in steep mixed forest has a single-shot error
+standard deviation of 6 to 10 m. A one-year-ahead height model fitted against
+GEDI would report a good coefficient of determination consisting entirely of
+static canopy height, because the growth component contributes at most about
+4e-4 of the explainable variance.
 
-- Sentinel-2 is the frequent camera. It sees the whole area repeatedly but does
-  not directly measure tree height.
-- GEDI is a sparse laser ruler from space. It gives height-like measurements at
-  scattered footprints, not a complete map.
-- Airborne LiDAR is the detailed reference survey. We have Sonoma canopy
-  products for 2013 and 2022, so the 2022 product is kept independent for the
-  final check.
-- The vegetation map provides broad ecological context.
-- Fire records and Landsat change evidence help separate slow growth from
-  abrupt canopy loss.
-- California Energy Commission transmission lines provide approximate corridor
-  context. They are not survey-grade conductor geometry.
+Airborne LiDAR change over a nine-year baseline is 0.7 to 5.5 m against a
+limit of detection of 0.5 to 2.8 m depending on aggregation. That is the only
+formulation where signal exceeds the noise floor, and it is why LiDAR-derived
+canopy height change is the label the forecast heads are trained against.
+Block-mean height change is a label-quality statement, not the operational
+target: clearance risk is carried by upper-percentile and local-maximum
+canopy height near conductors, not by the 30 m block mean. The full
+arithmetic is in `reports/research_design.md`.
 
-The intended evidence chain is:
+## 3. The measuring instrument
 
-```text
-raw source catalogues
-        |
-        v
-downloaded and clipped source files
-        |
-        v
-aligned monthly Sentinel-2 cube + filtered GEDI targets
-        |
-        v
-simple baselines -> candidate ML models -> locked 2022 evaluation
-                                            |
-                                            v
-                              independent LiDAR comparison
-                                            |
-                                            v
-                          risk ranking -> schedule comparison
-                                            |
-                                            v
-                              figures, claims, and paper
+The 2022 and 2023 LiDAR acquisitions are one year apart at 21.51 and 21.32
+points per square metre. One year of true growth is small relative to the
+expected measurement error, so the spread of their difference over stable
+cells estimates that error directly.
+
+```
+sigma_n(s) = sd[ delta_h(2022 -> 2023, s) ]
+LoD95(s)   = 1.96 * sigma_n(s)
 ```
 
-Every arrow must produce a documented file so a teammate can rerun one stage
-without repeating everything manually.
+Everything downstream is compared against `LoD95(s)`. It is measured, not
+assumed.
 
-## 3. What question are we testing?
+## 4. Data roles
 
-The locked primary question is:
+| Source | Role |
+| --- | --- |
+| Sonoma airborne LiDAR 2013, 2022, 2023 | Target and independent truth. Never a feature |
+| Sentinel-2 L2A, 2017 onward | Seasonal optical predictors at 10 m |
+| Landsat 8 Collection 2, 2013 onward | Seasonal predictors covering the pre-Sentinel window |
+| USGS 3DEP | Terrain and site quality |
+| Sonoma vegetation map | Alliance stratification for the growth model |
+| CAL FIRE, MTBS, Landsat change | Disturbance status |
+| GEDI02_A Version 2 | Independent cross-check only |
+| CEC transmission lines | Span construction |
 
-Can a locally calibrated model using the previous calendar year of monthly
-Sentinel-2 observations and sparse GEDI height references predict canopy height
-one year ahead more accurately than simple non-temporal baselines, under
-chronological and spatially blocked evaluation, and are the predictions useful
-for ranking vegetation priority when checked against independent 2022 LiDAR?
+Sentinel-2 begins in 2017 and the 2013 to 2022 label window begins in 2013, so
+45 percent of that window is unobserved by Sentinel-2. Landsat covers it and
+is kept as a separate feature block so its contribution is ablatable.
 
-The exact hypotheses and failure conditions are in
-`reports/research_design.md`.
+## 5. Concepts
 
-## 4. What is a machine-learning problem?
+**Raster and pixel.** A grid of values with a geographic transform. A 10 m
+pixel covers 10 by 10 m on the ground.
 
-Machine learning means learning a numerical relationship from examples rather
-than writing every rule manually.
+**Band.** One spectral channel. Sentinel-2 bands used here are B02, B03, B04,
+B08 at 10 m and B05, B06, B07, B8A, B11, B12 at 20 m. SWIR (B11, B12) and red
+edge (B05 to B07) outrank greenness for canopy structure.
 
-Each training example has:
+**CRS.** Coordinate reference system. Working CRS is EPSG:6339, NAD83(2011)
+UTM zone 10N, in metres. Vertical datum is NAVD88.
 
-- Features: information given to the model. Here these may include monthly
-  Sentinel-2 band values, vegetation indices, observation counts, terrain, and
-  carefully justified ecological context.
-- Target or label: the value the model tries to predict. The planned target is
-  GEDI RH98 canopy height in meters.
-- Model: the learned mathematical mapping from features to the target.
-- Prediction: the model's estimated height for a new place and time.
+**Resampling.** Bilinear for reflectance, nearest for categorical layers such
+as the scene classification mask.
 
-Our main task is regression because canopy height is a continuous number such
-as 8.4 m. Classification would instead predict categories such as low, medium,
-or high.
+**Alignment.** Every raster shares one origin, resolution and transform.
+Misalignment between LiDAR epochs is the dominant controllable error: on a 30
+degree slope, 1 m of horizontal shift produces 0.58 m of apparent vertical
+change, comparable to nine years of oak growth.
 
-## 5. Important remote-sensing and map concepts
+**Cloud masking.** Applied per pixel from the scene classification layer.
+Scene-level cloud percentage is a catalogue filter, never a pixel guarantee.
 
-### Raster and pixel
+**Composite.** A per-pixel reduction over a time window. Seasonal medians and
+percentiles handle cloud gaps without imputation.
 
-A raster is a grid. A Sentinel-2 10 m pixel represents an approximately 10 m by
-10 m ground cell. It does not represent one individual tree.
+**DSM, DTM, CHM.** Digital surface model is the top of returns. Digital
+terrain model is the ground. Canopy height model is their difference.
 
-### Band
+**LoD95.** Limit of detection at 95 percent confidence for a difference
+between two measurements. Change below it is not distinguishable from error.
 
-A band measures reflected light in one wavelength range. Different bands are
-sensitive to visible color, vegetation structure, water, and moisture. A model
-uses several bands together rather than treating the satellite image as a
-normal photograph.
+**Saturation.** Optical signal stops responding to height above roughly 25 to
+30 m canopy. Sonoma redwood and Douglas-fir reach 30 to 70 m. Spatial texture,
+not spectral value, is what carries information above saturation.
 
-### CRS
+## 6. Study setup
 
-A coordinate reference system explains how map coordinates relate to Earth.
-The study area is recorded in latitude and longitude as EPSG:4326. Analysis is
-planned in UTM zone 10N, EPSG:32610, where distances are measured in meters.
-
-### Reprojection and resampling
-
-Reprojection transforms data into a common CRS. Resampling determines pixel
-values on the new grid. Continuous reflectance can use bilinear resampling;
-categorical layers such as cloud classes must use nearest-neighbor resampling.
-
-### Alignment
-
-Two rasters are aligned only when they have the same CRS, pixel size, bounds,
-and pixel origin. Similar-looking maps can still be misaligned and produce bad
-training pairs.
-
-### Cloud masking and no-data
-
-Clouds, shadows, cirrus, snow, defective pixels, and missing pixels must not be
-treated as land observations. Sentinel-2 digital number 0 is no-data. The code
-masks configured Scene Classification Layer classes and counts how many clear
-observations contributed to each monthly pixel.
-
-### Composite
-
-Several clear observations in one month are combined into one value. The
-current design uses the median because it is less sensitive to remaining
-outliers than the mean.
-
-### Data cube
-
-The cube is an organized array with dimensions `time`, `band`, `y`, and `x`.
-It is the model-ready history of the study area, not a mysterious database.
-
-## 6. The five main data roles
-
-| Source | What it contributes | What it must not be treated as |
-| --- | --- | --- |
-| Sentinel-2 Level-2A | Dense monthly optical history | Direct tree-height truth |
-| GEDI02_A Version 2 | Sparse RH98 height reference | A wall-to-wall map |
-| Sonoma 2013 and 2022 LiDAR products | Persistence comparison and independent validation | Ordinary model features |
-| CEC transmission lines | Approximate corridor aggregation | Exact conductor or clearance geometry |
-| Vegetation and disturbance evidence | Stratification, weak priors, and change screening | Proof of one cause or one species per pixel |
-
-Keeping these roles separate prevents circular evaluation. For example, if the
-2022 LiDAR truth is used to train the model, it can no longer be an independent
-2022 test.
-
-## 7. The study setup
-
-- Study area: northern Sonoma County candidate, now confirmed.
 - Bounding box: west -122.90, south 38.475, east -122.74, north 38.82.
-- First Sentinel tile: MGRS 10SEH.
-- Study dates: 2017-01-01 through 2022-12-31.
-- Training period ends: 2020-12-31.
-- Validation period: calendar year 2021.
-- Test period: calendar year 2022.
-- Working grid: 10 m in EPSG:32610.
-
-The code rejects overlapping or out-of-order time splits.
-
-## 8. Why three time periods?
-
-- Training data teach the model.
-- Validation data help choose settings and compare candidate models.
-- Test data answer the final question after all choices are frozen.
-
-Looking repeatedly at test results and changing the model is similar to seeing
-an exam answer key while studying. It creates test leakage and makes reported
-performance look better than real future performance.
-
-Nearby forest pixels are also similar. Therefore the evaluation uses spatial
-blocks so neighboring pixels do not casually leak information across a split.
-Candidate block sizes are 1, 2, and 5 km, selected using training evidence only.
-
-## 9. Models we plan to use
-
-### Baselines first
-
-A baseline is a simple method that a more complex model must beat.
-
-1. Training median: always predict the median training height.
-2. Vegetation-class median: predict a separate training median for each broad
-   vegetation class.
-3. Snapshot Random Forest: use one contemporary snapshot without monthly
-   history.
-4. 2013 LiDAR persistence: assume the earlier LiDAR height persists, only for
-   the independent LiDAR comparison where alignment permits it.
-
-If a complex model cannot beat these, complexity has not added scientific
-value.
-
-### Candidate models
-
-- Random Forest: many decision trees learn different rules and average their
-  predictions. It handles nonlinear relationships and mixed features well.
-- Histogram Gradient Boosting: trees are added sequentially to correct earlier
-  errors. It is efficient and often strong for tabular data.
-
-Both can run on CPUs. A neural network and GPU are not part of the minimum
-experiment. They are justified only if the baselines reveal a specific problem
-that simpler models cannot solve.
-
-## 10. Terms needed to understand model results
-
-- Overfitting: memorizing training patterns that do not generalize.
-- Leakage: information from the future or test set reaches training or model
-  selection.
-- Hyperparameter: a setting chosen before fitting, such as tree depth.
-- Feature engineering: turning raw data into meaningful inputs.
-- Inference: using a fitted model to make predictions.
-- Ablation: remove one component and measure whether performance changes.
-- Uncertainty: how unsure a prediction or reported difference is.
-- Reproducibility: another teammate can regenerate the result from recorded
-  code, configuration, data versions, and seeds.
-
-## 11. Evaluation metrics
-
-- MAE: average absolute error in meters. This is the primary metric because it
-  is easy to interpret.
-- RMSE: similar to MAE but penalizes large errors more strongly.
-- Bias: average signed error. Positive bias means overprediction; negative bias
-  means underprediction.
-- R2: how much target variation is explained relative to predicting a constant.
-  It can be negative on difficult test data.
-
-Metrics will also be reported by height class, vegetation class, and
-disturbance status. One overall number can hide failure on tall trees or burned
-areas.
-
-A paired spatial-block bootstrap will estimate a 95 percent interval for model
-differences. The main forecast claim is supported only if the temporal model's
-MAE improvement over the best simple baseline remains below zero across that
-interval.
-
-## 12. What is already completed and verified?
-
-### Scientific feasibility
-
-Phase 0 is GO. The exact study box has approximate line context, overlapping
-2013 and 2022 LiDAR products, quality-filtered GEDI coverage, sufficient
-Sentinel-2 catalogue coverage, comparison forest, and independent disturbance
-evidence. Exact counts and limitations are in `reports/data_feasibility.md`.
-
-### Research design
-
-The primary question, hypotheses, source roles, baselines, ablations, metrics,
-time split, spatial validation, and falsification rules are predeclared in
-`reports/research_design.md`.
-
-### Literature check
-
-The current core literature matrix shows that growth-aware monitoring, risk
-modeling, and scheduling already exist. We cannot claim the first integrated
-system. The provisional contribution is the open, leakage-resistant evidence
-chain with independent repeat-LiDAR validation. A systematic review is still
-required before an absolute novelty statement.
-
-### Repository foundation
-
-- YAML files hold study, ingestion, forecasting, risk, and scheduling settings.
-- The Sentinel-2 catalogue stage retained 458 Level-2A acquisitions with all 11
-  configured assets.
-- DVC records the current Sentinel manifest stage.
-- Offline cube functions implement metadata-based reflectance scaling, no-data
-  masking, monthly clear-pixel medians, clear counts, and storage estimation.
-- Seed and time-split utilities exist.
-- Thirty-five offline tests pass. Ruff and text-hygiene checks pass.
-
-## 13. What has not happened yet?
-
-- The 458 raster acquisitions have not been downloaded and clipped.
-- The real monthly Sentinel-2 cube has not been built.
-- Pixel-level clear-observation availability has not been measured.
-- GEDI targets have not been turned into the final aligned training table.
-- The two LiDAR epochs have not completed alignment and quality control.
-- No model has been trained.
-- No performance metric, risk map, schedule result, or paper result exists.
-- No DVC remote or NSUT job script exists because storage and scheduler details
-  are not yet known.
-
-Code being present is not proof that the scientific result works.
-
-## 14. What happens after NSUT access?
-
-### Stage A: infrastructure setup
-
-Clone the repository, create the Conda environment, run offline checks,
-configure shared persistent and scratch paths, and create one shared DVC remote.
-
-Exit check: a teammate can clone the same commit, run tests, and access the DVC
-remote without credentials entering Git.
-
-### Stage B: Sentinel-2 raster ingestion
-
-Read only the study-area windows from each configured asset where possible,
-verify metadata scaling, reproject to the locked 10 m grid, mask invalid pixels,
-and write documented interim files.
-
-Exit check: scene counts match the manifest, grid metadata match the config,
-and rendered samples show no shifts or corrupted masks.
-
-### Stage C: monthly cube
-
-Build monthly median composites and clear-observation counts in Zarr format.
-
-Exit check: every month and band has expected dimensions, missingness is
-reported, and the minimum-clear-observation rule is chosen from training data.
-
-### Stage D: GEDI and LiDAR preparation
-
-Filter GEDI quality flags, align footprints with predictor dates and pixels,
-then independently align and inspect 2013 and 2022 LiDAR surfaces.
-
-Exit check: spatial offsets, missing areas, footprint counts, height ranges, and
-disturbance strata are documented.
-
-### Stage E: model-ready table
-
-Join each eligible GEDI target only to preceding predictor information. Assign
-time and spatial-block identifiers before model fitting.
-
-Exit check: automated tests show no future feature, duplicate target, test
-leakage, or train-test spatial overlap under the selected blocks.
-
-### Stage F: baseline and candidate experiments
-
-Fit baselines first, tune Random Forest and histogram boosting on training plus
-2021 validation rules, freeze the selected pipeline, then evaluate 2022 once.
-
-Exit check: logged parameters, seed, metrics, data hashes, Git commit, error
-strata, bootstrap intervals, and LiDAR comparison are complete.
-
-### Stage G: risk and scheduling study
-
-Convert forecast evidence and uncertainty into research-priority scenarios near
-approximate corridors. Compare forecast-based scheduling with random,
-current-height, static-risk, and simple highest-risk-first rules under identical
-budgets.
-
-Exit check: sensitivity analysis is reported and outputs clearly state they are
-not regulatory or engineering decisions.
-
-### Stage H: paper and release
-
-Create final figures and tables, finish the systematic review, reconcile every
-claim with `reports/claims_log.md`, rerun the full pipeline, archive the exact
-Git and DVC versions, and disclose AI use according to the selected venue.
-
-## 15. Why NSUT resources help
-
-The estimated uncompressed clipped source array is about 90.43 GiB. The monthly
-cube is about 15 GiB, while reprojection, caches, intermediate data, and reruns
-need additional room. The current request is at least 300 GiB persistent
-storage plus 300 GiB scratch.
-
-- Persistent storage keeps authoritative inputs and verified outputs.
-- Scratch storage is fast temporary space for jobs.
-- CPU and RAM matter first for download, reprojection, cube construction, and
-  tree models.
-- A GPU may help only if a later deep-learning experiment is justified.
-- A scheduler such as Slurm or PBS decides when and where cluster jobs run.
-
-Details to request from NSUT are in `reports/hpc_readiness.md`.
-
-## 16. How Git, DVC, and configuration fit together
-
-- Git versions small files: code, tests, configurations, and reports.
-- DVC versions large data and model artifacts without placing them inside Git.
-- `environment.yml` defines the reproducible software environment.
-- `configs/*.yaml` define the experiment without hiding settings inside code.
-- `dvc.yaml` defines the data-stage dependency graph.
-- Tests catch logic and contract errors using tiny offline examples.
-- Seeds reduce accidental randomness between runs.
-- The claims log connects scientific statements to sources.
-
-No raw raster, point cloud, Parquet file, credential, or token belongs in Git.
-
-## 17. Suggested team ownership
-
-- Data owner: ingestion, source provenance, DVC, and storage.
-- Cube-quality owner: projection, alignment, cloud masks, and visual samples.
-- Modeling owner: baselines, features, splits, experiments, and logs.
-- Validation owner: LiDAR, disturbance subsets, metrics, and error analysis.
-- Scheduling owner: constraints, baselines, sensitivity, and claim limits.
-- Paper owner: literature, claims log, figures, venue rules, and release.
-
-Every important output should be checked by a teammate who did not create it.
-
-## 18. What you should learn first
-
-Do not try to learn all of remote sensing and ML at once. Learn in this order:
-
-1. Read Sections 1 through 8 of this guide and explain the five data roles in
-   your own words.
-2. Learn raster, band, CRS, pixel, masking, alignment, and data cube.
-3. Learn feature, target, regression, training, validation, test, leakage, and
-   baseline.
-4. Understand MAE, RMSE, bias, and why a spatial block is required.
-5. Follow one tiny dataset through a notebook or script only after the real cube
-   pipeline exists.
-6. Learn DVC and the NSUT scheduler when access is granted.
-
-You do not need to derive every ML algorithm mathematically before helping.
-You do need to understand what information enters the model, what truth it is
-compared with, and why the test data remain untouched.
-
-## 19. Common mistakes to prevent
-
-- Training on 2022 LiDAR and then calling it independent validation.
-- Randomly shuffling pixels across time or neighboring train/test areas.
-- Treating tile cloud percentage as pixel-level cloud masking.
-- Mixing data with different grids without explicit alignment.
-- Treating GEDI footprints as a complete height map.
-- Claiming optical imagery measures small annual growth when errors are larger
-  than that growth.
-- Choosing thresholds after seeing test performance.
-- Adding a neural network because a GPU is available.
-- Reporting only the best model while hiding failed baselines or ablations.
-- Committing raw data, secrets, or untraceable manual outputs.
-
-## 20. Current decision and your immediate action
-
-Decision: Phase 1 data foundation is active. Phase 0 feasibility is GO, but no
-ML result is proven because the real aligned dataset does not exist yet.
-
-Your immediate action is to send the access request in
-`reports/hpc_readiness.md` and return with the scheduler, storage paths and
-quotas, CPU and RAM limits, GPU information, Conda availability, outbound
-network policy, and approved secret-storage method.
-
-After that, the next technical action is shared storage and DVC setup followed
-by the clipped Sentinel-2 cube. Model training comes only after cube, GEDI, and
-LiDAR quality gates pass.
-
-## 21. Source-of-truth documents
-
-- `MEMORY.md`: current project handoff and immediate next action.
-- `reports/data_feasibility.md`: exact Phase 0 evidence.
-- `reports/research_design.md`: locked research question and experiment rules.
-- `reports/literature_review.md`: current novelty evidence and limitations.
-- `reports/phase1_data_protocol.md`: growth and disturbance protocol.
-- `reports/hpc_readiness.md`: compute, storage, access, and team workflow.
-- `reports/claims_log.md`: verified scientific and dataset claims.
-- `configs/*.yaml`: machine-readable project and experiment settings.
-- `AGENTS.md`: repository coding and scientific-integrity rules.
+- Processing scope: a 60 m corridor buffer plus 40 stratified 1 km tiles,
+  roughly 64 km2. Not the full 533 km2 box.
+- Point clouds are read by bounding box from USGS 3DEP cloud-optimised point
+  clouds on AWS. No point-cloud file is downloaded. The LiDAR-to-raster step
+  runs in the `canopyguard-lidar` environment on a hosted notebook; every
+  other step runs in the working environment on a laptop.
+- The 2013 acquisition is served as three 3DEP resources (Sonoma A2, A3 and
+  A4), which are read together and merged for each tile.
+- Optical composites are built server side in Google Earth Engine and
+  exported as rasters. The STAC path in `configs/ingestion.yaml` is the
+  fallback for contributors without Earth Engine.
+- Aggregation ladder: 10, 20, 30, 50, 100, 200 m.
+- Temporal baselines: 1 year (2022 to 2023), 9 years (2013 to 2022), 10 years
+  (2013 to 2023).
+- Every required result runs on CPU.
+
+## 7. Pipeline
+
+1. **Epoch screen.** Admit a LiDAR epoch only if density, scan angle, season,
+   ground classification and declared datum all pass. Recorded per epoch.
+2. **Fetch.** Point clouds for admitted epochs over the processing scope. Only
+   the tile manifest is version-controlled; the clouds are regenerable.
+3. **Harmonise.** Common horizontal and vertical frame, scan angle clipped,
+   noise classes dropped, then every epoch decimated to the density of the
+   sparsest admitted epoch. Decimation is not optional: denser returns find
+   canopy apexes more often and manufacture apparent growth.
+4. **CHM.** One identical pipeline for every epoch. Same ground algorithm,
+   same height-above-ground method, same pit-free construction, same clamp.
+5. **Co-register.** Per 1 km tile, against the 2022 reference, using
+   ground-classified points on low slope.
+6. **Aggregate and difference.** Produce the scale ladder and the epoch-pair
+   differences.
+7. **Noise floor.** Measure `sigma_n(s)` and `LoD95(s)` from the one-year
+   pair over stable cells. Gate: proceed only if the mean one-year change lies
+   between minus the detection limit and a physically plausible growth, and
+   `sigma_n` falls with scale within its sampling error.
+8. **Predictors.** Seasonal composites with topographic correction and
+   view-angle normalisation, vegetation indices, multi-scale neighbourhood
+   statistics, terrain, fire and disturbance status, corridor spans.
+9. **As-of feature store.** LiDAR t0 structure, terrain, optical history to
+    t0, climate, vegetation type, fire history, keyed by cell and cutoff
+    date. The builder refuses any source observed after its cutoff.
+10. **Forecast heads.** A disturbance hazard head and a conditional growth
+    head, described in section 8.
+11. **Product benchmark.** Existing free canopy height products against the
+    same truth, both as differenced baselines and as candidate features.
+12. **Span ranking.** Span prioritisation by predicted encroachment
+    probability and expected time, against cyclic, current-height-first,
+    random and span-length allocation.
+
+## 8. Models
+
+Two heads, both conditioned on the as-of feature set at t0:
+
+- A disturbance hazard head, predicting the probability that a cell or span
+  crosses the clearance-relevant threshold by `t0 + k`.
+- A conditional growth head, quantile regression on height change given no
+  disturbance, at quantiles 0.05, 0.25, 0.50, 0.75 and 0.95.
+
+Growth and disturbance-loss residuals are bimodal, so a single Gaussian
+likelihood is not used. The start-height anchor for the growth head is the
+ring median of the eight neighbours, excluding the centre cell, because the
+centre cell's own height appears in the target and its measurement error
+would induce spurious correlation if also used as a feature.
+
+Model capacity is bounded by the number of spatially independent blocks, not
+the number of cells. Limits are in `configs/forecasting.yaml`.
+
+## 9. Validation
+
+Spatial block cross-validation, with block size from the practical range of
+the variogram of out-of-fold residuals and a buffer between train and test
+blocks sized from the same residual variogram. One region is held out
+entirely from every fold, for a fully independent generalisation estimate.
+
+An out-of-time check runs on the 2022 to 2023 pair, the one interval where
+both a t0-only feature set and the realised outcome exist.
+
+Confidence intervals on model and ranking differences come from a paired
+tile-block bootstrap that resamples whole blocks. Resampling individual cells
+understates the interval by roughly the square root of the cells per block.
+
+Two ablations are blocking and run before the others. The temporal shuffle
+permutes the as-of cutoff date; if error does not degrade, the model carries
+no temporal information and is not forecasting. The matched random field
+replaces the satellite block with a Gaussian random field of the same spatial
+autocorrelation; if it reproduces the gain, the gain is spatial structure, not
+signal.
+
+## 10. Metrics
+
+Cell level: mean absolute error on the growth head, and quantile coverage for
+both heads, reported by height class, vegetation class, disturbance status
+and slope band.
+
+Span level: recall at 1, 2 and 10 percent of ranked corridor length for
+"vegetation within the clearance envelope by t1", primary, reported
+absolutely and as lift over the cyclic baseline, against current-height-first,
+random and span-length allocation. Secondary are the partial area under the
+gain curve, area under the precision-recall curve reported with prevalence,
+and inspection burden per true positive.
+
+Mean absolute error in metres is a validation quantity, not a headline. A 6 m
+height error against a 1.22 m clearance threshold gives a discrimination area
+under the curve of about 0.56, so no clearance decision can rest on cell-level
+height error alone; the span-ranking evaluation is what the claim rests on.
+
+## 11. Completed
+
+- Phase 0 feasibility, all six scientific gates.
+- Research design reframed to a span-level encroachment forecast, 2026-09-24.
+- Verified literature comparison matrix.
+- Sentinel-2 catalogue manifest, 458 Level-2A items, tile 10SEH, DVC-recorded.
+- Reflectance scaling, clear-pixel compositing, clear-observation counts.
+- Provenance sidecars enforced on every data file.
+- Truth isolation enforced in continuous integration.
+- Evaluation core in `src/canopyguard/evaluation`: metrics, paired spatial
+  block bootstrap, variogram-driven blocking, detectability surface.
+
+- Measured noise floor, 2022-2023 pair, 52 admitted tiles: NMAD 0.10 m at
+  30-50 m, LoD95 about 0.20 m, sigma at the 100 m reference scale 0.092 m
+  (extrapolated), bias -0.08 m, gate passed.
+- Long-baseline pair 2013-2022, 30 tiles: bare-ground NMAD 0.073 m, median
+  canopy change +0.84 to +0.95 m over 8.96 years, 87 to 92 percent of canopy
+  cells above LoD95 at 10 to 100 m.
+
+## 12. Not completed
+
+See the `Not completed` list in `MEMORY.md`, which is the live record.
+
+## 13. Where code goes
+
+Rules are in `AGENTS.md`. Summary:
+
+| Directory | Contents |
+| --- | --- |
+| `src/canopyguard/data/` | One ingestion module per source |
+| `src/canopyguard/lidar/` | Truth pipeline. Never imported by feature or model code |
+| `src/canopyguard/features/` | Composites, indices, texture, terrain, assembly |
+| `src/canopyguard/evaluation/` | Metrics, blocking, bootstrap, detectability |
+| `src/canopyguard/forecasting/` | Growth model, residual model, conformal |
+| `src/canopyguard/risk/` | Spans and ranking |
+| `scripts/` | Thin entrypoints. No logic |
+| `configs/` | Every threshold, path and setting |
+
+No bbox, date, threshold, path or magic number appears inside a function.
+
+## 14. Git, DVC, configuration
+
+Git holds code, configs and small text records. DVC holds derived rasters, the
+analysis table and model artifacts. Raw point clouds are not tracked; they are
+regenerated from a tracked tile manifest recording per-tile URL and checksum.
+
+Every run records the config hash, seed, data hashes and commit. Every number
+that reaches the manuscript has a row in `reports/claims_log.md`.
+
+## 15. Failure modes to prevent
+
+- Reporting a static height map as a change model. The temporal shuffle
+  catches it.
+- Mistaking spatial structure for signal. The matched random field catches it.
+- Differencing the delivered CHM rasters. The 2013 and 2022 products use
+  different geoids, units and generation pipelines. Regenerate both.
+- Skipping decimation. Density mismatch manufactures growth.
+- Skipping co-registration. Slope converts horizontal shift into vertical
+  change.
+- Random cross-validation. Neighbouring cells leak.
+- Bootstrapping cells instead of blocks. Intervals come out an order of
+  magnitude too narrow.
+- Letting LiDAR into features. The guard test fails the build.
+- Treating a catalogue query count as data in hand.
+
+## 16. Source-of-truth documents
+
+| File | Holds |
+| --- | --- |
+| `reports/research_design.md` | Current question, hypotheses, protocol, claim limits |
+| `MEMORY.md` | Current phase, decisions, immediate next action |
+| `reports/data_feasibility.md` | Phase 0 evidence |
+| `reports/phase1_data_protocol.md` | Growth evidence and disturbance screen |
+| `reports/literature_review.md` | Comparison matrix and novelty position |
+| `reports/claims_log.md` | Every paper-bound number and its source |
+| `AGENTS.md` | Coding rules |
+| `configs/` | Every operative parameter |
