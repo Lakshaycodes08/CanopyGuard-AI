@@ -139,6 +139,7 @@ def tracked_data_files(root: str | Path | None = None) -> list[Path]:
             for path in sorted(directory.rglob("*"))
             if path.is_file()
             and path.name not in IGNORED_NAMES
+            and path.suffix != ".dvc"
             and not path.name.endswith(SIDECAR_SUFFIX)
         )
     return files

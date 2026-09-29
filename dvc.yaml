@@ -10,3 +10,15 @@ stages:
       - src/canopyguard/io.py
     outs:
       - data/interim/sentinel2/mgrs-10seh/scene_manifest.json
+  label_quality_2013_2022:
+    cmd: python scripts/deduplicate_labels.py
+    deps:
+      - configs/lidar.yaml
+      - data/interim/labels_2013-2022.npz
+      - scripts/deduplicate_labels.py
+      - src/canopyguard/config.py
+      - src/canopyguard/io.py
+      - src/canopyguard/lidar/label_quality.py
+    outs:
+      - data/processed/labels_2013-2022_unique.npz
+      - data/processed/label_quality_2013-2022.json

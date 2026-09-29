@@ -30,6 +30,13 @@ uv.lock
 !/data/raw/.gitkeep
 !/data/interim/.gitkeep
 !/data/processed/.gitkeep
+/data/raw/**
+/data/interim/**
+/data/processed/**
+!/data/**/
+!/data/**/.gitkeep
+!/data/**/.gitignore
+!/data/**/*.dvc
 
 # Generated outputs
 reports/figures/*

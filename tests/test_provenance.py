@@ -80,6 +80,16 @@ def test_study_area_box_matches_config():
     assert boxes_intersect(study_area_box(study_config), SONOMA)
 
 
+def test_tracked_data_files_excludes_dvc_metadata(tmp_path):
+    (tmp_path / "pyproject.toml").write_text("", encoding="utf-8")
+    data_dir = tmp_path / "data" / "interim"
+    data_dir.mkdir(parents=True)
+    data_file = data_dir / "sample.json"
+    data_file.write_text("{}", encoding="utf-8")
+    (data_dir / "sample.json.dvc").write_text("outs: []", encoding="utf-8")
+    assert tracked_data_files(tmp_path) == [data_file]
+
+
 def test_every_data_file_declares_provenance_inside_the_study_area():
     study_box = study_area_box(load_config("configs/study_area.yaml"))
     for path in tracked_data_files():

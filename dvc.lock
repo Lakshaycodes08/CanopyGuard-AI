@@ -32,3 +32,39 @@ stages:
       hash: md5
       md5: b651514000186ef1bdafed9b20e94178
       size: 1244248
+  label_quality_2013_2022:
+    cmd: python scripts/deduplicate_labels.py
+    deps:
+    - path: configs/lidar.yaml
+      hash: md5
+      md5: a84b3e55ac0abced621f7ed849602dd6
+      size: 10149
+    - path: data/interim/labels_2013-2022.npz
+      hash: md5
+      md5: 8bdc617ea17a1a77d60cf9f13b69cede
+      size: 115322717
+    - path: scripts/deduplicate_labels.py
+      hash: md5
+      md5: 42183a5e49363e87851ce358de739490
+      size: 412
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/lidar/label_quality.py
+      hash: md5
+      md5: a83f5a4bf0cd07624064131c7787092c
+      size: 5248
+    outs:
+    - path: data/processed/label_quality_2013-2022.json
+      hash: md5
+      md5: 118866402871ba22eb7dc1304fc5fac0
+      size: 616
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240

@@ -53,6 +53,12 @@ epochs:
 
 reference_epoch: "2022"
 
+label_archive:
+  source: data/interim/labels_2013-2022.npz
+  source_sha256: dc91f03b4f067a54a6666fc15cfdf6b86dc368a1d97e44555fb762515ab10763
+  unique: data/processed/labels_2013-2022_unique.npz
+  audit: data/processed/label_quality_2013-2022.json
+
 noise_floor:
   epoch_pair: ["2022", "2023"]
   calibration_area: co_covered_delivery_tiles
