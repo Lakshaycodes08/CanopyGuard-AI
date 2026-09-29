@@ -10,6 +10,7 @@ from run_noise_floor import _build_log, _checkpointed_build, _guard_plan, _signa
 from canopyguard.config import load_config
 from canopyguard.data.osm_power import fetch_power_lines, parse_overpass, spans
 from canopyguard.lidar.change import measure_pair
+from canopyguard.lidar.label_quality import select_unique_valid_labels
 from canopyguard.lidar.plan import change_plan, pair_projects, resource_footprints
 
 
@@ -80,6 +81,14 @@ def main() -> int:
     if labels:
         np.savez_compressed(out / f"labels_{args.pair}.npz", **labels)
         print(f"labels {labels['cell_id'].size:,} cells written")
+        unique, quality = select_unique_valid_labels(
+            labels, float(config["aggregation"]["min_valid_fraction"])
+        )
+        np.savez_compressed(out / f"labels_{args.pair}_unique.npz", **unique)
+        (out / f"label_quality_{args.pair}.json").write_text(
+            json.dumps(quality, indent=2), encoding="utf-8"
+        )
+        print(f"unique valid labels {unique['cell_id'].size:,} cells written")
     (out / f"change_{args.pair}.json").write_text(
         json.dumps(result, indent=2), encoding="utf-8"
     )

@@ -1,0 +1,16 @@
+{
+  "raw_rows": 1719567,
+  "valid_rows": 1478301,
+  "unique_valid_cells": 1478103,
+  "removed_valid_overlap_rows": 198,
+  "selection_rule": "highest minimum epoch coverage, highest total coverage, lowest tile ID",
+  "duplicate_cell_ids": 198,
+  "disagreeing_cell_ids": 198,
+  "max_change_disagreement_m": {
+    "mean_change": 8.132886056763851,
+    "p95_change": 17.522867776229692,
+    "max_change": 17.582099609331777
+  },
+  "source_sha256": "dc91f03b4f067a54a6666fc15cfdf6b86dc368a1d97e44555fb762515ab10763",
+  "unique_sha256": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9"
+}
