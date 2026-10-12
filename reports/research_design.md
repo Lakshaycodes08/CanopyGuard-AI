@@ -291,7 +291,7 @@ approximately the square root of the cells per block.
 
 | Source | Role | Prohibited use |
 | --- | --- | --- |
-| Sonoma 2013, 2022, 2023 airborne LiDAR | Label source and label-quality truth | Any model feature at or after its own epoch |
+| Sonoma 2013, 2022, 2023 airborne LiDAR | Change labels, quality checks, and pre-cutoff baseline-height features | Any survey acquired after the prediction cutoff as a model feature |
 | Landsat 5/7/8 | As-of predictor history to `t0` | Any observation dated after the cutoff |
 | USGS 3DEP | Terrain predictors and site quality | Substituting for a co-registration check |
 | TerraClimate | Climate normals and climatic water deficit | None beyond standard predictor use |
@@ -301,10 +301,12 @@ approximately the square root of the cells per block.
 | CEC transmission lines, OpenStreetMap power lines | Span construction and voltage cross-check | Engineering clearance or causation claims |
 | Lang et al. 2023, Meta/WRI, GLAD products | Baselines and candidate features | Substituting for the airborne LiDAR label |
 
-Truth isolation is enforced in continuous integration by
-`tests/test_truth_isolation.py`, which fails if any feature or model module
-imports the LiDAR package or references a truth path at or after its own
-epoch.
+`canopyguard.features.lidar.select_lidar_feature_epoch` admits a LiDAR survey
+as a feature only if its full acquisition ended by the prediction cutoff.
+`tests/test_truth_isolation.py` checks that the 2013 survey can be used after
+acquisition and later surveys are rejected for an earlier cutoff. Feature-table
+builders must select LiDAR through this gate; target-epoch surveys remain
+available as labels and held-out truth.
 
 ## Hypotheses
 

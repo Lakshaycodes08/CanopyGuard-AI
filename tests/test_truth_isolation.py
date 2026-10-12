@@ -1,47 +1,46 @@
 from __future__ import annotations
 
-import ast
-from pathlib import Path
-
 import pytest
 
-from canopyguard.io import project_root
-
-FEATURE_PACKAGES = ("features", "forecasting", "risk")
-FORBIDDEN_MODULES = ("canopyguard.lidar", "canopyguard.data.lidar")
-FORBIDDEN_PATHS = ("processed/truth", "data/processed/truth")
+from canopyguard.config import load_config
+from canopyguard.features.lidar import select_lidar_feature_epoch
 
 
-def _modules() -> list[Path]:
-    source = project_root() / "src" / "canopyguard"
-    return [
-        path
-        for package in FEATURE_PACKAGES
-        for path in sorted((source / package).rglob("*.py"))
-    ]
+@pytest.fixture
+def lidar_config():
+    return load_config("configs/lidar.yaml")
 
 
-def _imported_names(tree: ast.Module) -> list[str]:
-    names: list[str] = []
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Import):
-            names.extend(alias.name for alias in node.names)
-        elif isinstance(node, ast.ImportFrom) and node.module:
-            names.append(node.module)
-    return names
+def test_2013_lidar_can_be_a_feature_after_its_survey(lidar_config):
+    survey = select_lidar_feature_epoch(lidar_config, "2013", "2013-11-26")
+    assert survey["name"] == "2013"
 
 
-@pytest.mark.parametrize("path", _modules(), ids=lambda path: path.name)
-def test_module_does_not_import_lidar_truth(path):
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    for name in _imported_names(tree):
-        assert not name.startswith(FORBIDDEN_MODULES), f"{path}: {name}"
+def test_2022_lidar_can_be_a_feature_after_its_survey(lidar_config):
+    survey = select_lidar_feature_epoch(lidar_config, "2022", "2022-11-11")
+    assert survey["name"] == "2022"
 
 
-@pytest.mark.parametrize("path", _modules(), ids=lambda path: path.name)
-def test_module_does_not_reference_truth_paths(path):
-    tree = ast.parse(path.read_text(encoding="utf-8"))
-    for node in ast.walk(tree):
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            for fragment in FORBIDDEN_PATHS:
-                assert fragment not in node.value, f"{path}: {node.value}"
+@pytest.mark.parametrize(
+    ("epoch", "cutoff"),
+    [("2013", "2013-11-25"), ("2022", "2013-11-26")],
+)
+def test_lidar_acquired_after_cutoff_cannot_be_a_feature(lidar_config, epoch, cutoff):
+    with pytest.raises(ValueError, match="ends after prediction cutoff"):
+        select_lidar_feature_epoch(lidar_config, epoch, cutoff)
+
+
+def test_unknown_lidar_epoch_cannot_be_a_feature(lidar_config):
+    with pytest.raises(ValueError, match="Unknown LiDAR epoch"):
+        select_lidar_feature_epoch(lidar_config, "2024", "2025-01-01")
+
+
+def test_lidar_without_an_end_date_cannot_be_a_feature(lidar_config):
+    del lidar_config["epochs"][0]["end"]
+    with pytest.raises(ValueError, match="needs a valid end date"):
+        select_lidar_feature_epoch(lidar_config, "2013", "2014-01-01")
+
+
+def test_prediction_cutoff_must_be_a_full_date(lidar_config):
+    with pytest.raises(ValueError, match="prediction_cutoff must use YYYY-MM-DD"):
+        select_lidar_feature_epoch(lidar_config, "2013", "2013")
