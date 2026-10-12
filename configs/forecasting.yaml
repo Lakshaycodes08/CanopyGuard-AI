@@ -14,7 +14,7 @@ task:
 
 truth:
   source: sonoma_repeat_airborne_lidar
-  feature_policy: survey_end_on_or_before_prediction_cutoff
+  feature_policy: feature_survey_end_by_cutoff_before_target_survey_start
   feature_gate: canopyguard.features.lidar.select_lidar_feature_epoch
 
 gedi:

@@ -281,9 +281,10 @@ approximately the square root of the cells per block.
   with a paired tile-block bootstrap confidence interval on each pairwise
   difference.
 - Existing products (Lang et al. 2023 canopy height at 10 m, Meta/WRI canopy
-  height at 1 m, GLAD forest change at 30 m) are evaluated both as baselines,
-  differenced across epochs, and as candidate input features to the forecast
-  heads.
+  height at 1 m, GLAD forest change at 30 m) are 2022 benchmarks, including
+  change baselines only where dated maps exist for both epochs. A product is a
+  candidate feature only if the map and its underlying observations predate
+  the prediction cutoff; none is an input to the 2013-cutoff forecast.
 - Output: a span table and a map of the top-ranked spans, each with an
   encroachment probability and an expected time to encroachment.
 
@@ -291,7 +292,7 @@ approximately the square root of the cells per block.
 
 | Source | Role | Prohibited use |
 | --- | --- | --- |
-| Sonoma 2013, 2022, 2023 airborne LiDAR | Change labels, quality checks, and pre-cutoff baseline-height features | Any survey acquired after the prediction cutoff as a model feature |
+| Sonoma 2013, 2022, 2023 airborne LiDAR | Change labels, quality checks, and pre-cutoff baseline-height features | A survey that ends after the cutoff, or a cutoff on or after the target survey starts |
 | Landsat 5/7/8 | As-of predictor history to `t0` | Any observation dated after the cutoff |
 | USGS 3DEP | Terrain predictors and site quality | Substituting for a co-registration check |
 | TerraClimate | Climate normals and climatic water deficit | None beyond standard predictor use |
@@ -299,14 +300,14 @@ approximately the square root of the cells per block.
 | GEDI02_A Version 2 | Independent cross-check and gap fill | Training target |
 | CAL FIRE FRAP, MTBS | Disturbance history before `t0` | Treating absence from one source as proof of stability |
 | CEC transmission lines, OpenStreetMap power lines | Span construction and voltage cross-check | Engineering clearance or causation claims |
-| Lang et al. 2023, Meta/WRI, GLAD products | Baselines and candidate features | Substituting for the airborne LiDAR label |
+| Lang et al. 2023, Meta/WRI, GLAD products | Benchmarks for 2022; candidate inputs only when the map and its underlying observations predate the prediction cutoff | Post-cutoff maps or observations as features for a 2013-2022 forecast |
 
 `canopyguard.features.lidar.select_lidar_feature_epoch` admits a LiDAR survey
-as a feature only if its full acquisition ended by the prediction cutoff.
-`tests/test_truth_isolation.py` checks that the 2013 survey can be used after
-acquisition and later surveys are rejected for an earlier cutoff. Feature-table
-builders must select LiDAR through this gate; target-epoch surveys remain
-available as labels and held-out truth.
+as a feature only if its full acquisition ended by the prediction cutoff and
+the cutoff precedes the target survey's start. `tests/test_truth_isolation.py`
+checks these dates and scans feature and model modules for direct LiDAR imports
+or truth-file paths. Feature-table builders must select LiDAR through this gate;
+target-epoch surveys remain available as labels and held-out truth.
 
 ## Hypotheses
 
@@ -335,9 +336,10 @@ Falsified if the interval on the improvement includes zero.
 ### F4: existing products do not substitute
 
 Existing global canopy height and forest-change products (Lang et al. 2023,
-Meta/WRI, GLAD), used as either differenced baselines or candidate features,
-do not match the as-of forecast model's span-ranking recall. Falsified if any
-product-based approach matches or exceeds it.
+Meta/WRI, GLAD), evaluated as retrospective benchmarks or as features only
+when available before the cutoff, do not match the as-of forecast model's
+span-ranking recall. Falsified if any eligible product-based approach matches
+or exceeds it.
 
 ### H1: error decay (label quality, measured)
 
