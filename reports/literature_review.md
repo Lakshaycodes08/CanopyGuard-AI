@@ -1,6 +1,6 @@
 # Phase 1 literature review
 
-Reviewed: 2026-09-15
+Reviewed: 2026-10-12
 
 ## Status
 
@@ -34,12 +34,13 @@ left for CanopyGuard-AI?
 | [Canopy height mapping in complex temperate forests (2026)](https://doi.org/10.1016/j.atech.2026.102249) | Map canopy height in structurally complex temperate forest using GEDI, seasonal Sentinel-2, and 2,543 inventory plots. | Random Forest models compare seasonal and multitemporal predictors, GEDI filtering, local calibration, and plot-location correction. | Local multitemporal model RMSE 5.3 m and R2 0.45 against field data; GEDI filtering reduced RMSE from 11.7 m to 8.09 m. | Shows that quality filtering, seasonality, local calibration, and spatial alignment materially affect accuracy. | Optical saturation underestimates tall canopy; sparse GEDI and residual alignment error remain. Data are not publicly shareable. | Will a Sonoma model remain valid across fire history, terrain, and canopy structure without spatial leakage? |
 | [Savva et al. (2025)](https://doi.org/10.1109/MGRS.2025.3558741) | Review remote sensing and AI for vegetation hazards in power-line corridors. | Structured review of 2D imagery, LiDAR, AI methods, metrics, and datasets. | Review paper; no new predictive benchmark. | Establishes the current method landscape and identifies fragmented methods and scarce public 3D datasets. | A review cannot establish that our exact proposed combination is novel. | Has the review missed proprietary or recent integrated systems that already cover our claimed gap? |
 | [Wang et al. (2025)](https://doi.org/10.3390/f16040578) | Detect and predict transmission-line tree risks from UAV LiDAR, field inventory, and conductor geometry. | Point-cloud classification, 3D catenary reconstruction, field-informed tree growth, and risk detection. | The paper reports field experiments and comparisons with manual and point-cloud-only approaches. | Recent evidence that growth-aware, future tree-risk prediction is already an active integrated research area. | Requires UAV LiDAR and region-specific field/tree equations; it does not provide the proposed free satellite time series and independent repeat-LiDAR benchmark. | Does the lower-cost satellite design retain enough height accuracy to be useful? |
+| [Bahreini and Hammad (2025)](https://doi.org/10.3390/f16111658) | Review ML and remote-sensing methods for vegetation proximity to power lines. | Critical comparison of image, LiDAR, segmentation, growth, and risk methods, followed by a research roadmap. | Review paper; no new growth benchmark. Table 3 includes Chen et al.'s LiDAR and Richards growth model for future encroachment. | Directly identifies dynamic monitoring and multi-sensor validation as open research needs. | The roadmap proposes species-aware growth prediction and maintenance prioritization; proposing either alone is not novel. | What independent, out-of-time evidence shows that our ecological prior improves on no change? |
 | [Ayobo et al. (2025)](https://doi.org/10.1109/ACCESS.2025.3623468) | Review digital-twin approaches for power-line monitoring and vegetation risk management. | Survey plus a conceptual digital-twin integration framework. | Review article; no new open empirical benchmark. | Shows that predictive monitoring and integrated vegetation-management architectures are established concepts. | The proposed framework is conceptual and does not test our data roles or validation design. | Is CanopyGuard adding evidence, or merely implementing another integration diagram? |
 | [Parent et al. (2026)](https://doi.org/10.1016/j.rsase.2026.101928) | Relate LiDAR forest metrics and operational attributes to storm-related distribution outages. | Explainable GIS risk models using proximity pixels, canopy structure, soils, line attributes, and outage records. | Models differentiated zero, one-to-two, and more-than-two outage groups across a large utility service area. | Strong operational evidence that fine-scale LiDAR forest structure can support prioritization. | The utility data are not shareable; the study does not perform one-year canopy forecasting from open satellite time series. | Can an open proxy evaluation support a meaningful claim without confidential outage labels? |
 | [Sokolovsky et al. (2026)](https://arxiv.org/abs/2608.18611) | Model vegetation and lightning probability of failure at utility-asset scale. | Geospatial features, MODIS NDVI, utility records, LightGBM, and explainability in a cloud pipeline. | Reports cross-validated discrimination but explicitly does not test strict forward-time forecasting or geographic transfer. | Demonstrates scalable operational asset-risk modeling and exposes the weakness of geolocation-unaware splits. | A recent preprint using confidential utility data, coarse MODIS vegetation, and non-temporal cross-validation. | Does our chronological and spatially blocked open evaluation change the conclusions? |
 | [Ding et al. (2026)](https://slgc.nefu.edu.cn/EN/abstract/abstract2639.shtml) | Integrate UAV image measurement, vegetation risk assessment, and clearance scheduling. | ResNet-50 segmentation, multimodal risk grading, clustering, and vehicle routing. | Reports 86.7 percent vegetation classification accuracy, 65.88 percent IoU, 89.3 percent overall risk accuracy, and a 21 percent maintenance-cost reduction. | Directly occupies the broad measurement-assessment-scheduling integration claim. | Relies on UAV imagery and field data; the accessible record does not establish open data, independent repeat-LiDAR validation, or spatially blocked future evaluation. | What is scientifically new beyond replacing proprietary inputs with open ones? |
 | [Wanik et al. (2017)](https://doi.org/10.1016/j.epsr.2017.01.039) | Test whether vegetation management, LiDAR tree proximity, and infrastructure data improve Hurricane Sandy outage prediction. | A LiDAR-derived ProxPix layer and utility attributes feed repeatedly balanced Random Forest models on 0.5 km cells. | Models with added vegetation and infrastructure evidence improved by about 5 to 13 percent, depending on metric and inputs. | Operationally links fine vegetation structure to outage occurrence. | One storm and utility territory, confidential operational data, and no future canopy-height forecast. | Can an open proxy study remain operationally relevant without outage labels? |
-| [Zimmer et al. (2026)](https://doi.org/10.48550/arXiv.2602.21421) | Estimate canopy height over space and time (ECHOSAT) at 10 m resolution from multi-sensor satellite time series and GEDI. | Vision transformer with self-supervised growth loss processing Sentinel-2 time series and GEDI sparse heights. | Cross-sectional accuracy against spaceborne LiDAR and static airborne LiDAR across Europe. | Direct evidence that satellite time series plus GEDI can model temporal height with self-supervised loss constraints. | No repeat airborne LiDAR validation for temporal growth; no infrastructure corridor evaluation; no maintenance scheduling connection. | Does the self-supervised loss capture actual growth or optical seasonal variation, and does it transfer to corridor risk? |
+| [Pauls et al. (2026)](https://doi.org/10.48550/arXiv.2602.21421) | Produce ECHOSAT annual 10 m canopy-height maps for 2018-2024 from multisensor satellite data and GEDI supervision. | Temporal vision transformer with a self-supervised growth loss. | Single-year height accuracy evaluated against GEDI, with a local static airborne-LiDAR comparison. | Demonstrates retrospective annual height mapping with temporally regularized estimates. | The authors state that year-to-year height changes lack direct validation against independent repeated observations; no future-height forecast or corridor evaluation is reported. | Do ECHOSAT height differences agree with independent repeat airborne LiDAR in Sonoma? |
 
 ## What the literature already occupies
 
@@ -52,11 +53,14 @@ one, and Jumbo and Moghaddass already connect image-derived risk to routing and
 crew allocation.
 
 Sentinel-2 plus GEDI canopy-height mapping is also mature. Lang et al. establish
-a global single-year probabilistic model, Pauls et al. extend the idea to
-monthly time-series inputs and annual height maps, and Zimmer et al. (2026,
-ECHOSAT) train a vision transformer with self-supervised growth loss across
-multi-sensor satellite time series and GEDI. The project therefore must not
-claim the first temporal Sentinel-2 plus GEDI canopy-height model.
+a global single-year probabilistic model, Pauls et al. (2025) extend the idea to
+monthly time-series inputs and annual height maps, and Pauls et al. (2026,
+ECHOSAT) produce annual height maps with a temporal transformer and
+self-supervised growth loss from multisensor satellite data and GEDI. ECHOSAT
+does not forecast future height, and its authors report no direct validation
+of year-to-year height changes against independent repeated observations. The
+project therefore must not claim the first temporal Sentinel-2 plus GEDI
+canopy-height model.
 
 The broad end-to-end integration claim is now occupied as well. Jumbo and
 Moghaddass connect image-derived risk to routing, Ding et al. report an explicit
@@ -65,6 +69,13 @@ twin for predictive vegetation management. Parent et al. and Sokolovsky et al.
 also show operationally grounded asset-risk modeling. CanopyGuard-AI therefore
 must contribute a stronger open evaluation protocol, not claim the first
 integrated system.
+
+Bahreini and Hammad (2025) explicitly review an existing LiDAR and Richards
+growth-based encroachment study and propose species-aware growth prediction,
+multi-sensor integration, and maintenance prioritization in their roadmap.
+The Sonoma alliance-specific growth curve is therefore a baseline to test,
+not a standalone novelty claim. Its contribution depends on independent
+repeat-LiDAR validation and an honest comparison with no change.
 
 ## Provisional gap for CanopyGuard-AI
 

@@ -75,14 +75,28 @@ impress. Prefer boring, readable code over clever code.
 
 ## 5. Data hygiene
 
+The project predicts and validates canopy-height change near power lines in
+northern Sonoma County using repeat airborne LiDAR and open satellite data.
+
 - Never commit data. Root `data/` contains tracked `.gitkeep` placeholders only.
   Real data is gitignored and should be DVC-tracked.
 - Do not commit `.tif`, `.laz`, `.parquet`, credentials, tokens, or secrets.
-- Keep the four sources in their roles:
-  - LiDAR is validation truth.
-  - GEDI is sparse reference.
-  - Sentinel-2 is temporal signal.
-  - HIFLD is approximate corridor context, not engineering truth.
+- Keep each source in its documented role:
+  - Repeat airborne LiDAR supplies 2013 height and 2013-2022 change labels,
+    label-quality checks, and held-out validation truth. Never use target-epoch
+    LiDAR as a predictor.
+  - The 2013 Sonoma Veg Map supplies vegetation-alliance groups for the growth
+    baseline, not species-pure labels for every cell.
+  - Sentinel-2 and other open satellite observations are candidate predictors
+    only when available by the prediction cutoff.
+  - ECHOSAT supplies candidate annual height maps. Check Sonoma coverage and
+    validate height differences against repeat LiDAR before using them as
+    change evidence; its published maps do not establish future forecasts.
+  - GEDI is an independent height cross-check, not a one-year growth target.
+  - CAL FIRE and MTBS help screen disturbance; absence from one record does not
+    establish an undisturbed cell.
+  - Public power-line maps provide approximate corridor context, not conductor
+    geometry or engineering clearance truth.
 - Do not merge sources into one undocumented feature blob.
 
 ## 6. Scientific integrity

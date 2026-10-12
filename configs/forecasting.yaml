@@ -1,7 +1,7 @@
 seed: 42
 
 task:
-  name: canopy_height_change_from_optical_time_series
+  name: canopy_height_change_from_asof_sources
   target: delta_h
   definition: airborne_lidar_chm_difference
   epoch_pairs:
@@ -14,8 +14,8 @@ task:
 
 truth:
   source: sonoma_repeat_airborne_lidar
-  use_as_model_feature: false
-  isolation_enforced_by: tests/test_truth_isolation.py
+  feature_policy: survey_end_on_or_before_prediction_cutoff
+  feature_gate: canopyguard.features.lidar.select_lidar_feature_epoch
 
 gedi:
   role: independent_cross_check
