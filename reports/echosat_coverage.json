@@ -1,0 +1,145 @@
+{
+  "citation": "Pauls et al. 2026, ECHOSAT: Estimating Canopy Height Over Space And Time, arXiv:2602.21421",
+  "tile_url": "https://echosat.uni-muenster.de/ECHOSAT_T10S.tif",
+  "raster_crs": "EPSG:32610",
+  "study_crs": "EPSG:4326",
+  "pixel_size_m": [
+    10.0,
+    10.0
+  ],
+  "nodata_value": -9999.0,
+  "band_years_assumed": [
+    2018,
+    2019,
+    2020,
+    2021,
+    2022,
+    2023,
+    2024
+  ],
+  "raster_footprint_covers_box": true,
+  "years_missing_from_product": [],
+  "per_year": [
+    {
+      "year": 2018,
+      "box_pixels": 5330171,
+      "valid_pixels": 5330171,
+      "valid_share": 1.0,
+      "valid_area_km2": 533.0171,
+      "height_m": {
+        "min": 2.24,
+        "median": 9.13,
+        "p95": 21.93,
+        "max": 47.51
+      }
+    },
+    {
+      "year": 2019,
+      "box_pixels": 5330171,
+      "valid_pixels": 5330171,
+      "valid_share": 1.0,
+      "valid_area_km2": 533.0171,
+      "height_m": {
+        "min": 1.98,
+        "median": 9.19,
+        "p95": 21.97,
+        "max": 47.54
+      }
+    },
+    {
+      "year": 2020,
+      "box_pixels": 5330171,
+      "valid_pixels": 5330171,
+      "valid_share": 1.0,
+      "valid_area_km2": 533.0171,
+      "height_m": {
+        "min": 2.09,
+        "median": 9.2,
+        "p95": 21.84,
+        "max": 47.48
+      }
+    },
+    {
+      "year": 2021,
+      "box_pixels": 5330171,
+      "valid_pixels": 5330171,
+      "valid_share": 1.0,
+      "valid_area_km2": 533.0171,
+      "height_m": {
+        "min": 1.93,
+        "median": 9.21,
+        "p95": 21.85,
+        "max": 48.13
+      }
+    },
+    {
+      "year": 2022,
+      "box_pixels": 5330171,
+      "valid_pixels": 5330171,
+      "valid_share": 1.0,
+      "valid_area_km2": 533.0171,
+      "height_m": {
+        "min": 1.79,
+        "median": 9.21,
+        "p95": 21.73,
+        "max": 47.55
+      }
+    },
+    {
+      "year": 2023,
+      "box_pixels": 5330171,
+      "valid_pixels": 5330171,
+      "valid_share": 1.0,
+      "valid_area_km2": 533.0171,
+      "height_m": {
+        "min": 2.2,
+        "median": 9.15,
+        "p95": 21.68,
+        "max": 47.65
+      }
+    }
+  ],
+  "abrupt_changes": [
+    {
+      "from_year": 2018,
+      "to_year": 2019,
+      "drop_pixels": 269,
+      "gain_pixels": 0
+    },
+    {
+      "from_year": 2019,
+      "to_year": 2020,
+      "drop_pixels": 16733,
+      "gain_pixels": 0
+    },
+    {
+      "from_year": 2020,
+      "to_year": 2021,
+      "drop_pixels": 8044,
+      "gain_pixels": 3
+    },
+    {
+      "from_year": 2021,
+      "to_year": 2022,
+      "drop_pixels": 3237,
+      "gain_pixels": 64
+    },
+    {
+      "from_year": 2022,
+      "to_year": 2023,
+      "drop_pixels": 4320,
+      "gain_pixels": 148
+    },
+    {
+      "from_year": 2023,
+      "to_year": 2024,
+      "drop_pixels": 2848,
+      "gain_pixels": 75
+    }
+  ],
+  "remote_file": {
+    "last_modified": "Sat, 21 Feb 2026 23:08:04 GMT",
+    "etag": "\"699a3ad4-bdd8ce39e\"",
+    "content_length": "50961638302"
+  }
+}

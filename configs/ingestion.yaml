@@ -48,3 +48,29 @@ cube:
   nodata: "NaN"
   derive_bounds_from_study_area: true
   snap_bounds_to_target_grid: true
+
+echosat:
+  # Candidate annual height maps. Coverage check only; not a validated growth
+  # signal until compared with repeat airborne LiDAR.
+  citation: >-
+    Pauls et al. 2026, ECHOSAT: Estimating Canopy Height Over Space And Time,
+    arXiv:2602.21421
+  index_url: https://echosat.uni-muenster.de/
+  tile_url: https://echosat.uni-muenster.de/ECHOSAT_T10S.tif
+  # The authors do not document band order. Inferred as one band per year in
+  # this order; see reports/echosat_check.md for the evidence.
+  band_years: [2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  check_years: [2018, 2019, 2020, 2021, 2022, 2023]
+  nodata_value: -9999
+  height_scale_to_m: 0.01
+  abrupt_change_m: 5
+  request_timeout_seconds: 60
+  http_max_retry: 3
+  box_copy: interim/echosat/echosat_box.tif
+  coverage_report: reports/echosat_coverage.json
+  sample_figure: reports/figures_sample/echosat_sample.png
+  figure:
+    downsample: 4
+    dpi: 110
+    height_vmax_m: 30
+    change_limit_m: 10
