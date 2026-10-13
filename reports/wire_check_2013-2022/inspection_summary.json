@@ -1,0 +1,49 @@
+{
+  "cell_epochs_not_read": 7,
+  "2013_near_line": {
+    "cells": 29,
+    "thin": 24,
+    "apex_class": {
+      "1": 27,
+      "5": 2
+    },
+    "thin_share": 0.828,
+    "median_points_below": 0.0,
+    "median_apex_m": 22.7
+  },
+  "wire_class14_points": 0,
+  "tower_class15_points": 0,
+  "2013_control": {
+    "cells": 27,
+    "thin": 4,
+    "apex_class": {
+      "5": 20,
+      "1": 7
+    },
+    "thin_share": 0.148,
+    "median_points_below": 71.0,
+    "median_apex_m": 12.3
+  },
+  "2022_near_line": {
+    "cells": 30,
+    "thin": 12,
+    "apex_class": {
+      "18": 4,
+      "1": 26
+    },
+    "thin_share": 0.4,
+    "median_points_below": 21.5,
+    "median_apex_m": 29.4
+  },
+  "2022_control": {
+    "cells": 30,
+    "thin": 6,
+    "apex_class": {
+      "1": 27,
+      "18": 3
+    },
+    "thin_share": 0.2,
+    "median_points_below": 166.0,
+    "median_apex_m": 13.9
+  }
+}

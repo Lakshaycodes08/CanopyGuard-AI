@@ -1,0 +1,281 @@
+{
+  "cells": 1477905,
+  "disputed_removed": 198,
+  "start": {
+    "eligible_cells": 1473936,
+    "isolated_total": 7162,
+    "wire_like_total": 2237,
+    "bands": {
+      "near": {
+        "near_cells": 92059,
+        "control_cells": 811358,
+        "isolated": {
+          "near_flagged_raw": 904,
+          "near_rate_raw": 0.009819789482831662,
+          "control_rate_raw": 0.004661320896570934,
+          "matched_near_cells": 83979,
+          "observed": 797.0,
+          "expected": 614.832816647677,
+          "ratio": 1.2962873457951936,
+          "ci_low": 0.9336821028150198,
+          "ci_high": 1.7830552028940003
+        },
+        "wire_like": {
+          "near_flagged_raw": 334,
+          "near_rate_raw": 0.0036281080611347072,
+          "control_rate_raw": 0.0014075167805087272,
+          "matched_near_cells": 83979,
+          "observed": 325.0,
+          "expected": 115.10113342806908,
+          "ratio": 2.8236038197061233,
+          "ci_low": 1.9666952837164813,
+          "ci_high": 4.119898815935609
+        }
+      },
+      "secondary": {
+        "near_cells": 197044,
+        "control_cells": 811358,
+        "isolated": {
+          "near_flagged_raw": 899,
+          "near_rate_raw": 0.004562432756135685,
+          "control_rate_raw": 0.004661320896570934,
+          "matched_near_cells": 181510,
+          "observed": 815.0,
+          "expected": 876.0819135130815,
+          "ratio": 0.9302783078032697,
+          "ci_low": 0.7527774049274758,
+          "ci_high": 1.1570811444613658
+        },
+        "wire_like": {
+          "near_flagged_raw": 258,
+          "near_rate_raw": 0.001309352225898784,
+          "control_rate_raw": 0.0014075167805087272,
+          "matched_near_cells": 181510,
+          "observed": 244.0,
+          "expected": 235.33379030326867,
+          "ratio": 1.0368251821617431,
+          "ci_low": 0.793412573718642,
+          "ci_high": 1.3719944164446805
+        }
+      }
+    },
+    "profile": [
+      {
+        "from_m": 0,
+        "to_m": 10,
+        "cells": 33126,
+        "isolated_rate": 0.019078669323190245,
+        "wire_like_rate": 0.007788444122441587
+      },
+      {
+        "from_m": 10,
+        "to_m": 20,
+        "cells": 29913,
+        "isolated_rate": 0.0033095978337177815,
+        "wire_like_rate": 0.0011700598402032561
+      },
+      {
+        "from_m": 20,
+        "to_m": 30,
+        "cells": 29020,
+        "isolated_rate": 0.005961405926946933,
+        "wire_like_rate": 0.0014128187456926258
+      },
+      {
+        "from_m": 30,
+        "to_m": 50,
+        "cells": 57590,
+        "isolated_rate": 0.004861955200555652,
+        "wire_like_rate": 0.001215488800138913
+      },
+      {
+        "from_m": 50,
+        "to_m": 75,
+        "cells": 70755,
+        "isolated_rate": 0.0044519821920712315,
+        "wire_like_rate": 0.001286128188820578
+      },
+      {
+        "from_m": 75,
+        "to_m": 100,
+        "cells": 68699,
+        "isolated_rate": 0.00442510080204952,
+        "wire_like_rate": 0.0014119565059171166
+      },
+      {
+        "from_m": 100,
+        "to_m": 150,
+        "cells": 132458,
+        "isolated_rate": 0.0042428543387337874,
+        "wire_like_rate": 0.0013211735040541152
+      },
+      {
+        "from_m": 150,
+        "to_m": 200,
+        "cells": 124295,
+        "isolated_rate": 0.003934188824972847,
+        "wire_like_rate": 0.0012068063880284806
+      },
+      {
+        "from_m": 200,
+        "to_m": 250,
+        "cells": 116722,
+        "isolated_rate": 0.004506434091259574,
+        "wire_like_rate": 0.001524991004266548
+      },
+      {
+        "from_m": 250,
+        "to_m": 400,
+        "cells": 282079,
+        "isolated_rate": 0.004247037177528281,
+        "wire_like_rate": 0.001340050127801077
+      },
+      {
+        "from_m": 400,
+        "to_m": 800,
+        "cells": 261363,
+        "isolated_rate": 0.0051537516786997395,
+        "wire_like_rate": 0.0016605257821497306
+      }
+    ]
+  },
+  "end": {
+    "eligible_cells": 1473936,
+    "isolated_total": 7917,
+    "wire_like_total": 2263,
+    "bands": {
+      "near": {
+        "near_cells": 92059,
+        "control_cells": 811358,
+        "isolated": {
+          "near_flagged_raw": 1193,
+          "near_rate_raw": 0.012959080589621873,
+          "control_rate_raw": 0.004954656267640178,
+          "matched_near_cells": 82217,
+          "observed": 964.0,
+          "expected": 636.917783570334,
+          "ratio": 1.5135391487990173,
+          "ci_low": 1.140290977295456,
+          "ci_high": 2.01678225252092
+        },
+        "wire_like": {
+          "near_flagged_raw": 514,
+          "near_rate_raw": 0.005583375878512693,
+          "control_rate_raw": 0.0012854991261563946,
+          "matched_near_cells": 82217,
+          "observed": 436.0,
+          "expected": 91.07111264014607,
+          "ratio": 4.787467588353609,
+          "ci_low": 3.4888082997897913,
+          "ci_high": 6.768402052067378
+        }
+      },
+      "secondary": {
+        "near_cells": 197044,
+        "control_cells": 811358,
+        "isolated": {
+          "near_flagged_raw": 978,
+          "near_rate_raw": 0.004963358437709344,
+          "control_rate_raw": 0.004954656267640178,
+          "matched_near_cells": 179519,
+          "observed": 879.0,
+          "expected": 955.4945521398481,
+          "ratio": 0.9199424507774147,
+          "ci_low": 0.7548371902374846,
+          "ci_high": 1.131671394767005
+        },
+        "wire_like": {
+          "near_flagged_raw": 231,
+          "near_rate_raw": 0.001172326992955888,
+          "control_rate_raw": 0.0012854991261563946,
+          "matched_near_cells": 179519,
+          "observed": 211.0,
+          "expected": 192.7318698494991,
+          "ratio": 1.0947852068511874,
+          "ci_low": 0.8245759925111065,
+          "ci_high": 1.4414089118715212
+        }
+      }
+    },
+    "profile": [
+      {
+        "from_m": 0,
+        "to_m": 10,
+        "cells": 33126,
+        "isolated_rate": 0.026263358087303026,
+        "wire_like_rate": 0.012376984845740506
+      },
+      {
+        "from_m": 10,
+        "to_m": 20,
+        "cells": 29913,
+        "isolated_rate": 0.0039447731755424065,
+        "wire_like_rate": 0.0019723865877712033
+      },
+      {
+        "from_m": 20,
+        "to_m": 30,
+        "cells": 29020,
+        "isolated_rate": 0.007064093728463129,
+        "wire_like_rate": 0.0015506547208821502
+      },
+      {
+        "from_m": 30,
+        "to_m": 50,
+        "cells": 57590,
+        "isolated_rate": 0.005139781212015975,
+        "wire_like_rate": 0.0011981246744226428
+      },
+      {
+        "from_m": 50,
+        "to_m": 75,
+        "cells": 70755,
+        "isolated_rate": 0.005059713094480956,
+        "wire_like_rate": 0.0011165288672178645
+      },
+      {
+        "from_m": 75,
+        "to_m": 100,
+        "cells": 68699,
+        "isolated_rate": 0.004716225854815936,
+        "wire_like_rate": 0.0012081689689806257
+      },
+      {
+        "from_m": 100,
+        "to_m": 150,
+        "cells": 132458,
+        "isolated_rate": 0.005239396638934606,
+        "wire_like_rate": 0.001441966510139063
+      },
+      {
+        "from_m": 150,
+        "to_m": 200,
+        "cells": 124295,
+        "isolated_rate": 0.004127277847057404,
+        "wire_like_rate": 0.0011746248843477211
+      },
+      {
+        "from_m": 200,
+        "to_m": 250,
+        "cells": 116722,
+        "isolated_rate": 0.004446462534912013,
+        "wire_like_rate": 0.0011822963965662
+      },
+      {
+        "from_m": 250,
+        "to_m": 400,
+        "cells": 282079,
+        "isolated_rate": 0.004576732050241244,
+        "wire_like_rate": 0.0011167084398342308
+      },
+      {
+        "from_m": 400,
+        "to_m": 800,
+        "cells": 261363,
+        "isolated_rate": 0.0053833174550338035,
+        "wire_like_rate": 0.0014921775461714168
+      }
+    ]
+  },
+  "proposed_mask_cells": 1620
+}
