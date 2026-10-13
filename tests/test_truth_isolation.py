@@ -8,20 +8,33 @@ from pathlib import Path
 import pytest
 
 from canopyguard.config import load_config
-from canopyguard.features.lidar import select_lidar_feature_epoch
+from canopyguard.features.lidar import (
+    select_echosat_feature_years,
+    select_lidar_feature_epoch,
+)
 from canopyguard.io import project_root
 
 SOURCE = project_root() / "src" / "canopyguard"
 FEATURE_PACKAGES = ("features", "forecasting", "risk")
 GATE_MODULE = "canopyguard.features.lidar"
-GATE_FUNCTION = f"{GATE_MODULE}.select_lidar_feature_epoch"
+GATE_FUNCTIONS = (
+    f"{GATE_MODULE}.select_lidar_feature_epoch",
+    f"{GATE_MODULE}.select_echosat_feature_years",
+)
 RAW_LIDAR_MODULES = (
     "canopyguard.lidar",
     "canopyguard.data.lidar",
     "canopyguard.data.lidar_fetch",
+    "canopyguard.data.echosat",
+    "canopyguard.data.echosat_fire",
 )
 TRUTH_FILE_NAME = re.compile(r"(^|/)(labels|change|label_quality)_\d{4}-\d{4}")
-TRUTH_PATHS = ("processed/truth", "interim/lidar", "processed/lidar")
+TRUTH_PATHS = (
+    "processed/truth",
+    "interim/lidar",
+    "processed/lidar",
+    "interim/echosat",
+)
 
 
 @pytest.fixture
@@ -161,7 +174,7 @@ def _import_violations(node: ast.Import | ast.ImportFrom, package: str) -> list[
         for name in names
         if _raw_lidar(name)
         or (name == GATE_MODULE)
-        or (_under(name, GATE_MODULE) and name != GATE_FUNCTION)
+        or (_under(name, GATE_MODULE) and name not in GATE_FUNCTIONS)
     ]
 
 
@@ -180,7 +193,7 @@ def _truth_reference(value: str) -> bool:
         or any(path in value for path in TRUTH_PATHS)
         or bool(TRUTH_FILE_NAME.search(value))
         or any(module in value for module in RAW_LIDAR_MODULES)
-        or (value.startswith(GATE_MODULE) and value != GATE_FUNCTION)
+        or (value.startswith(GATE_MODULE) and value not in GATE_FUNCTIONS)
     )
 
 
@@ -233,12 +246,62 @@ def test_feature_and_model_code_uses_only_the_lidar_gate(path):
         "path = data_path('processed', 'truth')",
         "path = config['label_archive']['unique']",
         "importlib.import_module('canopyguard.features.lidar')",
+        "from canopyguard.data.echosat import read_box",
+        "from canopyguard.data import echosat",
+        "from canopyguard.data.echosat_fire import fetch_fire_perimeter",
+        "path = data_path('interim', 'echosat', 'echosat_box.tif')",
     ],
 )
 def test_scan_rejects_direct_lidar_or_truth_access(source):
     assert _violations(ast.parse(source), "canopyguard.features")
 
 
-def test_scan_allows_importing_the_checked_selector():
-    source = "from canopyguard.features.lidar import select_lidar_feature_epoch"
+@pytest.mark.parametrize(
+    "name", ["select_lidar_feature_epoch", "select_echosat_feature_years"]
+)
+def test_scan_allows_importing_the_checked_selectors(name):
+    source = f"from canopyguard.features.lidar import {name}"
     assert not _violations(ast.parse(source), "canopyguard.features")
+
+
+ECHOSAT_YEARS = list(range(2018, 2025))
+
+
+def _echosat_years(lidar_config, target_epoch, cutoff):
+    return select_echosat_feature_years(
+        ECHOSAT_YEARS,
+        lidar_config,
+        target_epoch=target_epoch,
+        prediction_cutoff=cutoff,
+    )
+
+
+def test_no_echosat_year_can_be_a_feature_for_the_2013_cutoff(lidar_config):
+    assert _echosat_years(lidar_config, "2022", "2013-11-26") == []
+
+
+def test_echosat_before_the_2022_survey_can_be_a_feature_for_2023(lidar_config):
+    years = _echosat_years(lidar_config, "2023", "2022-11-11")
+    assert years == [2018, 2019, 2020, 2021]
+
+
+def test_echosat_year_ending_on_the_cutoff_is_admitted(lidar_config):
+    years = _echosat_years(lidar_config, "2023", "2022-12-31")
+    assert years == [2018, 2019, 2020, 2021, 2022]
+
+
+def test_echosat_target_year_is_never_admitted(lidar_config):
+    years = _echosat_years(lidar_config, "2023", "2023-06-01")
+    assert 2023 not in years
+    assert years == [2018, 2019, 2020, 2021, 2022]
+
+
+@pytest.mark.parametrize("cutoff", ["2022-09-13", "2023-01-01"])
+def test_echosat_cutoff_cannot_reach_target_survey(lidar_config, cutoff):
+    with pytest.raises(ValueError, match="must precede target LiDAR survey"):
+        _echosat_years(lidar_config, "2022", cutoff)
+
+
+def test_echosat_cutoff_must_be_a_full_date(lidar_config):
+    with pytest.raises(ValueError, match="prediction_cutoff must use YYYY-MM-DD"):
+        _echosat_years(lidar_config, "2022", "2021")

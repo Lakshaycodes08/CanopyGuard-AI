@@ -71,16 +71,21 @@ also holds a 2024 band, which is outside this check.
     than 5 m (`abrupt_changes` in `reports/echosat_coverage.json`). The model
     forces slow growth and allows abrupt loss only for disturbance, so this
     fits a forward order.
-  - Manual check, not in the repo: the CAL FIRE FRAP perimeter for the Kincade
-    fire (alarm 2019-10-23, 77,762 acres) covers 41.8 percent of the box. About
-    94 percent of the large drops between the 2019 and 2020 bands fall inside it,
-    and about 8 percent of the few large drops between the 2018 and 2019 bands do.
-  - This supports the order but does not prove it. Confirm with the authors
-    before relying on a single year.
+  - Fire check, rerun by `scripts/check_echosat.py` (`fire_check` in the JSON):
+    the CAL FIRE FRAP perimeter of the Kincade fire (alarm 2019-10-23, 77,762
+    acres) covers 41.8 percent of the box pixels. Of the 16,733 large drops in
+    the 2019 to 2020 step, 15,694 (93.8 percent) fall inside it. In the 2018 to
+    2019 step only 21 of 269 (7.8 percent) do. The step with the most drops
+    inside the perimeter is the expected one, 2019 to 2020. FRAP states its
+    perimeters can be incomplete or over-generalized.
+  - This supports the order but does not prove it. The authors have not yet
+    confirmed it. Do not rely on a single year until they do.
 - Smooth by design: the model constrains yearly slopes to 0 to 3 m per year
   (paper, section 3.3), so slow change is a modeling choice. Typical error
   against GEDI is about 5 to 6 m (paper), larger than a year of growth.
-- No bare ground: the lowest height in every year is about 2 m, never 0.
+- No bare ground: the lowest height in every year is between 1.79 m and 2.24 m,
+  never 0, so bare ground and vineyards read as short canopy. The LiDAR
+  comparison must report cells with LiDAR height below 2 m separately.
 - Fire and logging loss is visible. Gradual growth is not established. The
   authors state that year-to-year change has no direct validation against
   independent repeated observations (paper, section 5.1).
@@ -92,16 +97,20 @@ also holds a 2024 band, which is outside this check.
 ## Not established here
 
 - No comparison with repeat airborne LiDAR, so no claim about growth accuracy.
-- ECHOSAT years after the 2022 target survey must not become predictors for a
-  forecast scored on 2022 LiDAR. The leakage guard in
-  `tests/test_truth_isolation.py` does not list ECHOSAT yet. Follow-up for the
-  feature-table work.
+- ECHOSAT is covered by the leakage guard. `select_echosat_feature_years` in
+  `src/canopyguard/features/lidar.py` admits a band year only when 31 December of
+  that year is on or before the prediction cutoff, and the cutoff must precede
+  the target survey. For the 2013 cutoff no ECHOSAT year is admitted. For the
+  2023 target with cutoff 2022-11-11 only 2018 to 2021 are. Feature, forecasting,
+  and risk code cannot import the raw ECHOSAT modules
+  (`tests/test_truth_isolation.py`).
 
 ## Reproduce
 
 `python scripts/check_echosat.py` needs network access to
-`echosat.uni-muenster.de`. Tests are offline: `python -m pytest tests/test_echosat.py`.
+`echosat.uni-muenster.de`. Tests are offline: `python -m pytest tests/test_echosat.py
+tests/test_echosat_fire.py tests/test_truth_isolation.py`.
 The sample figure `reports/figures_sample/echosat_sample.png` is committed on
 purpose. `reports/figures/` is gitignored for generated outputs, so this small
-folder holds the one picture a reviewer needs to see. The same command
-regenerates it.
+folder holds the one picture a reviewer needs to see. It is downsampled
+to stay under 0.3 MB. The same command regenerates it.

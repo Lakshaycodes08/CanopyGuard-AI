@@ -43,6 +43,7 @@ class BoxRead(NamedTuple):
     transform: Affine
     inside: np.ndarray
     fully_covers_box: bool
+    crs: Any
 
 
 def open_environment(source: dict[str, Any]) -> rasterio.Env:
@@ -86,6 +87,18 @@ def box_window(src: Any, bbox: Box) -> tuple[Window, bool]:
     return clipped, clipped == padded
 
 
+def pixel_lonlat(
+    transform: Affine, shape: tuple[int, int], crs: Any
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return lon and lat of every pixel centre for a raster window."""
+    rows, cols = np.meshgrid(
+        np.arange(shape[0]) + 0.5, np.arange(shape[1]) + 0.5, indexing="ij"
+    )
+    xs = transform.a * cols + transform.b * rows + transform.c
+    ys = transform.d * cols + transform.e * rows + transform.f
+    return Transformer.from_crs(crs, WGS84, always_xy=True).transform(xs, ys)
+
+
 def inside_box_mask(
     transform: Affine, shape: tuple[int, int], crs: Any, bbox: Box
 ) -> np.ndarray:
@@ -94,12 +107,7 @@ def inside_box_mask(
     The box is a rectangle in lon/lat, which is a slightly skewed shape in a
     projected CRS, so the test is done in lon/lat rather than on window edges.
     """
-    rows, cols = np.meshgrid(
-        np.arange(shape[0]) + 0.5, np.arange(shape[1]) + 0.5, indexing="ij"
-    )
-    xs = transform.a * cols + transform.b * rows + transform.c
-    ys = transform.d * cols + transform.e * rows + transform.f
-    lon, lat = Transformer.from_crs(crs, WGS84, always_xy=True).transform(xs, ys)
+    lon, lat = pixel_lonlat(transform, shape, crs)
     west, south, east, north = bbox
     return (lon >= west) & (lon <= east) & (lat >= south) & (lat <= north)
 
@@ -139,6 +147,14 @@ def count_valid_by_year(
     return records
 
 
+def step_change(
+    before: np.ndarray, after: np.ndarray, inside: np.ndarray, nodata: float
+) -> tuple[np.ndarray, np.ndarray]:
+    """Return the both-valid mask and the integer change between two bands."""
+    both_valid = inside & (before != nodata) & (after != nodata)
+    return both_valid, after.astype(np.int64) - before.astype(np.int64)
+
+
 def count_abrupt_changes(
     data: np.ndarray,
     inside: np.ndarray,
@@ -158,9 +174,7 @@ def count_abrupt_changes(
     threshold_raw = threshold_m / scale_to_m
     records = []
     for index in range(len(years) - 1):
-        before, after = data[index], data[index + 1]
-        both_valid = inside & (before != nodata) & (after != nodata)
-        change = after.astype(np.int64) - before.astype(np.int64)
+        both_valid, change = step_change(data[index], data[index + 1], inside, nodata)
         records.append(
             {
                 "from_year": years[index],
@@ -189,7 +203,7 @@ def read_box(src: Any, bbox: Box) -> BoxRead:
     transform = src.window_transform(window)
     data = src.read(window=window)
     inside = inside_box_mask(transform, data.shape[1:], src.crs, bbox)
-    return BoxRead(data, window, transform, inside, fully_covers_box)
+    return BoxRead(data, window, transform, inside, fully_covers_box, src.crs)
 
 
 def build_report(src: Any, box: BoxRead, source: dict[str, Any]) -> dict[str, Any]:

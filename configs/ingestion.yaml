@@ -64,13 +64,18 @@ echosat:
   nodata_value: -9999
   height_scale_to_m: 0.01
   abrupt_change_m: 5
+  # Band-order check. FRAP perimeters can be incomplete or over-generalized.
+  fire_check:
+    perimeter_url: https://services.arcgis.com/jIL9msH9OI208GCb/ArcGIS/rest/services/California_Fire_Perimeters_1878_2019/FeatureServer/1/query
+    fire_name: KINCADE
+    fire_year: 2019
   request_timeout_seconds: 60
   http_max_retry: 3
   box_copy: interim/echosat/echosat_box.tif
   coverage_report: reports/echosat_coverage.json
   sample_figure: reports/figures_sample/echosat_sample.png
   figure:
-    downsample: 4
-    dpi: 110
+    downsample: 8
+    dpi: 60
     height_vmax_m: 30
     change_limit_m: 10
