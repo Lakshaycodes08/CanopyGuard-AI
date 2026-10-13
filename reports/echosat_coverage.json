@@ -141,5 +141,58 @@
     "last_modified": "Sat, 21 Feb 2026 23:08:04 GMT",
     "etag": "\"699a3ad4-bdd8ce39e\"",
     "content_length": "50961638302"
+  },
+  "fire_check": {
+    "fire_name": "KINCADE",
+    "fire_year": 2019,
+    "perimeter_source": "https://services.arcgis.com/jIL9msH9OI208GCb/ArcGIS/rest/services/California_Fire_Perimeters_1878_2019/FeatureServer/1/query",
+    "expected_step": [
+      2019,
+      2020
+    ],
+    "peak_step": [
+      2019,
+      2020
+    ],
+    "peak_matches_expected": true,
+    "perimeter_share_of_box": 0.4175832257539205,
+    "steps": [
+      {
+        "from_year": 2018,
+        "to_year": 2019,
+        "drop_pixels": 269,
+        "drop_pixels_in_perimeter": 21
+      },
+      {
+        "from_year": 2019,
+        "to_year": 2020,
+        "drop_pixels": 16733,
+        "drop_pixels_in_perimeter": 15694
+      },
+      {
+        "from_year": 2020,
+        "to_year": 2021,
+        "drop_pixels": 8044,
+        "drop_pixels_in_perimeter": 7277
+      },
+      {
+        "from_year": 2021,
+        "to_year": 2022,
+        "drop_pixels": 3237,
+        "drop_pixels_in_perimeter": 2048
+      },
+      {
+        "from_year": 2022,
+        "to_year": 2023,
+        "drop_pixels": 4320,
+        "drop_pixels_in_perimeter": 2974
+      },
+      {
+        "from_year": 2023,
+        "to_year": 2024,
+        "drop_pixels": 2848,
+        "drop_pixels_in_perimeter": 2357
+      }
+    ]
   }
 }
