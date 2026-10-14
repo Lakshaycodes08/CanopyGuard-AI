@@ -8,6 +8,7 @@ from canopyguard.lidar.wire_check import (
     tile_bootstrap_ratio,
     to_grid,
 )
+from canopyguard.lidar.wire_check_verify import persistence_counts
 
 SPIKE = {
     "min_max_height_m": 10.0,
@@ -51,7 +52,8 @@ def test_expected_counts_use_only_strata_with_controls():
     near = np.array([True, False, True, False, False])
     control = np.array([False, False, False, True, True])
     obs, exp, n_near = expected_counts(key, flag, near, control)
-    assert obs.tolist() == [0.0, 0.0] and n_near.tolist() == [0.0, 1.0]
+    assert obs.tolist() == [0.0, 0.0]
+    assert n_near.tolist() == [0.0, 1.0]
     assert exp[1] == 0.5
 
 
@@ -59,7 +61,8 @@ def test_bootstrap_ratio_of_equal_rates_is_one():
     tiles = np.arange(40)
     obs = np.ones(40)
     ratio, low, high = tile_bootstrap_ratio(tiles, obs, obs.copy(), 500, 0.95, 1)
-    assert ratio == 1.0 and low <= 1.0 <= high
+    assert ratio == 1.0
+    assert low <= 1.0 <= high
 
 
 def raw_table():
@@ -87,8 +90,6 @@ def test_unique_archive_uses_the_disputed_flag():
 
 
 def test_persistence_counts_split_flags_by_epoch():
-    from canopyguard.lidar.wire_check_verify import persistence_counts
-
     first = np.array([True, True, False, False])
     second = np.array([True, False, True, False])
     out = persistence_counts(first, second, np.array([True, True, True, True]))

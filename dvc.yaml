@@ -22,3 +22,19 @@ stages:
     outs:
       - data/processed/labels_2013-2022_unique.npz
       - data/processed/label_quality_2013-2022.json
+  wire_suspect_flags:
+    cmd: python scripts/flag_wire_suspects.py
+    deps:
+      - scripts/flag_wire_suspects.py
+      - src/canopyguard/lidar/wire_check.py
+      - src/canopyguard/lidar/wire_check_run.py
+      - src/canopyguard/lidar/wire_flags.py
+      - data/processed/labels_2013-2022_unique.npz
+      - data/interim/cec/cec_lines_study_box.geojson
+    params:
+      - configs/lidar.yaml:
+          - wire_check
+    outs:
+      - data/processed/labels_2013-2022_wire_flags.npz
+      - data/processed/wire_flags_summary.json
+

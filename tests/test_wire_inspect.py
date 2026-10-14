@@ -2,7 +2,12 @@ import csv
 
 import numpy as np
 
-from canopyguard.lidar.wire_inspect import summarise, summarise_inspection
+from canopyguard.lidar.wire_inspect import (
+    FIELDS,
+    _load_done,
+    summarise,
+    summarise_inspection,
+)
 
 CFG = {
     "cell_m": 10.0,
@@ -32,14 +37,16 @@ def ground(seed):
 def test_wire_like_cell_has_nothing_beneath_the_apex():
     gx, gy = ground(0)
     pts = points(
-        list(gx) + [0.5, 1.0],
-        list(gy) + [0.2, 0.3],
+        [*gx, 0.5, 1.0],
+        [*gy, 0.2, 0.3],
         [100.0] * 200 + [125.0, 125.1],
         [2] * 200 + [14, 14],
     )
     out = summarise(pts, (0.0, 0.0), CFG)
-    assert out["status"] == "ok" and out["apex_class"] == 14
-    assert out["wire_points_class14"] == 2 and out["points_below_apex_2m"] == 0
+    assert out["status"] == "ok"
+    assert out["apex_class"] == 14
+    assert out["wire_points_class14"] == 2
+    assert out["points_below_apex_2m"] == 0
 
 
 def test_tree_cell_has_points_beneath_the_apex():
@@ -54,7 +61,8 @@ def test_tree_cell_has_points_beneath_the_apex():
         [2] * 200 + [5] * 40,
     )
     out = summarise(pts, (0.0, 0.0), CFG)
-    assert out["apex_class"] == 5 and out["points_below_apex_2m"] >= 30
+    assert out["apex_class"] == 5
+    assert out["points_below_apex_2m"] >= 30
 
 
 def test_cell_without_ground_is_reported():
@@ -67,6 +75,7 @@ def test_inspection_summary_uses_only_the_flagged_epoch(tmp_path):
     header = [
         "group",
         "flag_epoch",
+        "cell_id",
         "epoch",
         "status",
         "points_below_apex_2m",
@@ -76,15 +85,87 @@ def test_inspection_summary_uses_only_the_flagged_epoch(tmp_path):
         "tower_points_class15",
     ]
     rows = [
-        ["near_line", "start", "2013", "ok", "0", "1", "25", "0", "0"],
-        ["near_line", "start", "2022", "ok", "90", "1", "25", "0", "0"],
-        ["near_line", "end", "2022", "ok", "50", "1", "30", "0", "0"],
-        ["near_line", "end", "2013", "read_error:RuntimeError", "", "", "", "", ""],
+        ["near_line", "start", "1", "2013", "ok", "0", "1", "25", "0", "0"],
+        ["near_line", "start", "1", "2022", "ok", "90", "1", "25", "0", "0"],
+        ["near_line", "end", "2", "2022", "ok", "50", "1", "30", "0", "0"],
+        [
+            "near_line",
+            "end",
+            "2",
+            "2013",
+            "read_error:RuntimeError",
+            "",
+            "",
+            "",
+            "",
+            "",
+        ],
     ]
     with open(path, "w", newline="") as handle:
         writer = csv.writer(handle)
         writer.writerow(header)
         writer.writerows(rows)
     out = summarise_inspection(str(path), 10)
-    assert out["2013_near_line"]["cells"] == 1 and out["2013_near_line"]["thin"] == 1
-    assert out["2022_near_line"]["cells"] == 1 and out["2022_near_line"]["thin"] == 0
+    assert out["2013_near_line"]["cells"] == 1
+    assert out["2013_near_line"]["thin"] == 1
+    assert out["2022_near_line"]["cells"] == 1
+    assert out["2022_near_line"]["thin"] == 0
+
+
+def test_failed_reads_are_dropped_so_they_can_be_retried(tmp_path):
+    path = tmp_path / "summary.csv"
+    with open(path, "w", newline="") as handle:
+        writer = csv.DictWriter(handle, fieldnames=FIELDS)
+        writer.writeheader()
+        writer.writerow(
+            {"cell_id": "1", "epoch": "2013", "flag_epoch": "start", "status": "ok"}
+        )
+        writer.writerow(
+            {
+                "cell_id": "2",
+                "epoch": "2013",
+                "flag_epoch": "start",
+                "status": "read_error:RuntimeError",
+            }
+        )
+    done = _load_done(path, retry_failed=True)
+    assert done == {("1", "2013", "start")}
+    with open(path, newline="") as handle:
+        assert [r["cell_id"] for r in csv.DictReader(handle)] == ["1"]
+    assert _load_done(path, retry_failed=False) == {("1", "2013", "start")}
+
+
+def test_inspection_summary_lists_failed_reads(tmp_path):
+    path = tmp_path / "summary.csv"
+    header = [
+        "group",
+        "flag_epoch",
+        "cell_id",
+        "epoch",
+        "status",
+        "points_below_apex_2m",
+        "apex_class",
+        "apex_height_m",
+        "wire_points_class14",
+        "tower_points_class15",
+    ]
+    with open(path, "w", newline="") as handle:
+        writer = csv.writer(handle)
+        writer.writerow(header)
+        writer.writerow(
+            [
+                "near_line",
+                "start",
+                "7",
+                "2013",
+                "read_error:RuntimeError",
+                "",
+                "",
+                "",
+                "",
+                "",
+            ]
+        )
+    out = summarise_inspection(str(path), 10)
+    assert out["failed_reads"][0]["cell_id"] == "7"
+    assert out["cell_epochs_not_read"] == 1

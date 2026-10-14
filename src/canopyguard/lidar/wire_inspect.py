@@ -164,16 +164,11 @@ def inspect_cells(
             taken[key] = taken.get(key, 0) + 1
             chosen.append(row)
     out = Path(out_path)
-    done: set[tuple[str, str, str]] = set()
-    if out.exists():
-        with open(out, newline="", encoding="utf-8") as handle:
-            done = {
-                (r["cell_id"], r["epoch"], r["flag_epoch"])
-                for r in csv.DictReader(handle)
-            }
+    write_header = not out.exists()
+    done = _load_done(out, cfg["retry_failed"])
     with open(out, "a", newline="", encoding="utf-8") as handle:
         writer = csv.DictWriter(handle, fieldnames=FIELDS, extrasaction="ignore")
-        if not done:
+        if write_header:
             writer.writeheader()
         for number, row in enumerate(chosen, start=1):
             center = (float(row["x_6339"]), float(row["y_6339"]))
@@ -192,10 +187,28 @@ def inspect_cells(
                 }
                 writer.writerow(record)
                 handle.flush()
-                print(
-                    f"[{number}/{len(chosen)}] cell {row['cell_id']} {epoch}: {record['status']}"
-                )
+                label = f"[{number}/{len(chosen)}] cell {row['cell_id']} {epoch}"
+                print(f"{label}: {record['status']}")
                 time.sleep(cfg["pause_s"])
+
+
+def _load_done(path: Path, retry_failed: bool) -> set[tuple[str, str, str]]:
+    """Cell-epochs already summarised; failed reads are dropped to be retried."""
+    if not path.exists():
+        return set()
+    with open(path, newline="", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle))
+    if retry_failed:
+        kept = [r for r in rows if not r["status"].startswith("read_error")]
+        if len(kept) < len(rows):
+            with open(path, "w", newline="", encoding="utf-8") as handle:
+                writer = csv.DictWriter(
+                    handle, fieldnames=FIELDS, extrasaction="ignore"
+                )
+                writer.writeheader()
+                writer.writerows(kept)
+        rows = kept
+    return {(r["cell_id"], r["epoch"], r["flag_epoch"]) for r in rows}
 
 
 def _one_cell(lidar_config, cfg, epoch, center, to_lonlat) -> dict[str, Any]:
@@ -230,7 +243,14 @@ def summarise_inspection(summary_path: str, thin_max_points: int) -> dict[str, A
         everything = list(csv.DictReader(handle))
     rows = [r for r in everything if r["status"] == "ok"]
     matched = {"start": "2013", "end": "2022"}
-    result: dict[str, Any] = {"cell_epochs_not_read": len(everything) - len(rows)}
+    result: dict[str, Any] = {
+        "cell_epochs_not_read": len(everything) - len(rows),
+        "failed_reads": [
+            {k: r[k] for k in ("cell_id", "epoch", "group", "flag_epoch", "status")}
+            for r in everything
+            if r["status"] != "ok"
+        ],
+    }
     for row in rows:
         if matched[row["flag_epoch"]] != row["epoch"]:
             continue
@@ -251,7 +271,7 @@ def summarise_inspection(summary_path: str, thin_max_points: int) -> dict[str, A
         result["tower_class15_points"] = result.get("tower_class15_points", 0) + int(
             row["tower_points_class15"]
         )
-    for key, item in list(result.items()):
+    for item in result.values():
         if isinstance(item, dict):
             item["thin_share"] = round(item["thin"] / item["cells"], 3)
             item["median_points_below"] = float(np.median(item.pop("below")))

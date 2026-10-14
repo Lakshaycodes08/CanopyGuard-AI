@@ -1,0 +1,43 @@
+{
+  "counts": {
+    "analysed_cells": 1477905,
+    "disputed_removed": 198,
+    "wire_suspect": 1620,
+    "within_exclusion_distance": 33139,
+    "both": 1138,
+    "excluded_from_max_p95": 33621,
+    "remaining_for_mean_labels": 1477905,
+    "remaining_for_max_p95": 1444284,
+    "canopy_cells_before": 718162,
+    "canopy_cells_remaining_for_max_p95": 693912
+  },
+  "rule": {
+    "spike": {
+      "max_neighbour_median_m": 3.0,
+      "min_max_height_m": 10.0,
+      "min_neighbours": 4,
+      "wire_like_gap_m": 5.0
+    },
+    "near_band_m": [
+      0.0,
+      30.0
+    ],
+    "exclusion": {
+      "max_p95_columns": [
+        "max_start",
+        "max_end",
+        "max_change",
+        "p95_start",
+        "p95_end",
+        "p95_change"
+      ],
+      "modelling_min_mean_start_m": 2.0,
+      "within_line_m": 10.0
+    }
+  },
+  "inputs": {
+    "labels_sha256": "dc91f03b4f067a54a6666fc15cfdf6b86dc368a1d97e44555fb762515ab10763",
+    "lines_sha256": "b0133265c7b291b106f8b4ac0e418297a07a9fac900b0f69179097718b3cbea8",
+    "lines_source_url": "https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query (envelope -122.90,38.475,-122.74,38.82, outFields=*, outSR=4326, f=geojson; Sonoma County copy of the California Energy Commission layer, retrieved 2026-10-12)"
+  }
+}

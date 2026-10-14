@@ -119,6 +119,12 @@ def distance_profile(flags: dict, dist: np.ndarray, edges: list[float]) -> list[
     return rows
 
 
+def suspect_mask(flags: dict, dist: np.ndarray, near_upper_m: float) -> np.ndarray:
+    """Cells inside the near band that are flagged isolated in either epoch."""
+    either = flags["start"]["isolated"] | flags["end"]["isolated"]
+    return (dist < near_upper_m) & either
+
+
 def run(cfg: dict, labels_path: str, lines_path: str) -> dict:
     """All results for both epochs as a plain dictionary."""
     table = dict(np.load(labels_path))
@@ -141,8 +147,7 @@ def run(cfg: dict, labels_path: str, lines_path: str) -> dict:
             },
             "profile": distance_profile(flags, dist, cfg["profile_edges_m"]),
         }
-    either = cache["start"]["isolated"] | cache["end"]["isolated"]
-    mask = (dist < cfg["bands_m"]["near"][1]) & either
+    mask = suspect_mask(cache, dist, cfg["bands_m"]["near"][1])
     results["proposed_mask_cells"] = int(mask.sum())
     results["_arrays"] = {"rows": rows, "dist": dist, "flags": cache, "mask": mask}
     return results
