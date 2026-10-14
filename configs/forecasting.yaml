@@ -39,6 +39,61 @@ stage1_growth_model:
   fit_on: stable_cells_only
   stratify_by: vegetation_alliance
   pool_to_physiognomic_group_below_n: 500
+  labels_path: data/processed/labels_2013-2022_unique.npz
+  vegetation_join:
+    source_url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query
+    raw_path: data/raw/sonoma_veg_2013.geojson
+    output_path: data/interim/veg_type_2013.parquet
+    boundary_exclusion_m: 5.0
+    page_size: 1000
+    chunk_size: 100000
+    uncertain_review_fraction: 0.30
+  clean_screen:
+    output_path: data/interim/clean_cells_2013_2022.parquet
+    wire_flags_path: data/processed/labels_2013-2022_wire_flags.npz
+    fire_years: [2014, 2022]
+    min_mean_start_m: 2.0
+    loss_share_threshold: 0.05
+    near_line_m: 30.0
+    chunk_size: 100000
+    sources:
+      frap:
+        url: https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/California_Fire_Perimeters/FeatureServer/0/query
+        where: YEAR_ >= 2014 AND YEAR_ <= 2022
+        path: data/raw/frap_fire_perimeters_2014-2022_2026-10-14.geojson
+      mtbs:
+        url: https://apps.fs.usda.gov/ArcX/rest/services/EDW/EDW_MTBS_01/MapServer/63/query
+        where: year >= 2014 AND year <= 2022
+        path: data/raw/mtbs_fire_perimeters_2014-2022_2026-10-14.geojson
+      cec:
+        url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
+        where: 1=1
+        path: data/interim/cec/cec_lines_study_box.geojson
+      hansen:
+        url: https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif
+        path: data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif
+  growth_curve:
+    time_gap_source: data/interim/change_2013-2022.json
+    primary_block_m: 2000
+    forest_groups: [conifer forest, hardwood forest]
+    block_sizes_m: [2000, 1000, 5000]
+    folds: 5
+    bootstrap_draws: 2000
+    seed: 42
+    min_fit_cells: 500
+    a_margin_m: 0.01
+    a_upper_m: 120.0
+    a_upper_warning_fraction: 0.99
+    k_bounds: [0.000001, 1.0]
+    c_bounds: [1.01, 10.0]
+    initial_k: 0.03
+    initial_c: 2.0
+    soft_l1_scale_m: 1.0
+    max_nfev: 200
+    oof_path: data/interim/growth_curve_oof_2013-2022.parquet
+    metrics_path: reports/growth_curve_check_2013-2022.json
+    report_path: reports/growth_curve_check_2013-2022.md
+    figure_path: reports/figures/growth_curves_2013-2022.png
   site_modifier_candidates: [heat_load, tpi_450, elevation_m, slope_deg]
   site_modifier_admission: cross_validated_improvement_under_r2_folds
   loss: soft_l1

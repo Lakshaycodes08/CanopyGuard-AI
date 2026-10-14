@@ -195,3 +195,234 @@ stages:
       hash: md5
       md5: a327d9b13ccff7536517ac027e9b6699
       size: 1382
+  sonoma_veg_2013:
+    cmd: python scripts/join_sonoma_veg.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: d4ffd988a837836ec349580678682af3
+      size: 5448
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240
+    - path: scripts/join_sonoma_veg.py
+      hash: md5
+      md5: 0f70e6bbd51ce7e7de711ae02fe96ac5
+      size: 810
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/data/sonoma_veg.py
+      hash: md5
+      md5: f7cb5dc50fb5e0cf131361959851833a
+      size: 9898
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    outs:
+    - path: data/interim/veg_type_2013.parquet
+      hash: md5
+      md5: 697218b8dde27e57607235332fdd05b4
+      size: 10149111
+    - path: data/interim/veg_type_2013.parquet.provenance.json
+      hash: md5
+      md5: c45de5a5f78498f48307bff49d7de871
+      size: 554
+    - path: data/interim/veg_type_2013.provenance.json
+      hash: md5
+      md5: a637b2b2de6847429e198a5a907310ac
+      size: 3815
+    - path: data/raw/sonoma_veg_2013.geojson
+      hash: md5
+      md5: 80469e3e8dd32708892b05f24fcafba7
+      size: 289037519
+    - path: data/raw/sonoma_veg_2013.geojson.provenance.json
+      hash: md5
+      md5: f68672f8a77938dd94d1c3a149a1d2ca
+      size: 552
+  clean_growth_2013_2022:
+    cmd: python scripts/build_clean_cells.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: d4ffd988a837836ec349580678682af3
+      size: 5448
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: data/interim/veg_type_2013.parquet
+      hash: md5
+      md5: 697218b8dde27e57607235332fdd05b4
+      size: 10149111
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240
+    - path: scripts/build_clean_cells.py
+      hash: md5
+      md5: 95d6bbc787b6cfc4813e51212d701d2d
+      size: 851
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/data/fire_perimeters.py
+      hash: md5
+      md5: 6907a9551b8906e94f506d1fc5f89dfa
+      size: 2861
+    - path: src/canopyguard/data/hansen.py
+      hash: md5
+      md5: ab3b66ac056366ba9ae16c4c85b1b003
+      size: 2470
+    - path: src/canopyguard/evaluation/clean_cells.py
+      hash: md5
+      md5: c9982b3fcedad964e755a48a739e37ea
+      size: 8730
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    - path: src/canopyguard/utils.py
+      hash: md5
+      md5: 6b8b8b99fd772b6a92f8e714c741e5b1
+      size: 908
+    outs:
+    - path: data/interim/cec/cec_lines_study_box.geojson
+      hash: md5
+      md5: c41c079ab214d6b9bd098c701d28adb1
+      size: 94389
+    - path: data/interim/cec/cec_lines_study_box.geojson.provenance.json
+      hash: md5
+      md5: 942afa229d8c746827004b18f997960f
+      size: 556
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/clean_cells_2013_2022.parquet.provenance.json
+      hash: md5
+      md5: 2ece3c64b305f1ad45c9c52f43e8d37d
+      size: 493
+    - path: data/interim/clean_cells_2013_2022.provenance.json
+      hash: md5
+      md5: 4472a232cddef5780f683d8fcd4180a0
+      size: 6474
+    - path: data/raw/frap_fire_perimeters_2014-2022_2026-10-14.geojson
+      hash: md5
+      md5: 8fe7ac44a8d16f65378b8718f7c30ee6
+      size: 1619574
+    - path:
+        data/raw/frap_fire_perimeters_2014-2022_2026-10-14.geojson.provenance.json
+      hash: md5
+      md5: a182bec009f9dca76a7d7a1ce9831ff9
+      size: 545
+    - path: data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif
+      hash: md5
+      md5: 6c8cf30d385ac4ae900c3d573b8d18c7
+      size: 23484389
+    - path:
+        data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif.provenance.json
+      hash: md5
+      md5: 19ab8f7ce2c3db893af970658babaf9c
+      size: 545
+    - path: data/raw/mtbs_fire_perimeters_2014-2022_2026-10-14.geojson
+      hash: md5
+      md5: 5d33b1ac46663e6a5e8b00002ba37b1b
+      size: 2279849
+    - path:
+        data/raw/mtbs_fire_perimeters_2014-2022_2026-10-14.geojson.provenance.json
+      hash: md5
+      md5: ade0bbbd77f8dc6c170b2801ab1bfb84
+      size: 508
+  growth_curve_gate_2013_2022:
+    cmd: python scripts/run_growth_curve_check.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: d4ffd988a837836ec349580678682af3
+      size: 5448
+    - path: data/interim/change_2013-2022.json
+      hash: md5
+      md5: 113aa38319be3c1bfec2b0bf1399b3d5
+      size: 529059
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/clean_cells_2013_2022.provenance.json
+      hash: md5
+      md5: 4472a232cddef5780f683d8fcd4180a0
+      size: 6474
+    - path: data/interim/veg_type_2013.parquet
+      hash: md5
+      md5: 697218b8dde27e57607235332fdd05b4
+      size: 10149111
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240
+    - path: scripts/run_growth_curve_check.py
+      hash: md5
+      md5: e5943f62539d3763139634fc576e3492
+      size: 558
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/data/fire_perimeters.py
+      hash: md5
+      md5: 6907a9551b8906e94f506d1fc5f89dfa
+      size: 2861
+    - path: src/canopyguard/evaluation/blocks.py
+      hash: md5
+      md5: d643efa79173517c4fb245293d20c4bc
+      size: 7425
+    - path: src/canopyguard/evaluation/growth_gate.py
+      hash: md5
+      md5: 24f75a6c0946163c679834f1d4f8d088
+      size: 10347
+    - path: src/canopyguard/forecasting/growth_curve.py
+      hash: md5
+      md5: 7043872078fed93ff1bd94f67b98bd87
+      size: 6697
+    - path: src/canopyguard/forecasting/growth_report.py
+      hash: md5
+      md5: 3431d378d4c4345eb243c70909b1f977
+      size: 12655
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    - path: src/canopyguard/utils.py
+      hash: md5
+      md5: 6b8b8b99fd772b6a92f8e714c741e5b1
+      size: 908
+    outs:
+    - path: data/interim/growth_curve_oof_2013-2022.parquet
+      hash: md5
+      md5: f36dabc739c9919ba656361874dd5f5a
+      size: 6332075
+    - path: data/interim/growth_curve_oof_2013-2022.parquet.provenance.json
+      hash: md5
+      md5: a9390d9c7b39723772c72ad7c0b40963
+      size: 497
