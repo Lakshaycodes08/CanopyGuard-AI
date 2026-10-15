@@ -1,6 +1,6 @@
 {
-  "generated_utc": "2026-10-15T10:52:58.495444+00:00",
-  "git_revision": "d312797d92dc809754dba4f3fd56b2d89f00f8e0",
+  "generated_utc": "2026-10-15T10:56:09.446602+00:00",
+  "git_revision": "000d95e1ba24cc4c6cee2d2517b609c0ea5c3052",
   "inputs_sha256": {
     "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
     "clean_cells": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
@@ -15,17 +15,18 @@
     "commit": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
     "scope": "A-rule implementation and held-out-fold leakage checks",
     "independence_limit": "reviewer proposed the A rule",
-    "human_review": "pending",
-    "follow_up_review": {
-      "reviewer": "Claude Opus 5",
-      "reviewer_type": "ai",
-      "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
-      "date": "2026-10-15",
-      "commit": "a4e272edbd3ea983348d5a7beb5670ee1791d615",
-      "compared_to": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
-      "scope": "diffs in growth_curve.py and growth_prior.py",
-      "independence_limit": "reviewer proposed the A rule; human review pending"
-    }
+    "human_review": "pending"
+  },
+  "reviewer_spot_check_followup": {
+    "reviewer": "Claude Opus 5",
+    "reviewer_type": "ai",
+    "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
+    "review_window_utc": "2026-10-15T10:20:00Z/2026-10-15T10:51:00Z",
+    "commit": "57c94acabd4aa1162191bf7471361eab116896a3",
+    "scope": "Re-review after the first spot-check. Read the post-review hardening diffs (full-sample prior rename, map-class group assertions, cached ceiling copy, gate record validation), re-ran the full suite and the reviewer leakage checks, and confirmed the G3 scores did not move.",
+    "evidence": "tests/test_growth_curve_review.py",
+    "independence_limit": "reviewer proposed the A rule",
+    "human_review": "pending"
   },
   "screen_counts": {
     "all_loss_off": 140530,

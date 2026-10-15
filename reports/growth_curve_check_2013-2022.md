@@ -2,7 +2,7 @@
 
 **Post hoc empirical height ceiling by map class.** The original literature-only A preflight exceeded 0.5% in nine classes. The Chapman-Richards sensitivity uses the maximum of the literature typical-upper value and the 99.5th percentile of max(2013 p95, 2022 p95), calculated within each spatial training fold. The 2022 heights in a held-out fold never set that fold's A. This A is an empirical map-class cutoff, not a biological maximum or a species asymptote. The rule was selected after seeing exceedances and must not be presented as predeclared. Promoting the median increment and treating both forest screens as co-primary were also decisions made after inspecting the earlier curve results.
 
-Run: 2026-10-15T10:53:23.546324+00:00. Issue #8. Base revision: d312797d92dc809754dba4f3fd56b2d89f00f8e0.
+Run: 2026-10-15T10:56:34.402692+00:00. Issue #8. Base revision: 000d95e1ba24cc4c6cee2d2517b609c0ea5c3052.
 
 ## Gate G3: co-primary forest median-increment prior
 
@@ -127,7 +127,7 @@ Whole-block bootstrap intervals resample spatial blocks while holding the fitted
 The LiDAR-loss screen selects a retrospective subset; it is never a forecast feature. No random visual audit of persistent forest cells has been completed. Fire, Hansen and LiDAR screens alone do not verify continuous undisturbed forest, so the growth-only sample and its upper-bound interpretation remain provisional.
 The mixed Eucalyptus literature A is 55 m from FEIS E. globulus. Kew and ANBG describe E. camaldulensis up to 45 m in its native Australian range; a person still needs to verify the Jepson entry. The exact excerpts and source dates are in reports/claims_log.md.
 An offline test changes a held-out fold's 2022 heights and confirms that fold's A and predictions do not change. Claude Opus 5 reviewed the A-rule implementation at 32b94cefc8e6530ed4fe65c751f10b96e77319e0 during 2026-10-15T09:54:00Z/2026-10-15T10:04:00Z (https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E). This was an AI code spot-check by a reviewer who proposed the rule, not an independent human review; human sign-off remains pending.
-The same reviewer checked the subsequent growth_curve.py and growth_prior.py diffs through commit a4e272edbd3ea983348d5a7beb5670ee1791d615 on 2026-10-15. The six adversarial review tests, including a non-vacuity check, are retained in tests/test_growth_curve_review.py.
+The same AI reviewer re-reviewed the post-review hardening through commit 57c94acabd4aa1162191bf7471361eab116896a3 during 2026-10-15T10:20:00Z/2026-10-15T10:51:00Z. The six reviewer-authored adversarial tests, including a non-vacuity check, are retained in tests/test_growth_curve_review.py.
 
 ## Reproduction
 
