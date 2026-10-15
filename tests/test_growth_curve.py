@@ -135,6 +135,9 @@ def test_held_out_2022_heights_cannot_change_fold_a_or_prediction():
     )
     np.testing.assert_array_equal(changed["A"][held_out], original["A"][held_out])
     np.testing.assert_allclose(changed["curve"][held_out], original["curve"][held_out])
+    np.testing.assert_allclose(
+        changed["median"][held_out], original["median"][held_out]
+    )
 
 
 def test_spatially_isolated_class_uses_literature_a_without_held_out_leak():

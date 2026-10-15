@@ -120,6 +120,8 @@ stages:
     - src/canopyguard/evaluation/growth_outputs.py
     - src/canopyguard/evaluation/growth_screen.py
     - src/canopyguard/forecasting/growth_curve.py
+    - src/canopyguard/forecasting/growth_plot.py
+    - src/canopyguard/forecasting/growth_prior.py
     - src/canopyguard/forecasting/growth_report.py
     - src/canopyguard/io.py
     - src/canopyguard/provenance.py

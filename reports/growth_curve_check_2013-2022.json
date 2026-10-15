@@ -1,7 +1,7 @@
 {
   "issue": 8,
-  "generated_utc": "2026-10-15T08:19:24.284801+00:00",
-  "git_base_revision": "9e673107af580daa8ca41de9a7c2905ad347a5da",
+  "generated_utc": "2026-10-15T08:35:44.630766+00:00",
+  "git_base_revision": "aab06c8b782dcfcee464f4e3446891e8176031c5",
   "baseline_years": 8.958247775496236,
   "decision": "PASS",
   "settings": {
@@ -116,6 +116,13 @@
         "blocks": 82,
         "draws": 2000
       },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
       "curve_minus_median_growth": {
         "difference_m": 0.0020202020627197808,
         "ci_low_m": -0.007331555162192592,
@@ -140,6 +147,13 @@
         "difference_m": -0.12106927540974433,
         "ci_low_m": -0.14737583769474072,
         "ci_high_m": -0.09426607669333731,
+        "blocks": 83,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.12109633697370328,
+        "ci_low_m": -0.14525691387540246,
+        "ci_high_m": -0.09702721176994858,
         "blocks": 83,
         "draws": 2000
       },
@@ -168,6 +182,13 @@
         "blocks": 83,
         "draws": 2000
       },
+      "median_minus_no_change": {
+        "difference_m": -0.287474679957987,
+        "ci_low_m": -0.33706303543190114,
+        "ci_high_m": -0.24336225039615902,
+        "blocks": 83,
+        "draws": 2000
+      },
       "curve_minus_median_growth": {
         "difference_m": 0.003775108126420853,
         "ci_low_m": -0.007962324580916003,
@@ -190,6 +211,13 @@
         "difference_m": -0.12324870895142452,
         "ci_low_m": -0.14723581991293022,
         "ci_high_m": -0.09752877066550211,
+        "blocks": 84,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.120980339138963,
+        "ci_low_m": -0.1422863241674885,
+        "ci_high_m": -0.097139800412348,
         "blocks": 84,
         "draws": 2000
       },
@@ -219,6 +247,13 @@
         "blocks": 82,
         "draws": 2000
       },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
       "curve_minus_median_growth": {
         "difference_m": 0.012209004576550487,
         "ci_low_m": 0.0010331739271687852,
@@ -240,6 +275,13 @@
         "difference_m": -0.26530783583143913,
         "ci_low_m": -0.3179017939350271,
         "ci_high_m": -0.21577977762016443,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
         "blocks": 82,
         "draws": 2000
       },
@@ -267,6 +309,13 @@
         "blocks": 82,
         "draws": 2000
       },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
       "curve_minus_median_growth": {
         "difference_m": 0.013232176311131374,
         "ci_low_m": 0.0021112356162569846,
@@ -290,6 +339,13 @@
         "difference_m": -0.2688395096349411,
         "ci_low_m": -0.30697524678093036,
         "ci_high_m": -0.23221907800464262,
+        "blocks": 198,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.2714545581104281,
+        "ci_low_m": -0.308084190460354,
+        "ci_high_m": -0.2401745088685193,
         "blocks": 198,
         "draws": 2000
       },
@@ -320,6 +376,13 @@
         "blocks": 18,
         "draws": 2000
       },
+      "median_minus_no_change": {
+        "difference_m": -0.26566944867052006,
+        "ci_low_m": -0.31907450119423103,
+        "ci_high_m": -0.22330216170287334,
+        "blocks": 18,
+        "draws": 2000
+      },
       "curve_minus_median_growth": {
         "difference_m": 0.005878750461618909,
         "ci_low_m": -0.007165360995604647,
@@ -345,12 +408,111 @@
       "blocks": 82,
       "draws": 2000
     },
+    "median_minus_no_change": {
+      "difference_m": -0.4871273571168696,
+      "ci_low_m": -0.5653998775186218,
+      "ci_high_m": -0.42268111458017055,
+      "blocks": 82,
+      "draws": 2000
+    },
     "curve_minus_median_growth": {
       "difference_m": -0.016563211210573074,
       "ci_low_m": -0.03491333028176812,
       "ci_high_m": 0.0013452492126989847,
       "blocks": 82,
       "draws": 2000
+    }
+  },
+  "median_growth_prior": {
+    "Acer macrophyllum Alliance": {
+      "fit_scope": "broad:hardwood forest",
+      "training_cells": 115387,
+      "median_increment_m": 0.44086493203874255
+    },
+    "Arbutus menziesii Alliance": {
+      "fit_scope": "type:Arbutus menziesii Alliance",
+      "training_cells": 7627,
+      "median_increment_m": 0.4902174996779465
+    },
+    "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": {
+      "fit_scope": "type:Eucalyptus (globulus, camaldulensis) Semi-natural Alliance",
+      "training_cells": 1335,
+      "median_increment_m": 0.7508415535735651
+    },
+    "Hesperocyparis sargentii Alliance": {
+      "fit_scope": "type:Hesperocyparis sargentii Alliance",
+      "training_cells": 1087,
+      "median_increment_m": 0.5809840646749391
+    },
+    "Pinus attenuata Alliance": {
+      "fit_scope": "type:Pinus attenuata Alliance",
+      "training_cells": 556,
+      "median_increment_m": 0.7970266423469585
+    },
+    "Pinus sabiniana / Quercus durata Provisional Alliance": {
+      "fit_scope": "type:Pinus sabiniana / Quercus durata Provisional Alliance",
+      "training_cells": 1166,
+      "median_increment_m": 1.3341607176857169
+    },
+    "Populus fremontii Alliance": {
+      "fit_scope": "type:Populus fremontii Alliance",
+      "training_cells": 7070,
+      "median_increment_m": 0.32714907729851816
+    },
+    "Pseudotsuga menziesii Alliance": {
+      "fit_scope": "type:Pseudotsuga menziesii Alliance",
+      "training_cells": 5578,
+      "median_increment_m": 1.0556953704314296
+    },
+    "Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": {
+      "fit_scope": "type:Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance",
+      "training_cells": 17665,
+      "median_increment_m": 0.3472028835727663
+    },
+    "Quercus agrifolia Alliance": {
+      "fit_scope": "type:Quercus agrifolia Alliance",
+      "training_cells": 25116,
+      "median_increment_m": 0.5064620476076644
+    },
+    "Quercus chrysolepis Alliance": {
+      "fit_scope": "type:Quercus chrysolepis Alliance",
+      "training_cells": 1520,
+      "median_increment_m": 0.6408435240980026
+    },
+    "Quercus douglasii Alliance": {
+      "fit_scope": "type:Quercus douglasii Alliance",
+      "training_cells": 11777,
+      "median_increment_m": 0.3557509185101537
+    },
+    "Quercus garryana Alliance": {
+      "fit_scope": "type:Quercus garryana Alliance",
+      "training_cells": 7856,
+      "median_increment_m": 0.3883459385491408
+    },
+    "Quercus kelloggii Alliance": {
+      "fit_scope": "type:Quercus kelloggii Alliance",
+      "training_cells": 7982,
+      "median_increment_m": 0.7056406177373269
+    },
+    "Quercus lobata Alliance": {
+      "fit_scope": "type:Quercus lobata Alliance",
+      "training_cells": 11855,
+      "median_increment_m": 0.42328700391801277
+    },
+    "Quercus wislizeni (tree) Alliance": {
+      "fit_scope": "type:Quercus wislizeni (tree) Alliance",
+      "training_cells": 3636,
+      "median_increment_m": 0.6647150808842204
+    },
+    "Sequoia sempervirens Alliance": {
+      "fit_scope": "type:Sequoia sempervirens Alliance",
+      "training_cells": 2114,
+      "median_increment_m": 1.2262355833923273
+    },
+    "Umbellularia californica Alliance": {
+      "fit_scope": "type:Umbellularia californica Alliance",
+      "training_cells": 11624,
+      "median_increment_m": 0.3986642966611029
     }
   },
   "forest_saturation": {

@@ -13,6 +13,7 @@ from canopyguard.forecasting.growth_curve import (
     class_heights,
     fit_growth_curve,
 )
+from canopyguard.forecasting.growth_prior import training_scope
 from canopyguard.io import ensure_parent, project_root
 from canopyguard.provenance import current_commit, file_sha256, write_provenance
 
@@ -28,14 +29,14 @@ def _fit_parameters(frame: pd.DataFrame, start, end, dt, settings) -> dict:
         use = names == name
         model_group = groups[np.flatnonzero(use)[0]]
         broad_group = broad[np.flatnonzero(use)[0]]
-        own = groups == model_group
-        if (
-            not model_group.startswith("group:")
-            and own.sum() >= settings["min_fit_cells"]
-        ):
-            scope, training = "type:" + model_group, own
-        else:
-            scope, training = "broad:" + broad_group, broad == broad_group
+        scope, training = training_scope(
+            model_group,
+            broad_group,
+            np.ones(len(frame), dtype=bool),
+            groups,
+            broad,
+            settings["min_fit_cells"],
+        )
         if scope not in fitted:
             ceilings = class_heights(
                 names[training], start[training], end[training], settings, mode

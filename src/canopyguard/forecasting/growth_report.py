@@ -1,17 +1,13 @@
-"""Render the issue 8 gate report and forest growth-curve figure."""
+"""Render the issue 8 growth-prior gate report."""
 
 from __future__ import annotations
 
 import json
 
-import matplotlib
-
-matplotlib.use("Agg")
-
-import matplotlib.pyplot as plt
 import numpy as np
 
 from canopyguard.forecasting.growth_curve import chapman_richards
+from canopyguard.forecasting.growth_plot import plot_curves
 from canopyguard.io import ensure_parent, project_root
 
 
@@ -24,54 +20,12 @@ def interval_text(result: dict | None) -> str:
     )
 
 
-def plot_curves(metrics: dict, path) -> None:
-    """Plot full forest curves, including the no-growth region above A."""
-    preferred = (
-        "Sequoia sempervirens Alliance",
-        "Pseudotsuga menziesii Alliance",
-        "Quercus agrifolia Alliance",
-        "Quercus douglasii Alliance",
-        "Umbellularia californica Alliance",
-        "Arbutus menziesii Alliance",
-    )
-    by_name = {row["vegetation_type"]: row for row in metrics["per_type"]}
-    fig, axes = plt.subplots(1, 2, figsize=(12, 5), dpi=160)
-    grid = np.linspace(2, 40, 150)
-    axes[0].plot(grid, grid, color="black", ls="--", lw=1.2, label="No change")
-    axes[1].axhline(0, color="black", ls="--", lw=1.2)
-    for name in preferred:
-        if name not in by_name:
-            continue
-        fit = by_name[name]["fit"]
-        height = chapman_richards(
-            grid, metrics["baseline_years"], fit["A"], fit["k"], fit["c"]
-        )
-        label = name.replace(" Alliance", "")
-        axes[0].plot(grid, height, lw=2, label=label)
-        axes[1].plot(grid, height - grid, lw=2, label=label)
-    axes[0].set(
-        xlabel="2013 p95 canopy height (m)",
-        ylabel="Predicted 2022 p95 canopy height (m)",
-        title="Fitted height",
-    )
-    axes[1].set(
-        xlabel="2013 p95 canopy height (m)",
-        ylabel="Predicted 9-year gain (m)",
-        title="Height dependence",
-    )
-    for axis in axes:
-        axis.grid(alpha=0.2)
-    axes[0].legend(fontsize=8, loc="upper left")
-    fig.tight_layout()
-    fig.savefig(ensure_parent(path))
-    plt.close(fig)
-
-
 def _score_row(label: str, score: dict, model: str) -> str:
     return (
         f"| {label} | {model} | {score['cells']:,} | {score['blocks']} "
         f"| {score['mae_no_change_m']:.3f} | {score['mae_median_growth_m']:.3f} "
         f"| {score['mae_curve_m']:.3f} "
+        f"| {interval_text(score['median_minus_no_change'])} "
         f"| {interval_text(score['curve_minus_no_change'])} "
         f"| {interval_text(score['curve_minus_median_growth'])} |"
     )
@@ -80,15 +34,17 @@ def _score_row(label: str, score: dict, model: str) -> str:
 def _score_table(rows: list[tuple[str, dict, str]]) -> list[str]:
     output = [
         "| Scope | A mode | Cells | Blocks | No change MAE | Median MAE | Curve MAE "
+        "| Median - no change [95% block CI] "
         "| Curve - no change [95% block CI] | Curve - median [95% block CI] |",
-        "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |",
+        "| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |",
     ]
     return output + [_score_row(*row) for row in rows]
 
 
 def _type_rows(metrics: dict) -> list[str]:
     rows = [
-        "| Forest map class | Cells | Fit scope | Full-fit A (m) | Fold A range (m) "
+        "| Forest map class | Cells | Curve fit scope | Full-fit empirical A (m) "
+        "| Fold empirical A range (m) "
         "| Held-out 2013 p95 >= fold A "
         "| k (/yr) | c | No change MAE | Median MAE | Curve MAE | Bound? |",
         "| --- | ---: | --- | ---: | --- | --- | ---: | ---: | ---: "
@@ -109,6 +65,21 @@ def _type_rows(metrics: dict) -> list[str]:
             f"| {item['mae_median_growth_m']:.3f} "
             f"| {item['mae_curve_m']:.3f} "
             f"| {'yes' if bound else 'no'} |"
+        )
+    return rows
+
+
+def _median_prior_rows(metrics: dict) -> list[str]:
+    rows = [
+        "| Forest map class | Fit scope | Training cells | Median increment (m) |",
+        "| --- | --- | ---: | ---: |",
+    ]
+    for item in metrics["per_type"]:
+        name = item["vegetation_type"]
+        prior = metrics["median_growth_prior"][name]
+        rows.append(
+            f"| {name} | {prior['fit_scope']} | {prior['training_cells']:,} "
+            f"| {prior['median_increment_m']:+.3f} |"
         )
     return rows
 
@@ -143,7 +114,8 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         screen_path.with_suffix(".provenance.json").read_text(encoding="utf-8")
     )
     plot_curves(metrics, root / settings["figure_path"])
-    main = metrics["screens"]["forest_loss_on"]
+    growth_only = metrics["screens"]["forest_loss_on"]
+    loss_off = metrics["screens"]["forest_loss_off"]
     comparison = [
         (name.replace("_", " "), score, score["model"])
         for name, score in metrics["screens"].items()
@@ -170,30 +142,61 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         if score["literature_fallback_cells"]
     ]
     lines = [
-        "# Growth-curve check, 2013-2022",
+        "# Growth-prior check, 2013-2022",
         "",
-        "**Post hoc A rule.** The original literature-only A preflight exceeded "
-        "0.5% in nine classes. The revised primary A is the maximum of the "
+        "**Post hoc empirical height ceiling by map class.** The original "
+        "literature-only A preflight exceeded 0.5% in nine classes. The "
+        "Chapman-Richards sensitivity uses the maximum of the "
         "literature typical-upper value and the 99.5th percentile of "
         "max(2013 p95, 2022 p95), calculated within each spatial training fold. "
-        "The 2022 heights in a held-out fold never set that fold's A. This "
-        "revised gate is exploratory and must not be presented as predeclared.",
+        "The 2022 heights in a held-out fold never set that fold's A. This A "
+        "is an empirical map-class cutoff, not a biological maximum or a "
+        "species asymptote. The rule was selected after seeing exceedances "
+        "and must not be presented as predeclared. Promoting the median "
+        "increment and treating both forest screens as co-primary were also "
+        "decisions made after inspecting the earlier curve results.",
         "",
         f"Run: {metrics['generated_utc']}. Issue #8. Base revision: "
         f"{metrics['git_base_revision']}.",
         "",
-        "## Gate G3: forest, LiDAR-loss screen on",
+        "## Gate G3: co-primary forest median-increment prior",
         "",
-        f"**{metrics['decision']}**: curve minus no-change p95 MAE is "
-        f"{interval_text(main['curve_minus_no_change'])} m on 2 km blocks. "
-        "The 95% interval must lie entirely below zero to pass.",
-        f"Curve minus training-group median p95 MAE is "
-        f"{interval_text(main['curve_minus_median_growth'])} m. "
-        "A negative interval that excludes zero supports a height-dependent advantage.",
-        f"The main comparison uses {main['cells']:,} conifer and hardwood cells "
-        f"in {main['blocks']} spatial blocks, five folds, "
+        f"**{metrics['decision']}**: the type-specific or pooled broad-group "
+        "median increment beats no change on both forest screens when each "
+        "95% whole-block interval is entirely below zero.",
+        f"LiDAR-loss screen off ({loss_off['cells']:,} cells): median MAE "
+        f"{loss_off['mae_median_growth_m']:.3f} m versus no change "
+        f"{loss_off['mae_no_change_m']:.3f} m; median minus no change "
+        f"{interval_text(loss_off['median_minus_no_change'])} m.",
+        f"LiDAR-loss screen on ({growth_only['cells']:,} cells): median MAE "
+        f"{growth_only['mae_median_growth_m']:.3f} m versus no change "
+        f"{growth_only['mae_no_change_m']:.3f} m; median minus no change "
+        f"{interval_text(growth_only['median_minus_no_change'])} m. "
+        "This retrospectively selected growth-only subset is an upper bound "
+        "on performance for undisturbed canopy.",
+        f"Curve minus median is "
+        f"{interval_text(loss_off['curve_minus_median_growth'])} m with the "
+        "LiDAR-loss screen off and "
+        f"{interval_text(growth_only['curve_minus_median_growth'])} m with it on. "
+        "Neither establishes a height-dependent advantage.",
+        f"The co-primary comparisons use five folds, 2 km blocks, "
         f"{settings['bootstrap_draws']:,} whole-block bootstrap draws and "
         f"{metrics['baseline_years']:.5f} years between surveys.",
+        "The loss-off subset still uses retrospective fire and Hansen screens; "
+        "it is less conditioned on target-epoch LiDAR but is not a fully "
+        "prospective 2013 forecast evaluation.",
+        "",
+        "## Forecast growth prior",
+        "",
+        "The selected stage-one prior is the training-group median p95 "
+        "increment. Mapped classes with fewer than 500 training cells use "
+        "their broad forest group. These full-sample increments are fitted "
+        "on the forest LiDAR-loss-off subset for later forecasting; the G3 "
+        "scores above use held-out-fold medians. "
+        "Height-bin medians were not tested and require their own held-out "
+        "comparison before adoption.",
+        "",
+        *_median_prior_rows(metrics),
         "",
         "## Selection and A sensitivity",
         "",
@@ -224,10 +227,11 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         + ("; ".join(fallback) if fallback else "none")
         + ". The primary forest-loss-on 2 km result has zero fallbacks.",
         "",
-        "## Forest map classes and height ceilings",
+        "## Forest map classes and empirical height ceilings",
         "",
-        "The post hoc A is fixed within each training fold before fitting k "
-        "and c. Cells starting at or above A are predicted to have no growth. "
+        "The post hoc empirical A is fixed within each training fold before "
+        "fitting k and c. In this curve sensitivity, cells starting at or "
+        "above A are forced to no growth. "
         "Mixed classes use the largest member literature A; pooled fits share "
         "k and c while each class keeps its own fold A. The table reports "
         "held-out exceedance after wire and 10 m line exclusions. Its share "
@@ -238,12 +242,18 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "Fitted k/c bound warnings: " + (", ".join(bound) if bound else "none") + ".",
         f"{len(bound)} of {len(metrics['per_type'])} class fits touch a k or c "
         "bound. Their fitted shape parameters should not be interpreted "
-        "biologically. The forest curve also does not beat the training-group "
-        "median growth baseline at the reported 95% interval, so the G3 pass "
-        "supports growth by vegetation type rather than added skill from "
-        "height-dependent Chapman-Richards curves.",
+        "biologically. Literature-only and record-tree A curves are worse "
+        "than the type-median baseline at their 95% intervals; the post hoc "
+        "curve ties it. Do not tune the curve further or use its shape as "
+        "the growth prior.",
         "",
-        "## Ecological shape check",
+        "## Curve-shape diagnostic, not ecological support",
+        "",
+        "The 10 m versus 20 m check partly follows from forcing no growth "
+        "when starting height reaches A. Quercus douglasii has A = 20 m, "
+        "so its 20 m gain is zero by construction. Nearly flat gains and "
+        "the mixed Eucalyptus reversal also limit interpretation. A "
+        "'shorter gains more' entry does not validate tree biology.",
         "",
         *_shape_rows(metrics),
         "",
@@ -260,12 +270,22 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         f"[MTBS]({screen['sources']['mtbs']['url']}); Hansen supplies "
         f"[loss year]({screen['sources']['hansen']['url']}).",
         "Sonoma MAP_CLASS is a mapping unit, not a species-pure cell label. "
-        "The LiDAR-loss screen selects a retrospective subset; it is never a "
-        "forecast feature. The persistent-forest visual audit remains outstanding.",
+        "Several empirical map-class A values exceed the cited typical-upper "
+        "species heights. Taller crowns of other species within polygons "
+        "and residual LiDAR outliers are possible explanations, not verified "
+        "causes. The empirical A is not a biological ceiling.",
+        "The LiDAR-loss screen selects a retrospective subset; it is never "
+        "a forecast feature. No random visual audit of persistent forest "
+        "cells has been completed. Fire, Hansen and LiDAR screens alone do "
+        "not verify continuous undisturbed forest, so the growth-only sample "
+        "and its upper-bound interpretation remain provisional.",
         "The mixed Eucalyptus literature A is 55 m from FEIS E. globulus. "
         "Kew and ANBG describe E. camaldulensis up to 45 m in its native "
         "Australian range; a person still needs to verify the Jepson entry. "
         "The exact excerpts and source dates are in reports/claims_log.md.",
+        "An offline test changes a held-out fold's 2022 heights and confirms "
+        "that fold's A and predictions do not change. An independent reviewer "
+        "spot-check of the A-rule implementation remains pending.",
         "",
         "## Reproduction",
         "",

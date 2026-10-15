@@ -1,44 +1,72 @@
-# Growth-curve check, 2013-2022
+# Growth-prior check, 2013-2022
 
-**Post hoc A rule.** The original literature-only A preflight exceeded 0.5% in nine classes. The revised primary A is the maximum of the literature typical-upper value and the 99.5th percentile of max(2013 p95, 2022 p95), calculated within each spatial training fold. The 2022 heights in a held-out fold never set that fold's A. This revised gate is exploratory and must not be presented as predeclared.
+**Post hoc empirical height ceiling by map class.** The original literature-only A preflight exceeded 0.5% in nine classes. The Chapman-Richards sensitivity uses the maximum of the literature typical-upper value and the 99.5th percentile of max(2013 p95, 2022 p95), calculated within each spatial training fold. The 2022 heights in a held-out fold never set that fold's A. This A is an empirical map-class cutoff, not a biological maximum or a species asymptote. The rule was selected after seeing exceedances and must not be presented as predeclared. Promoting the median increment and treating both forest screens as co-primary were also decisions made after inspecting the earlier curve results.
 
-Run: 2026-10-15T08:19:24.284801+00:00. Issue #8. Base revision: 9e673107af580daa8ca41de9a7c2905ad347a5da.
+Run: 2026-10-15T08:35:44.630766+00:00. Issue #8. Base revision: aab06c8b782dcfcee464f4e3446891e8176031c5.
 
-## Gate G3: forest, LiDAR-loss screen on
+## Gate G3: co-primary forest median-increment prior
 
-**PASS**: curve minus no-change p95 MAE is -0.266 [-0.314, -0.220] m on 2 km blocks. The 95% interval must lie entirely below zero to pass.
-Curve minus training-group median p95 MAE is +0.002 [-0.007, +0.013] m. A negative interval that excludes zero supports a height-dependent advantage.
-The main comparison uses 76,980 conifer and hardwood cells in 82 spatial blocks, five folds, 2,000 whole-block bootstrap draws and 8.95825 years between surveys.
+**PASS**: the type-specific or pooled broad-group median increment beats no change on both forest screens when each 95% whole-block interval is entirely below zero.
+LiDAR-loss screen off (125,888 cells): median MAE 1.256 m versus no change 1.378 m; median minus no change -0.121 [-0.145, -0.097] m.
+LiDAR-loss screen on (76,980 cells): median MAE 0.782 m versus no change 1.049 m; median minus no change -0.268 [-0.312, -0.227] m. This retrospectively selected growth-only subset is an upper bound on performance for undisturbed canopy.
+Curve minus median is +0.000 [-0.005, +0.005] m with the LiDAR-loss screen off and +0.002 [-0.007, +0.013] m with it on. Neither establishes a height-dependent advantage.
+The co-primary comparisons use five folds, 2 km blocks, 2,000 whole-block bootstrap draws and 8.95825 years between surveys.
+The loss-off subset still uses retrospective fire and Hansen screens; it is less conditioned on target-epoch LiDAR but is not a fully prospective 2013 forecast evaluation.
+
+## Forecast growth prior
+
+The selected stage-one prior is the training-group median p95 increment. Mapped classes with fewer than 500 training cells use their broad forest group. These full-sample increments are fitted on the forest LiDAR-loss-off subset for later forecasting; the G3 scores above use held-out-fold medians. Height-bin medians were not tested and require their own held-out comparison before adoption.
+
+| Forest map class | Fit scope | Training cells | Median increment (m) |
+| --- | --- | ---: | ---: |
+| Quercus agrifolia Alliance | type:Quercus agrifolia Alliance | 25,116 | +0.506 |
+| Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance | type:Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance | 17,665 | +0.347 |
+| Quercus douglasii Alliance | type:Quercus douglasii Alliance | 11,777 | +0.356 |
+| Quercus lobata Alliance | type:Quercus lobata Alliance | 11,855 | +0.423 |
+| Umbellularia californica Alliance | type:Umbellularia californica Alliance | 11,624 | +0.399 |
+| Quercus garryana Alliance | type:Quercus garryana Alliance | 7,856 | +0.388 |
+| Arbutus menziesii Alliance | type:Arbutus menziesii Alliance | 7,627 | +0.490 |
+| Quercus kelloggii Alliance | type:Quercus kelloggii Alliance | 7,982 | +0.706 |
+| Pseudotsuga menziesii Alliance | type:Pseudotsuga menziesii Alliance | 5,578 | +1.056 |
+| Quercus wislizeni (tree) Alliance | type:Quercus wislizeni (tree) Alliance | 3,636 | +0.665 |
+| Populus fremontii Alliance | type:Populus fremontii Alliance | 7,070 | +0.327 |
+| Sequoia sempervirens Alliance | type:Sequoia sempervirens Alliance | 2,114 | +1.226 |
+| Quercus chrysolepis Alliance | type:Quercus chrysolepis Alliance | 1,520 | +0.641 |
+| Hesperocyparis sargentii Alliance | type:Hesperocyparis sargentii Alliance | 1,087 | +0.581 |
+| Pinus sabiniana / Quercus durata Provisional Alliance | type:Pinus sabiniana / Quercus durata Provisional Alliance | 1,166 | +1.334 |
+| Eucalyptus (globulus, camaldulensis) Semi-natural Alliance | type:Eucalyptus (globulus, camaldulensis) Semi-natural Alliance | 1,335 | +0.751 |
+| Pinus attenuata Alliance | type:Pinus attenuata Alliance | 556 | +0.797 |
+| Acer macrophyllum Alliance | broad:hardwood forest | 115,387 | +0.441 |
 
 ## Selection and A sensitivity
 
-| Scope | A mode | Cells | Blocks | No change MAE | Median MAE | Curve MAE | Curve - no change [95% block CI] | Curve - median [95% block CI] |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| forest loss on | posthoc | 76,980 | 82 | 1.049 | 0.782 | 0.784 | -0.266 [-0.314, -0.220] | +0.002 [-0.007, +0.013] |
-| forest loss off | posthoc | 125,888 | 83 | 1.378 | 1.256 | 1.256 | -0.121 [-0.147, -0.094] | +0.000 [-0.005, +0.005] |
-| all loss on | free | 83,772 | 83 | 1.112 | 0.825 | 0.828 | -0.284 [-0.342, -0.230] | +0.004 [-0.008, +0.015] |
-| all loss off | free | 140,530 | 84 | 1.479 | 1.358 | 1.355 | -0.123 [-0.147, -0.098] | -0.002 [-0.007, +0.003] |
-| forest loss on | literature | 76,980 | 82 | 1.049 | 0.782 | 0.794 | -0.255 [-0.301, -0.212] | +0.012 [+0.001, +0.025] |
-| forest loss on | free | 76,980 | 82 | 1.049 | 0.782 | 0.784 | -0.265 [-0.318, -0.216] | +0.002 [-0.009, +0.015] |
-| forest loss on | record | 76,980 | 82 | 1.049 | 0.782 | 0.795 | -0.254 [-0.301, -0.211] | +0.013 [+0.002, +0.026] |
+| Scope | A mode | Cells | Blocks | No change MAE | Median MAE | Curve MAE | Median - no change [95% block CI] | Curve - no change [95% block CI] | Curve - median [95% block CI] |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
+| forest loss on | posthoc | 76,980 | 82 | 1.049 | 0.782 | 0.784 | -0.268 [-0.312, -0.227] | -0.266 [-0.314, -0.220] | +0.002 [-0.007, +0.013] |
+| forest loss off | posthoc | 125,888 | 83 | 1.378 | 1.256 | 1.256 | -0.121 [-0.145, -0.097] | -0.121 [-0.147, -0.094] | +0.000 [-0.005, +0.005] |
+| all loss on | free | 83,772 | 83 | 1.112 | 0.825 | 0.828 | -0.287 [-0.337, -0.243] | -0.284 [-0.342, -0.230] | +0.004 [-0.008, +0.015] |
+| all loss off | free | 140,530 | 84 | 1.479 | 1.358 | 1.355 | -0.121 [-0.142, -0.097] | -0.123 [-0.147, -0.098] | -0.002 [-0.007, +0.003] |
+| forest loss on | literature | 76,980 | 82 | 1.049 | 0.782 | 0.794 | -0.268 [-0.312, -0.227] | -0.255 [-0.301, -0.212] | +0.012 [+0.001, +0.025] |
+| forest loss on | free | 76,980 | 82 | 1.049 | 0.782 | 0.784 | -0.268 [-0.312, -0.227] | -0.265 [-0.318, -0.216] | +0.002 [-0.009, +0.015] |
+| forest loss on | record | 76,980 | 82 | 1.049 | 0.782 | 0.795 | -0.268 [-0.312, -0.227] | -0.254 [-0.301, -0.211] | +0.013 [+0.002, +0.026] |
 
 The LiDAR-loss-off rows keep the fire and Hansen screens. All-class rows are secondary and use the former free-A model because literature A values were specified for forest alliances only. The literature-only row keeps Douglas-fir and redwood at 76 and 91 m. The record-tree row uses 101 and 111 m for those classes; all other classes keep their literature A. The free-A row is the former fit.
 If an entire map class lies in a held-out spatial fold, its training fold has no class-specific height percentile. That class uses its literature A for that fold; the affected cells and classes are recorded in the machine metrics. This does not affect the main forest-loss-on 2 km result.
 
 ## Spatial sensitivity and mean-height check
 
-| Scope | A mode | Cells | Blocks | No change MAE | Median MAE | Curve MAE | Curve - no change [95% block CI] | Curve - median [95% block CI] |
-| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- |
-| forest loss on, 1000 m | posthoc | 76,980 | 198 | 1.049 | 0.778 | 0.780 | -0.269 [-0.307, -0.232] | +0.003 [-0.010, +0.013] |
-| forest loss on, 5000 m | posthoc | 76,980 | 18 | 1.049 | 0.784 | 0.790 | -0.260 [-0.311, -0.213] | +0.006 [-0.007, +0.023] |
-| forest mean, 2 km | literature | 76,980 | 82 | 1.253 | 0.765 | 0.749 | -0.504 [-0.581, -0.432] | -0.017 [-0.035, +0.001] |
+| Scope | A mode | Cells | Blocks | No change MAE | Median MAE | Curve MAE | Median - no change [95% block CI] | Curve - no change [95% block CI] | Curve - median [95% block CI] |
+| --- | --- | ---: | ---: | ---: | ---: | ---: | --- | --- | --- |
+| forest loss on, 1000 m | posthoc | 76,980 | 198 | 1.049 | 0.778 | 0.780 | -0.271 [-0.308, -0.240] | -0.269 [-0.307, -0.232] | +0.003 [-0.010, +0.013] |
+| forest loss on, 5000 m | posthoc | 76,980 | 18 | 1.049 | 0.784 | 0.790 | -0.266 [-0.319, -0.223] | -0.260 [-0.311, -0.213] | +0.006 [-0.007, +0.023] |
+| forest mean, 2 km | literature | 76,980 | 82 | 1.253 | 0.765 | 0.749 | -0.487 [-0.565, -0.423] | -0.504 [-0.581, -0.432] | -0.017 [-0.035, +0.001] |
 Absent-class literature-A fallbacks: forest loss off: 1,087 cells (Hesperocyparis sargentii Alliance); forest loss on 5000 m: 1,153 cells (Acer macrophyllum Alliance, Hesperocyparis sargentii Alliance). The primary forest-loss-on 2 km result has zero fallbacks.
 
-## Forest map classes and height ceilings
+## Forest map classes and empirical height ceilings
 
-The post hoc A is fixed within each training fold before fitting k and c. Cells starting at or above A are predicted to have no growth. Mixed classes use the largest member literature A; pooled fits share k and c while each class keeps its own fold A. The table reports held-out exceedance after wire and 10 m line exclusions. Its share need not equal 0.5%, because held-out blocks can have taller trees.
+The post hoc empirical A is fixed within each training fold before fitting k and c. In this curve sensitivity, cells starting at or above A are forced to no growth. Mixed classes use the largest member literature A; pooled fits share k and c while each class keeps its own fold A. The table reports held-out exceedance after wire and 10 m line exclusions. Its share need not equal 0.5%, because held-out blocks can have taller trees.
 
-| Forest map class | Cells | Fit scope | Full-fit A (m) | Fold A range (m) | Held-out 2013 p95 >= fold A | k (/yr) | c | No change MAE | Median MAE | Curve MAE | Bound? |
+| Forest map class | Cells | Curve fit scope | Full-fit empirical A (m) | Fold empirical A range (m) | Held-out 2013 p95 >= fold A | k (/yr) | c | No change MAE | Median MAE | Curve MAE | Bound? |
 | --- | ---: | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
 | Quercus agrifolia Alliance | 17,265 | type:Quercus agrifolia Alliance | 28.6 | 27.7-29.0 | 59/17265 (0.34%) | 0.0062 | 1.01 | 1.038 | 0.791 | 0.781 | yes |
 | Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance | 10,875 | type:Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance | 30.0 | 30.0-30.2 | 29/10875 (0.27%) | 0.0042 | 1.01 | 0.848 | 0.678 | 0.687 | yes |
@@ -60,9 +88,11 @@ The post hoc A is fixed within each training fold before fitting k and c. Cells 
 | Acer macrophyllum Alliance | 171 | broad:hardwood forest | 28.4 | 27.4-28.5 | 0/171 (0.00%) | 0.0066 | 3.00 | 1.717 | 1.298 | 1.295 | no |
 
 Fitted k/c bound warnings: Quercus agrifolia Alliance, Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance, Quercus douglasii Alliance, Quercus lobata Alliance, Umbellularia californica Alliance, Quercus garryana Alliance, Arbutus menziesii Alliance, Quercus kelloggii Alliance, Quercus wislizeni (tree) Alliance, Populus fremontii Alliance, Hesperocyparis sargentii Alliance.
-11 of 18 class fits touch a k or c bound. Their fitted shape parameters should not be interpreted biologically. The forest curve also does not beat the training-group median growth baseline at the reported 95% interval, so the G3 pass supports growth by vegetation type rather than added skill from height-dependent Chapman-Richards curves.
+11 of 18 class fits touch a k or c bound. Their fitted shape parameters should not be interpreted biologically. Literature-only and record-tree A curves are worse than the type-median baseline at their 95% intervals; the post hoc curve ties it. Do not tune the curve further or use its shape as the growth prior.
 
-## Ecological shape check
+## Curve-shape diagnostic, not ecological support
+
+The 10 m versus 20 m check partly follows from forcing no growth when starting height reaches A. Quercus douglasii has A = 20 m, so its 20 m gain is zero by construction. Nearly flat gains and the mixed Eucalyptus reversal also limit interpretation. A 'shorter gains more' entry does not validate tree biology.
 
 | Forest map class | Gain at 10 m | Gain at 20 m | Shorter gains more? |
 | --- | ---: | ---: | --- |
@@ -91,8 +121,10 @@ Fitted k/c bound warnings: Quercus agrifolia Alliance, Quercus (agrifolia, dougl
 
 The original clean screen retained 111,672 of 1,478,103 label cells. The revised selections and wire exclusions are recorded in the machine metrics and preflight JSON.
 2013 vegetation groups come from the [Sonoma Veg Map](https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query); fire from [FRAP](https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/California_Fire_Perimeters/FeatureServer/0/query) and [MTBS](https://apps.fs.usda.gov/ArcX/rest/services/EDW/EDW_MTBS_01/MapServer/63/query); Hansen supplies [loss year](https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif).
-Sonoma MAP_CLASS is a mapping unit, not a species-pure cell label. The LiDAR-loss screen selects a retrospective subset; it is never a forecast feature. The persistent-forest visual audit remains outstanding.
+Sonoma MAP_CLASS is a mapping unit, not a species-pure cell label. Several empirical map-class A values exceed the cited typical-upper species heights. Taller crowns of other species within polygons and residual LiDAR outliers are possible explanations, not verified causes. The empirical A is not a biological ceiling.
+The LiDAR-loss screen selects a retrospective subset; it is never a forecast feature. No random visual audit of persistent forest cells has been completed. Fire, Hansen and LiDAR screens alone do not verify continuous undisturbed forest, so the growth-only sample and its upper-bound interpretation remain provisional.
 The mixed Eucalyptus literature A is 55 m from FEIS E. globulus. Kew and ANBG describe E. camaldulensis up to 45 m in its native Australian range; a person still needs to verify the Jepson entry. The exact excerpts and source dates are in reports/claims_log.md.
+An offline test changes a held-out fold's 2022 heights and confirms that fold's A and predictions do not change. An independent reviewer spot-check of the A-rule implementation remains pending.
 
 ## Reproduction
 

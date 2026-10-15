@@ -34,9 +34,8 @@ gedi:
     max_elevation_residual_m: 25.0
 
 stage1_growth_model:
-  form: gada
-  base_function: chapman_richards
-  fit_on: stable_cells_only
+  form: type_median_increment
+  fit_on: fire_hansen_screened_forest_without_lidar_loss_filter
   stratify_by: vegetation_alliance
   pool_to_physiognomic_group_below_n: 500
   labels_path: data/processed/labels_2013-2022_unique.npz
@@ -171,7 +170,7 @@ ladder:
   - id: E2
     model: start_height_ring_isotonic
   - id: E3
-    model: stage1_gada
+    model: stage1_type_median_increment
   - id: E4
     model: ridge_on_stage2_residual
   - id: E5

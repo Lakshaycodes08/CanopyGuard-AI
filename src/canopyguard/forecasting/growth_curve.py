@@ -6,6 +6,7 @@ import numpy as np
 from scipy.optimize import least_squares
 
 from canopyguard.evaluation.blocks import assign_blocks, systematic_folds
+from canopyguard.forecasting.growth_prior import training_scope
 
 
 def chapman_richards(
@@ -141,23 +142,6 @@ def class_heights(
     return {name: float(heights[name]) for name in np.unique(names)}
 
 
-def _training_scope(
-    model_group: str,
-    broad_group: str,
-    train: np.ndarray,
-    groups: np.ndarray,
-    broad: np.ndarray,
-    minimum: int,
-) -> tuple[str, np.ndarray]:
-    own = train & (groups == model_group)
-    if not model_group.startswith("group:") and own.sum() >= minimum:
-        return "type:" + model_group, own
-    pooled = train & (broad == broad_group)
-    if pooled.sum() < minimum:
-        raise ValueError(f"Too few training cells for broad group {broad_group}")
-    return "broad:" + broad_group, pooled
-
-
 def blocked_predictions(
     frame,
     start: np.ndarray,
@@ -185,7 +169,7 @@ def blocked_predictions(
         for model_group in np.unique(group[test]):
             use = test & (group == model_group)
             broad_group = broad[np.flatnonzero(use)[0]]
-            scope, fit_rows = _training_scope(
+            scope, fit_rows = training_scope(
                 model_group,
                 broad_group,
                 train,

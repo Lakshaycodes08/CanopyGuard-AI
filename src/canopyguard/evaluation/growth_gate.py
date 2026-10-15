@@ -26,6 +26,7 @@ from canopyguard.forecasting.growth_curve import (
     block_mae_interval,
     blocked_predictions,
 )
+from canopyguard.forecasting.growth_prior import fit_type_median_prior
 from canopyguard.forecasting.growth_report import write_growth_report
 from canopyguard.io import ensure_parent, project_root
 
@@ -107,11 +108,26 @@ def _score(
         "curve_minus_no_change": block_mae_interval(
             curve_error, zero_error, predicted["blocks"], **interval_settings
         ),
+        "median_minus_no_change": block_mae_interval(
+            median_error, zero_error, predicted["blocks"], **interval_settings
+        ),
         "curve_minus_median_growth": block_mae_interval(
             curve_error, median_error, predicted["blocks"], **interval_settings
         ),
     }
     return score, predicted
+
+
+def median_gate_decision(screens: dict) -> str:
+    """Require the median prior to beat no change in both forest screens."""
+    names = ("forest_loss_on", "forest_loss_off")
+    return (
+        "PASS"
+        if all(
+            screens[name]["median_minus_no_change"]["ci_high_m"] < 0 for name in names
+        )
+        else "FAIL"
+    )
 
 
 def _check_fit_permission(settings: dict, shares: dict) -> None:
@@ -174,7 +190,6 @@ def run_growth_gate(forecast: dict) -> dict:
         screens[screen_name] = {"model": mode, **score}
         if screen_name == "forest_loss_on":
             primary_predictions = predicted
-    primary = screens["forest_loss_on"]
     sensitivities = {}
     for mode in ("literature", "free", "record"):
         sensitivities[mode], _ = _score(
@@ -227,7 +242,14 @@ def run_growth_gate(forecast: dict) -> dict:
         fold_shares,
         settings,
     )
-    decision = "PASS" if primary["curve_minus_no_change"]["ci_high_m"] < 0 else "FAIL"
+    prior_frame, prior_heights = _selected(table, heights, masks["forest_loss_off"])
+    median_prior = fit_type_median_prior(
+        prior_frame,
+        prior_heights["p95_start"],
+        prior_heights["p95_end"],
+        settings["min_fit_cells"],
+    )
+    decision = median_gate_decision(screens)
     _save_oof(
         forest_frame,
         forest_heights["p95_start"],
@@ -255,6 +277,7 @@ def run_growth_gate(forecast: dict) -> dict:
         "height_sensitivities": sensitivities,
         "spatial_sensitivities": spatial,
         "mean_secondary": mean_score,
+        "median_growth_prior": median_prior,
         "forest_saturation": fold_shares,
         "literature_saturation": shares,
         "per_type": per_type,

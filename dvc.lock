@@ -355,8 +355,8 @@ stages:
     deps:
     - path: configs/forecasting.yaml
       hash: md5
-      md5: dfb5e228dc3f8362696c3d5e351265bc
-      size: 7266
+      md5: a6b91deaca5e3fd97fdab50f4ae7170b
+      size: 7302
     - path: data/interim/change_2013-2022.json
       hash: md5
       md5: 113aa38319be3c1bfec2b0bf1399b3d5
@@ -399,24 +399,32 @@ stages:
       size: 7425
     - path: src/canopyguard/evaluation/growth_gate.py
       hash: md5
-      md5: 85aab8b1e43e65e0aec598ae19d55ac2
-      size: 9247
+      md5: e07f080fb6301d6ca7e1b2620591f736
+      size: 10028
     - path: src/canopyguard/evaluation/growth_outputs.py
       hash: md5
-      md5: c60b0a22dfbdaa8730890afb652dd124
-      size: 5307
+      md5: 3ab286ba6f691499ea48fe9f54cdcfb5
+      size: 5286
     - path: src/canopyguard/evaluation/growth_screen.py
       hash: md5
       md5: 3c5b737b8a594c2b58eb16fb2e0eea8e
       size: 3682
     - path: src/canopyguard/forecasting/growth_curve.py
       hash: md5
-      md5: 763e1409ca37253a9d2540efd12b517a
-      size: 11136
+      md5: 2bbaf62be9e1a2638aa736364052b865
+      size: 10662
+    - path: src/canopyguard/forecasting/growth_plot.py
+      hash: md5
+      md5: 96c76771a36ed2cd8c0f164dc9e1134a
+      size: 1930
+    - path: src/canopyguard/forecasting/growth_prior.py
+      hash: md5
+      md5: abe774a602bc2f0b444083722c8964a8
+      size: 2457
     - path: src/canopyguard/forecasting/growth_report.py
       hash: md5
-      md5: 2e2b4b8c8c945e0bf491af0851ebaf53
-      size: 11970
+      md5: e1d2d6a088608f464ca525e5e604905f
+      size: 14106
     - path: src/canopyguard/io.py
       hash: md5
       md5: 7860402382d495aae9b8663a4567565f
@@ -436,5 +444,5 @@ stages:
       size: 4384888
     - path: data/interim/growth_curve_oof_2013-2022.parquet.provenance.json
       hash: md5
-      md5: 331849b9f3c1affabf8fda58792749cf
+      md5: 1757830a93993835f1ca2089bd458b78
       size: 496
