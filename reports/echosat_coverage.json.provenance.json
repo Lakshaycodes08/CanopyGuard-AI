@@ -1,0 +1,17 @@
+{
+  "bbox_wgs84": [
+    -122.9,
+    38.475,
+    -122.74,
+    38.82
+  ],
+  "config_sha256": "8bab0833a24cdf05f7b672ebe44575955dbd305cc993c2a76ffea62b6708ca0c",
+  "crs": "EPSG:4326",
+  "fetch_utc": "2026-10-13T20:51:21.578283+00:00",
+  "git_commit": "774509398315f0153315fe624009521336b73741",
+  "http_status": null,
+  "row_count": null,
+  "script_name": "scripts/check_echosat.py",
+  "sha256": "bbb7beb45ea279272e4ca7a20a82fcb5e524ddaf51b14104f85b679b7f584eb0",
+  "source_url": "https://echosat.uni-muenster.de/ECHOSAT_T10S.tif"
+}
