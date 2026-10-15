@@ -1,78 +1,213 @@
 \documentclass[11pt]{article}
-
 \usepackage[margin=1in]{geometry}
-\usepackage{graphicx}
 \usepackage{booktabs}
 \usepackage{amsmath}
 \usepackage{hyperref}
-
-\title{CanopyGuard-AI: Vegetation Risk Forecasting and Maintenance Prioritization Near Power-Line Corridors}
+\title{A Spatially Blocked Test of a Map-Class Canopy-Height Growth Prior in Northern Sonoma County}
 \author{CanopyGuard-AI contributors}
 \date{}
 
 \begin{document}
-
 \maketitle
-
 \begin{abstract}
-Vegetation encroachment near power-line corridors creates maintenance and
-reliability challenges. This paper presents CanopyGuard-AI, a reproducible
-pipeline for forecasting vegetation risk and prioritizing trimming decisions
-using satellite time series, sparse canopy reference data, LiDAR validation, and
-optimization. The risk score is designed as a research prioritization aid and is
-not a regulatory clearance or safety certification.
+Forecasting canopy-height change from repeat airborne light detection and
+ranging (LiDAR) requires a baseline evaluated without using the target survey
+as a predictor. We compare no height change, a map-class median increment,
+and a Chapman--Richards curve on screened 2013--2022 observations in northern
+Sonoma County. Five-fold spatial cross-validation with 2 km blocks finds
+that the type-specific or pooled broad-group median reduces mean absolute
+error (MAE) relative to no change by 0.121 m on the forest
+LiDAR-loss-off screen. The height-dependent curve adds no measurable
+improvement. This is a preliminary growth-prior result, not a validated
+corridor clearance forecast. The LiDAR-loss-on subset is retrospectively
+selected; persistent-forest selection still needs visual audit.
+Conductor geometry is unavailable, so future span rankings would be
+research prioritization rather than clearance or safety determinations.
 \end{abstract}
 
 \section{Introduction}
-
-Power-line vegetation management requires identifying where growth is likely to
-create future risk and deciding how limited maintenance resources should be
-allocated. This work studies whether remote sensing and forecasting can produce
-a defensible prioritization signal for vegetation management.
+Vegetation management near transmission lines motivates forecasts of canopy
+change, but this study has not measured conductor clearance or produced
+validated span rankings. The immediate question is narrower: does a simple
+vegetation-map-class increment improve a 2013-to-2022 height forecast over
+assuming no change, and does a height-dependent growth curve improve on that
+increment? The study uses 2013 airborne LiDAR and vegetation mapping at the
+forecast cutoff and reserves 2022 LiDAR for the outcome. Its present
+contribution is a spatially blocked comparison of growth priors with
+explicit treatment of label contamination and retrospective screening.
 
 \section{Related Work}
+Growth-aware corridor analysis predates this study. Mongus et al.\ used
+repeat airborne LiDAR to predict growth and detect encroachment
+\cite{mongus2021}; Chen et al.\ combined UAV LiDAR, species information,
+and Richards curves for future tree encroachment \cite{chen2022}. These
+studies motivate a simple baseline before fitting a more flexible curve
+to map classes that are not species-pure.
 
-This section will summarize prior work on vegetation management, satellite-based
-canopy monitoring, GEDI and LiDAR validation, forecasting, and maintenance
-optimization.
+Satellite height mapping and maintenance allocation address related tasks.
+Lang et al.\ mapped canopy height from Sentinel-2 and GEDI with independent
+airborne-LiDAR evaluation \cite{lang2023}. Pauls et al.\ released
+retrospective annual ECHOSAT maps while stating that year-to-year height
+changes lack direct validation against independent repeated observations
+\cite{pauls2026}. Jumbo and Moghaddass connected image-derived vegetation
+risk to crew routing \cite{jumbo2022}; Jaramillo-Leon and Leite studied
+preventive trimming schedules \cite{jaramillo2022}. These works establish
+that growth curves, satellite height mapping, and scheduling are not
+new components. The present result concerns the measured value of a
+map-class growth prior under a fixed spatial evaluation.
 
 \section{Study Area and Data}
+The configured northern Sonoma County box spans $122.90^\circ$--$122.74^\circ$
+W and $38.475^\circ$--$38.82^\circ$ N. The California Energy Commission
+map contains 41 published overhead transmission features intersecting it.
+These are approximate line features, not conductor geometry \cite{cecsource}.
+The analysis uses a stable 10 m cell grid in EPSG:6339, with 2013 and 2022
+airborne-LiDAR canopy summaries and 2013 Sonoma vegetation-map classes
+\cite{sonomaveg}.
 
-This section will describe the study area, HIFLD corridor context, Sentinel-2
-time series, GEDI reference data, and LiDAR validation data.
+Per cell, the label archive holds mean, 95th-percentile (p95), and
+maximum canopy height at both epochs. The outcome is the p95 height
+difference. The 2022 survey supplies the held-out outcome only. GEDI is
+reserved for an independent cross-check; ECHOSAT is a product benchmark.
+GEDI, ECHOSAT, and Sentinel-2 all postdate the 2013 cutoff and are excluded
+from predictors in this experiment. Fire-perimeter and Hansen loss records
+support retrospective sample screens, not model features
+\cite{frapsource,mtbssource,hansensource}.
 
 \section{Methods}
+\subsection{Label construction and wire-quality control}
+Canopy-height summaries are formed on matching cell identifiers after
+within-epoch surface and terrain processing. The overlap rule retains
+the highest minimum-coverage observation, then the higher total coverage,
+then the lower tile identifier. It yields 1,478,103 unique cells; 198
+disputed overlaps are excluded. Terrain from different epochs is not
+directly subtracted as a height-change label. The 2013 p95 value may be
+a predictor; no 2022 height enters a predictor.
 
-This section will define the feature pipeline, forecasting task, risk score, and
-scheduling optimizer.
+Mapped transmission features may pass near unclassified wires, poles,
+or towers. The wire-quality check found an excess of isolated tall
+returns near published lines, especially in 2013, but point inspections
+did not prove each return's cause. The p95 analysis excludes flagged
+wire-suspect cells and cells within 10 m of a mapped line. This is a
+documented quality choice, not a verified point-level classifier.
 
-\section{Experiments}
+\subsection{Screens and priors}
+The forest comparison excludes disputed overlaps, invalid height changes,
+low starting canopy, unknown vegetation, mapped fire or Hansen loss, cells
+near published lines, and wire-affected p95 cells. The forest
+LiDAR-loss-off screen retains 125,888 cells. A second forest screen
+removes cells with target-epoch LiDAR loss, leaving 76,980. Because this
+uses target-epoch information, it is a retrospectively selected
+undisturbed-canopy upper bound. Even the loss-off screen uses retrospective
+fire and Hansen data; neither proves persistent forest. A random visual
+audit of persistent forest has not yet been done.
 
-This section will define time-based train, validation, and test splits,
-baselines, metrics, and ablation studies.
+For each training fold, the stage-one prior is the median observed p95
+increment for the cell's 2013 Sonoma map class. Classes with fewer than
+500 training cells use their broad forest group. The no-change baseline
+predicts the 2013 p95 height. The Chapman--Richards curve is a sensitivity
+comparison only. Its height parameter $A$ is the maximum of a cited
+typical-upper height and the training-fold 99.5th percentile of paired
+p95 heights. This rule was chosen \emph{after} literature-only ceilings
+showed exceedances. It is an empirical map-class cutoff, not a biological
+asymptote. The 2022 heights of a held-out fold do not set that fold's $A$.
+
+\subsection{Spatial evaluation}
+Square 2 km spatial blocks are assigned to five dispersed folds. Every
+prediction is made for a block held out from its fit. MAE is computed
+across held-out cells. Paired MAE differences use 2,000 whole-block
+bootstrap draws with seed 42; a 95\% interval wholly below zero is the
+comparison criterion. G3 evaluated both forest screens. The later
+stage-two residual gate was preregistered separately, with loss-off as
+its headline screen.
 
 \section{Results}
+\begin{table}[ht]
+\centering
+\caption{G3 p95 comparison with five-fold, 2 km spatial cross-validation.
+MAE is in metres.}
+\begin{tabular}{lrrr}
+\toprule
+Forest screen & Cells & No change MAE & Median MAE \\
+\midrule
+LiDAR loss off & 125,888 & 1.378 & 1.256 \\
+LiDAR loss on & 76,980 & 1.049 & 0.782 \\
+\bottomrule
+\end{tabular}
+\end{table}
 
-This section will report forecasting accuracy, risk-prioritization performance,
-scheduling outcomes, and uncertainty analysis.
+On the loss-off screen, median minus no-change MAE was $-0.121$ m
+(95\% whole-block interval $[-0.145,-0.097]$). On the retrospectively
+selected loss-on screen it was $-0.268$ m ($[-0.312,-0.227]$).
+The type-specific or pooled median increment beats assuming no change
+on both screens. The larger loss-on gain is an upper-bound result for
+a selected subset.
+
+Curve minus median MAE was $+0.000$ m ($[-0.005,+0.005]$) with LiDAR
+loss off and $+0.002$ m ($[-0.007,+0.013]$) with it on. The
+height-dependent Chapman--Richards curve adds nothing measurable
+under spatial cross-validation. With literature-only $A$, the curve
+was worse than the median on the loss-on screen: $+0.012$ m
+($[+0.001,+0.025]$). Eleven of 18 map-class fits touched a $k$
+or $c$ bound, so their shape parameters are not interpreted biologically.
+
+\subsection{Stage-two residual models}
+The preregistered ridge and LightGBM residual comparisons have not
+yet been run. No stage-two result or pass decision is claimed here.
 
 \section{Discussion}
+The measured contribution is a map-class median increment that improves
+on no change. The curve sensitivity does not improve on that median,
+and its post hoc $A$ values are not species maxima. Sonoma map
+polygons may contain mixed species; whether this or LiDAR outliers
+explains tall empirical cutoffs is unverified. The 27 m
+\emph{Acer macrophyllum} value is a champion-tree exception to the
+otherwise typical-upper rule. The Jepson height entry for
+\emph{Eucalyptus camaldulensis} still needs human verification.
 
-This section will interpret results, failure modes, operational constraints, and
-scientific limitations.
-For the preliminary growth-prior comparison, whole-block bootstrap intervals
-hold the fitted spatial-fold models fixed; they omit refit variance and may
-therefore be too narrow.
+The persistent-forest visual audit is incomplete. The LiDAR-loss-on
+population is retrospectively selected and cannot represent an
+operational forecast-time filter. ECHOSAT band-to-year mapping is
+inferred, not author-confirmed; ECHOSAT supplies no 2013 predictor.
+Whole-block bootstrap intervals hold fitted fold models fixed and
+omit refit variance, so they may be too narrow. No conductor
+geometry is available. Eventual span rankings would be research
+prioritization, not clearance or safety determinations.
 
 \section{Conclusion}
-
-This section will summarize the contribution and identify next validation steps.
+A type-specific or pooled broad-group median height increment improves
+the screened 2013--2022 p95 comparison over no change. Height-dependent
+Chapman--Richards curves add no measurable benefit. Independent scientific
+review of the post hoc curve rule and validation of persistent-forest
+selection remain open before broader claims are made.
 
 \section*{AI Assistance Disclosure}
-
 AI assistance was used for project planning, code drafting, and manuscript
-support. The final manuscript, claims, results, and citations must be verified by
-the authors according to the target venue policy.
+support. The authors must verify the final manuscript, claims, results,
+and citations under the target venue's policy.
 
+\begin{thebibliography}{99}
+\bibitem{mongus2021} Mongus et al. (2021).
+\href{https://doi.org/10.3390/rs13245159}{doi:10.3390/rs13245159}.
+\bibitem{chen2022} Chen et al. (2022).
+\href{https://doi.org/10.1016/j.jag.2022.102740}{doi:10.1016/j.jag.2022.102740}.
+\bibitem{lang2023} Lang et al. (2023).
+\href{https://doi.org/10.1038/s41559-023-02206-6}{doi:10.1038/s41559-023-02206-6}.
+\bibitem{pauls2026} Pauls et al. (2026).
+\href{https://doi.org/10.48550/arXiv.2602.21421}{doi:10.48550/arXiv.2602.21421}.
+\bibitem{jumbo2022} Jumbo and Moghaddass (2022).
+\href{https://doi.org/10.1016/j.apenergy.2022.119234}{doi:10.1016/j.apenergy.2022.119234}.
+\bibitem{jaramillo2022} Jaramillo-Leon and Leite (2022).
+\href{https://doi.org/10.1007/s40313-020-00606-8}{doi:10.1007/s40313-020-00606-8}.
+\bibitem{cecsource} California Energy Commission transmission-line layer.
+\href{https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/MapServer/0}{Sonoma County service}.
+\bibitem{sonomaveg} Sonoma County, 2013 vegetation map.
+\href{https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0}{Sonoma County service}.
+\bibitem{frapsource} CAL FIRE, historical fire perimeters.
+\href{https://www.fire.ca.gov/what-we-do/fire-resource-assessment-program/fire-perimeters}{Source}.
+\bibitem{mtbssource} Monitoring Trends in Burn Severity, mapping methods.
+\href{https://mtbs.gov/mapping-methods}{Source}.
+\bibitem{hansensource} Hansen Global Forest Change loss year.
+\href{https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif}{Source data}.
+\end{thebibliography}
 \end{document}
-
