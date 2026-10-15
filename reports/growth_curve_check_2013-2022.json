@@ -1,7 +1,7 @@
 {
   "issue": 8,
-  "generated_utc": "2026-10-15T10:11:06.555838+00:00",
-  "git_base_revision": "a4e272edbd3ea983348d5a7beb5670ee1791d615",
+  "generated_utc": "2026-10-15T10:53:23.546324+00:00",
+  "git_base_revision": "d312797d92dc809754dba4f3fd56b2d89f00f8e0",
   "baseline_years": 8.958247775496236,
   "decision": "PASS",
   "settings": {
@@ -48,7 +48,17 @@
       "commit": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
       "scope": "A-rule implementation and held-out-fold leakage checks",
       "independence_limit": "reviewer proposed the A rule",
-      "human_review": "pending"
+      "human_review": "pending",
+      "follow_up_review": {
+        "reviewer": "Claude Opus 5",
+        "reviewer_type": "ai",
+        "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
+        "date": "2026-10-15",
+        "commit": "a4e272edbd3ea983348d5a7beb5670ee1791d615",
+        "compared_to": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
+        "scope": "diffs in growth_curve.py and growth_prior.py",
+        "independence_limit": "reviewer proposed the A rule; human review pending"
+      }
     },
     "p95_wire_exclusion_m": 10.0,
     "saturation_review_fraction": 0.005,
