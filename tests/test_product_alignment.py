@@ -86,4 +86,7 @@ def test_explicit_warp_matches_cells_and_records_offset_sensitivity():
     assert moved[1] != pytest.approx(heights[1], abs=1e-4)
     assert record["operation_epsg"] == 9774
     assert record["target_crs"] == "EPSG:6339"
+    assert record["cell_grid_checked"] is True
+    assert record["cell_count"] == 3
+    assert record["gdal_version"]
     assert moved_record["offset_east_m"] == 2.0
