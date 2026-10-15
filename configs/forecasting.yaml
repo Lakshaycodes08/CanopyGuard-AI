@@ -192,7 +192,13 @@ stage2_residual_model:
     learning_rate: 0.03
     min_data_in_leaf: 200
     feature_fraction: 0.6
+    deterministic: true
+    force_col_wise: true
+    n_jobs: 4
     verbosity: -1
+  oof_path: data/interim/stage2_residual_oof_2013-2022.parquet
+  metrics_path: reports/stage2_residual_check_2013-2022.json
+  report_path: reports/stage2_residual_check_2013-2022.md
   capacity_ceiling:
     max_depth: 4
     num_leaves: 15

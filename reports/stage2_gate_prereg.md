@@ -18,6 +18,8 @@ Use five spatial folds with 2 km square blocks, seed 42, via `canopyguard.evalua
 
 E4 is scikit-learn ridge with alpha 1.0. Numeric predictors are training-median imputed then standardized; vegetation class is one-hot encoded. E5 is LightGBM regression with max depth 4, 15 leaves, 400 estimators, learning rate 0.03, minimum 200 cells per leaf, feature fraction 0.6, and seed 42. Its categorical map class is encoded using the same training-only vocabulary. These settings are recorded in `configs/forecasting.yaml`, remain under its capacity ceiling, and are used for one fit per fold per declared screen and block-size evaluation. No other model family, hyperparameter search, feature search, or screen selection is permitted after seeing results.
 
+For reproducible execution, LightGBM uses deterministic and column-wise modes with four threads. These execution controls are frozen before the first E4 or E5 fit.
+
 ## Decision and declared sensitivities
 
 For each model separately, PASS requires the 95% whole-block interval for (model MAE minus stage-one prior MAE) to lie entirely below zero on the forest LiDAR-loss-OFF 2 km screen. An interval touching or crossing zero is FAIL. The forest LiDAR-loss-ON comparison is reported as a retrospective upper bound. Declared sensitivities are 1 km and 5 km blocks, and forest-only versus all admissible map classes, using the same fixed settings and showing the matched stage-one baseline. A null or negative result is a reportable finding. It is not grounds to change the gate, settings, blocks, features, or screens.
