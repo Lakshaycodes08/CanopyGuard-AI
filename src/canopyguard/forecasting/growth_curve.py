@@ -177,6 +177,7 @@ def blocked_predictions(
     curve = np.full(len(frame), np.nan)
     median = np.full(len(frame), np.nan)
     fold_a = np.full(len(frame), np.nan)
+    literature_fallback = np.zeros(len(frame), dtype=bool)
     scopes: dict[str, int] = {}
     for fold in range(settings["folds"]):
         train, test = folds != fold, folds == fold
@@ -213,6 +214,17 @@ def blocked_predictions(
                 median_growth = float(np.median(end[fit_rows] - start[fit_rows]))
                 cache[scope] = fit, median_growth, ceilings
             fit, median_growth, ceilings = cache[scope]
+            if ceilings is not None:
+                training_names = np.unique(names[fit_rows])
+                absent = ~np.isin(names[use], training_names)
+                literature_fallback[use] = absent
+                fallback_heights = dict(settings["max_height_m"])
+                if a_mode == "record":
+                    fallback_heights.update(settings["record_tree_height_m"])
+                for name in np.unique(names[use][absent]):
+                    if fallback_heights.get(name) is None:
+                        raise ValueError(f"Unconfirmed maximum height for: {name}")
+                    ceilings[name] = float(fallback_heights[name])
             a = (
                 fit["A"]
                 if ceilings is None
@@ -230,6 +242,7 @@ def blocked_predictions(
         "curve": curve,
         "median": median,
         "A": fold_a,
+        "literature_fallback": literature_fallback,
         "fit_scope_counts": scopes,
     }
 

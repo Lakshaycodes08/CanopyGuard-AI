@@ -100,6 +100,10 @@ def _score(
         "mae_no_change_m": float(np.mean(np.abs(zero_error))),
         "mae_median_growth_m": float(np.mean(np.abs(median_error))),
         "mae_curve_m": float(np.mean(np.abs(curve_error))),
+        "literature_fallback_cells": int(predicted["literature_fallback"].sum()),
+        "literature_fallback_classes": sorted(
+            frame.loc[predicted["literature_fallback"], "vegetation_type"].unique()
+        ),
         "curve_minus_no_change": block_mae_interval(
             curve_error, zero_error, predicted["blocks"], **interval_settings
         ),

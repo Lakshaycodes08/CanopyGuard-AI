@@ -355,8 +355,8 @@ stages:
     deps:
     - path: configs/forecasting.yaml
       hash: md5
-      md5: d4ffd988a837836ec349580678682af3
-      size: 5448
+      md5: dfb5e228dc3f8362696c3d5e351265bc
+      size: 7266
     - path: data/interim/change_2013-2022.json
       hash: md5
       md5: 113aa38319be3c1bfec2b0bf1399b3d5
@@ -377,10 +377,14 @@ stages:
       hash: md5
       md5: 449032f5fcb1db0e54c9e455fe1b2cdf
       size: 111596240
+    - path: data/processed/labels_2013-2022_wire_flags.npz
+      hash: md5
+      md5: 98d5ee04e0a7bc8b1dab61a8a4e31d9a
+      size: 7647531
     - path: scripts/run_growth_curve_check.py
       hash: md5
-      md5: e5943f62539d3763139634fc576e3492
-      size: 558
+      md5: 4b5304b73b3147d28cf73d7c3d9a6ce3
+      size: 970
     - path: src/canopyguard/config.py
       hash: md5
       md5: 6831473e26f947a6ceaed4378369f39e
@@ -395,16 +399,24 @@ stages:
       size: 7425
     - path: src/canopyguard/evaluation/growth_gate.py
       hash: md5
-      md5: 24f75a6c0946163c679834f1d4f8d088
-      size: 10347
+      md5: 85aab8b1e43e65e0aec598ae19d55ac2
+      size: 9247
+    - path: src/canopyguard/evaluation/growth_outputs.py
+      hash: md5
+      md5: c60b0a22dfbdaa8730890afb652dd124
+      size: 5307
+    - path: src/canopyguard/evaluation/growth_screen.py
+      hash: md5
+      md5: 3c5b737b8a594c2b58eb16fb2e0eea8e
+      size: 3682
     - path: src/canopyguard/forecasting/growth_curve.py
       hash: md5
-      md5: 7043872078fed93ff1bd94f67b98bd87
-      size: 6697
+      md5: 763e1409ca37253a9d2540efd12b517a
+      size: 11136
     - path: src/canopyguard/forecasting/growth_report.py
       hash: md5
-      md5: 3431d378d4c4345eb243c70909b1f977
-      size: 12655
+      md5: 2e2b4b8c8c945e0bf491af0851ebaf53
+      size: 11970
     - path: src/canopyguard/io.py
       hash: md5
       md5: 7860402382d495aae9b8663a4567565f
@@ -420,9 +432,9 @@ stages:
     outs:
     - path: data/interim/growth_curve_oof_2013-2022.parquet
       hash: md5
-      md5: f36dabc739c9919ba656361874dd5f5a
-      size: 6332075
+      md5: a174b9ad0b9542f8a3e4017d0710a8ab
+      size: 4384888
     - path: data/interim/growth_curve_oof_2013-2022.parquet.provenance.json
       hash: md5
-      md5: a9390d9c7b39723772c72ad7c0b40963
-      size: 497
+      md5: 331849b9f3c1affabf8fda58792749cf
+      size: 496

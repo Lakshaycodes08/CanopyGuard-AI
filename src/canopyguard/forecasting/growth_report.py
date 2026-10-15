@@ -157,6 +157,18 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         for item in metrics["per_type"]
         if item["fit"]["k_at_bound"] or item["fit"]["c_at_bound"]
     ]
+    fallback = [
+        f"{name.replace('_', ' ')}: {score['literature_fallback_cells']:,} cells "
+        f"({', '.join(score['literature_fallback_classes'])})"
+        for name, score in (
+            list(metrics["screens"].items())
+            + [
+                (f"forest loss on {size} m", score)
+                for size, score in metrics["spatial_sensitivities"].items()
+            ]
+        )
+        if score["literature_fallback_cells"]
+    ]
     lines = [
         "# Growth-curve check, 2013-2022",
         "",
@@ -193,6 +205,11 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "The literature-only row keeps Douglas-fir and redwood at 76 and 91 m. "
         "The record-tree row uses 101 and 111 m for those classes; all other "
         "classes keep their literature A. The free-A row is the former fit.",
+        "If an entire map class lies in a held-out spatial fold, its training "
+        "fold has no class-specific height percentile. That class uses its "
+        "literature A for that fold; the affected cells and classes are "
+        "recorded in the machine metrics. This does not affect the main "
+        "forest-loss-on 2 km result.",
         "",
         "## Spatial sensitivity and mean-height check",
         "",
@@ -203,6 +220,9 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
             ]
             + [("forest mean, 2 km", metrics["mean_secondary"], "literature")]
         ),
+        "Absent-class literature-A fallbacks: "
+        + ("; ".join(fallback) if fallback else "none")
+        + ". The primary forest-loss-on 2 km result has zero fallbacks.",
         "",
         "## Forest map classes and height ceilings",
         "",
@@ -216,6 +236,12 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         *_type_rows(metrics),
         "",
         "Fitted k/c bound warnings: " + (", ".join(bound) if bound else "none") + ".",
+        f"{len(bound)} of {len(metrics['per_type'])} class fits touch a k or c "
+        "bound. Their fitted shape parameters should not be interpreted "
+        "biologically. The forest curve also does not beat the training-group "
+        "median growth baseline at the reported 95% interval, so the G3 pass "
+        "supports growth by vegetation type rather than added skill from "
+        "height-dependent Chapman-Richards curves.",
         "",
         "## Ecological shape check",
         "",
@@ -236,6 +262,10 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "Sonoma MAP_CLASS is a mapping unit, not a species-pure cell label. "
         "The LiDAR-loss screen selects a retrospective subset; it is never a "
         "forecast feature. The persistent-forest visual audit remains outstanding.",
+        "The mixed Eucalyptus literature A is 55 m from FEIS E. globulus. "
+        "Kew and ANBG describe E. camaldulensis up to 45 m in its native "
+        "Australian range; a person still needs to verify the Jepson entry. "
+        "The exact excerpts and source dates are in reports/claims_log.md.",
         "",
         "## Reproduction",
         "",

@@ -91,7 +91,7 @@ stage1_growth_model:
       Arbutus menziesii Alliance: 40
       Acer macrophyllum Alliance: 27
       Populus fremontii Alliance: 34
-      Eucalyptus (globulus, camaldulensis) Semi-natural Alliance: null
+      Eucalyptus (globulus, camaldulensis) Semi-natural Alliance: 55
       Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance: 30
       Pseudotsuga menziesii Alliance: 76
       Sequoia sempervirens Alliance: 91
@@ -101,8 +101,9 @@ stage1_growth_model:
     record_tree_height_m:
       Pseudotsuga menziesii Alliance: 101
       Sequoia sempervirens Alliance: 111
-    pending_source_review: [Eucalyptus camaldulensis Jepson height]
-    source_review_confirmed: false
+    pending_source_review: []
+    open_verification_items: [Eucalyptus camaldulensis Jepson height; check whether above 55 m]
+    source_review_confirmed: true
     reviewer_spot_checked: true
     p95_wire_exclusion_m: 10.0
     saturation_review_fraction: 0.005

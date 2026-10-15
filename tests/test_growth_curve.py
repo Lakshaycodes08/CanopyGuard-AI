@@ -137,6 +137,36 @@ def test_held_out_2022_heights_cannot_change_fold_a_or_prediction():
     np.testing.assert_allclose(changed["curve"][held_out], original["curve"][held_out])
 
 
+def test_spatially_isolated_class_uses_literature_a_without_held_out_leak():
+    cfg = settings()
+    cfg["min_fit_cells"] = 20
+    cfg["max_height_m"] = {"oak": 40.0, "pine": 60.0}
+    block = np.repeat(np.arange(10), 20)
+    names = np.where(block == 0, "pine", "oak")
+    start = np.full(len(block), 10.0)
+    end = np.full(len(block), 14.0)
+    frame = pd.DataFrame(
+        {
+            "x": block * 1000.0,
+            "y": np.zeros(len(block)),
+            "model_group": ["group:forest"] * len(block),
+            "broader_group": ["forest"] * len(block),
+            "vegetation_type": names,
+        }
+    )
+    original = blocked_predictions(frame, start, end, 8.96, 1000, cfg, a_mode="posthoc")
+    isolated = names == "pine"
+    assert original["literature_fallback"].sum() == isolated.sum()
+    np.testing.assert_array_equal(original["A"][isolated], 60.0)
+    changed_end = end.copy()
+    changed_end[isolated] = 500.0
+    changed = blocked_predictions(
+        frame, start, changed_end, 8.96, 1000, cfg, a_mode="posthoc"
+    )
+    np.testing.assert_array_equal(changed["A"][isolated], original["A"][isolated])
+    np.testing.assert_allclose(changed["curve"][isolated], original["curve"][isolated])
+
+
 def test_pooled_predictions_use_each_class_height_ceiling():
     generator = np.random.default_rng(11)
     cfg = settings()
