@@ -21,6 +21,9 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+lidar = [
+  "laspy[lazrs]>=2.5",
+]
 dev = [
   "pytest>=9.1",
   "ruff>=0.16",
