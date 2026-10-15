@@ -5,13 +5,13 @@
     -122.74,
     38.82
   ],
-  "config_sha256": "8bab0833a24cdf05f7b672ebe44575955dbd305cc993c2a76ffea62b6708ca0c",
+  "config_sha256": "70dc2355e1dbef1981e9e34ac913d29997cbc5e1f7ebb650aa86572de975f823",
   "crs": "EPSG:4326",
-  "fetch_utc": "2026-10-13T20:51:21.578283+00:00",
-  "git_commit": "774509398315f0153315fe624009521336b73741",
+  "fetch_utc": "2026-10-15T12:25:21.417644+00:00",
+  "git_commit": "cc3143715e6923ce2c6725fb5e0d260ecc490060",
   "http_status": null,
   "row_count": null,
   "script_name": "scripts/check_echosat.py",
-  "sha256": "bbb7beb45ea279272e4ca7a20a82fcb5e524ddaf51b14104f85b679b7f584eb0",
+  "sha256": "64b8e84b8dd901a64344baf637ec99806c19248c59deba109c83fb84de693b8c",
   "source_url": "https://echosat.uni-muenster.de/ECHOSAT_T10S.tif"
 }
