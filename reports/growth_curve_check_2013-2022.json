@@ -1,0 +1,1336 @@
+{
+  "issue": 8,
+  "generated_utc": "2026-10-15T10:56:34.402692+00:00",
+  "git_base_revision": "000d95e1ba24cc4c6cee2d2517b609c0ea5c3052",
+  "baseline_years": 8.958247775496236,
+  "decision": "PASS",
+  "settings": {
+    "primary_a_mode": "posthoc",
+    "a_rule": "max_literature_and_training_p995_pair_max_p95",
+    "a_rule_post_hoc": true,
+    "mixed_class_rule": "max_of_members",
+    "pooled_rule": "shared_k_c_class_specific_A",
+    "unit_mismatch_rule": "max_of_printed_metres_and_converted_feet",
+    "max_height_m": {
+      "Quercus agrifolia Alliance": 25,
+      "Quercus douglasii Alliance": 20,
+      "Quercus lobata Alliance": 25,
+      "Quercus garryana Alliance": 30,
+      "Quercus kelloggii Alliance": 25,
+      "Quercus wislizeni (tree) Alliance": 23,
+      "Quercus chrysolepis Alliance": 30,
+      "Umbellularia californica Alliance": 24,
+      "Arbutus menziesii Alliance": 40,
+      "Acer macrophyllum Alliance": 27,
+      "Populus fremontii Alliance": 34,
+      "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": 55,
+      "Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": 30,
+      "Pseudotsuga menziesii Alliance": 76,
+      "Sequoia sempervirens Alliance": 91,
+      "Hesperocyparis sargentii Alliance": 23,
+      "Pinus attenuata Alliance": 12,
+      "Pinus sabiniana / Quercus durata Provisional Alliance": 24
+    },
+    "record_tree_height_m": {
+      "Pseudotsuga menziesii Alliance": 101,
+      "Sequoia sempervirens Alliance": 111
+    },
+    "pending_source_review": [],
+    "open_verification_items": [
+      "Eucalyptus camaldulensis Jepson height; check whether above 55 m"
+    ],
+    "source_review_confirmed": true,
+    "reviewer_spot_check": {
+      "reviewer": "Claude Opus 5",
+      "reviewer_type": "ai",
+      "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
+      "review_window_utc": "2026-10-15T09:54:00Z/2026-10-15T10:04:00Z",
+      "commit": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
+      "scope": "A-rule implementation and held-out-fold leakage checks",
+      "independence_limit": "reviewer proposed the A rule",
+      "human_review": "pending"
+    },
+    "reviewer_spot_check_followup": {
+      "reviewer": "Claude Opus 5",
+      "reviewer_type": "ai",
+      "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
+      "review_window_utc": "2026-10-15T10:20:00Z/2026-10-15T10:51:00Z",
+      "commit": "57c94acabd4aa1162191bf7471361eab116896a3",
+      "scope": "Re-review after the first spot-check. Read the post-review hardening diffs (full-sample prior rename, map-class group assertions, cached ceiling copy, gate record validation), re-ran the full suite and the reviewer leakage checks, and confirmed the G3 scores did not move.",
+      "evidence": "tests/test_growth_curve_review.py",
+      "independence_limit": "reviewer proposed the A rule",
+      "human_review": "pending"
+    },
+    "p95_wire_exclusion_m": 10.0,
+    "saturation_review_fraction": 0.005,
+    "training_height_quantile": 0.995,
+    "excluded_map_classes": [
+      "Urban Window",
+      "Developed",
+      "Vineyard",
+      "Orchard or Grove",
+      "Nursery or Ornamental Horticultural Area",
+      "Major Roads",
+      "Water",
+      "Annual Cropland",
+      "Irrigated Pasture",
+      "Perennial Agriculture"
+    ],
+    "time_gap_source": "data/interim/change_2013-2022.json",
+    "primary_block_m": 2000,
+    "forest_groups": [
+      "conifer forest",
+      "hardwood forest"
+    ],
+    "block_sizes_m": [
+      2000,
+      1000,
+      5000
+    ],
+    "folds": 5,
+    "bootstrap_draws": 2000,
+    "seed": 42,
+    "min_fit_cells": 500,
+    "a_margin_m": 0.01,
+    "a_upper_m": 120.0,
+    "a_upper_warning_fraction": 0.99,
+    "k_bounds": [
+      1e-06,
+      1.0
+    ],
+    "c_bounds": [
+      1.01,
+      10.0
+    ],
+    "initial_k": 0.03,
+    "initial_c": 2.0,
+    "soft_l1_scale_m": 1.0,
+    "max_nfev": 200,
+    "oof_path": "data/interim/growth_curve_oof_2013-2022.parquet",
+    "metrics_path": "reports/growth_curve_check_2013-2022.json",
+    "preflight_path": "reports/growth_curve_preflight_2013-2022.json",
+    "report_path": "reports/growth_curve_check_2013-2022.md",
+    "figure_path": "reports/figures/growth_curves_2013-2022.png"
+  },
+  "input_sha256": {
+    "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
+    "clean_cells": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
+    "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee",
+    "vegetation": "2e6f31498dac520ae7b62b5a51044fd5d389b03fc230d13023b94b696499f110"
+  },
+  "screens": {
+    "forest_loss_on": {
+      "model": "posthoc",
+      "cells": 76980,
+      "blocks": 82,
+      "folds": 5,
+      "mae_no_change_m": 1.0493018992916734,
+      "mae_median_growth_m": 0.781685799107731,
+      "mae_curve_m": 0.7837060011704501,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.26559589812122314,
+        "ci_low_m": -0.31442348477921395,
+        "ci_high_m": -0.21954500349574432,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.0020202020627197808,
+        "ci_low_m": -0.007331555162192592,
+        "ci_high_m": 0.012547087889063115,
+        "blocks": 82,
+        "draws": 2000
+      }
+    },
+    "forest_loss_off": {
+      "model": "posthoc",
+      "cells": 125888,
+      "blocks": 83,
+      "folds": 5,
+      "mae_no_change_m": 1.37750216072966,
+      "mae_median_growth_m": 1.2564058237559559,
+      "mae_curve_m": 1.2564328853199163,
+      "literature_fallback_cells": 1087,
+      "literature_fallback_classes": [
+        "Hesperocyparis sargentii Alliance"
+      ],
+      "curve_minus_no_change": {
+        "difference_m": -0.12106927540974433,
+        "ci_low_m": -0.14737583769474072,
+        "ci_high_m": -0.09426607669333731,
+        "blocks": 83,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.12109633697370328,
+        "ci_low_m": -0.14525691387540246,
+        "ci_high_m": -0.09702721176994858,
+        "blocks": 83,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 2.7061563958967197e-05,
+        "ci_low_m": -0.0047242894281667325,
+        "ci_high_m": 0.005016806850043136,
+        "blocks": 83,
+        "draws": 2000
+      }
+    },
+    "all_loss_on": {
+      "model": "free",
+      "cells": 83772,
+      "blocks": 83,
+      "folds": 5,
+      "mae_no_change_m": 1.1121170008106231,
+      "mae_median_growth_m": 0.8246423208526371,
+      "mae_curve_m": 0.8284174289790578,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.2836995718315661,
+        "ci_low_m": -0.3422330514960565,
+        "ci_high_m": -0.23041992077414478,
+        "blocks": 83,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.287474679957987,
+        "ci_low_m": -0.33706303543190114,
+        "ci_high_m": -0.24336225039615902,
+        "blocks": 83,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.003775108126420853,
+        "ci_low_m": -0.007962324580916003,
+        "ci_high_m": 0.015377078590093558,
+        "blocks": 83,
+        "draws": 2000
+      }
+    },
+    "all_loss_off": {
+      "model": "free",
+      "cells": 140530,
+      "blocks": 84,
+      "folds": 5,
+      "mae_no_change_m": 1.478719040576995,
+      "mae_median_growth_m": 1.357738701438032,
+      "mae_curve_m": 1.3554703316255705,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.12324870895142452,
+        "ci_low_m": -0.14723581991293022,
+        "ci_high_m": -0.09752877066550211,
+        "blocks": 84,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.120980339138963,
+        "ci_low_m": -0.1422863241674885,
+        "ci_high_m": -0.097139800412348,
+        "blocks": 84,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": -0.00226836981246153,
+        "ci_low_m": -0.007183923947166587,
+        "ci_high_m": 0.0025633803264346394,
+        "blocks": 84,
+        "draws": 2000
+      }
+    }
+  },
+  "height_sensitivities": {
+    "literature": {
+      "cells": 76980,
+      "blocks": 82,
+      "folds": 5,
+      "mae_no_change_m": 1.0493018992916734,
+      "mae_median_growth_m": 0.781685799107731,
+      "mae_curve_m": 0.7938948036842812,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.25540709560739244,
+        "ci_low_m": -0.3014407209507839,
+        "ci_high_m": -0.21200552058126831,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.012209004576550487,
+        "ci_low_m": 0.0010331739271687852,
+        "ci_high_m": 0.024768113235069486,
+        "blocks": 82,
+        "draws": 2000
+      }
+    },
+    "free": {
+      "cells": 76980,
+      "blocks": 82,
+      "folds": 5,
+      "mae_no_change_m": 1.0493018992916734,
+      "mae_median_growth_m": 0.781685799107731,
+      "mae_curve_m": 0.7839940634602344,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.26530783583143913,
+        "ci_low_m": -0.3179017939350271,
+        "ci_high_m": -0.21577977762016443,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.002308264352503777,
+        "ci_low_m": -0.009273586639156065,
+        "ci_high_m": 0.014702545715205578,
+        "blocks": 82,
+        "draws": 2000
+      }
+    },
+    "record": {
+      "cells": 76980,
+      "blocks": 82,
+      "folds": 5,
+      "mae_no_change_m": 1.0493018992916734,
+      "mae_median_growth_m": 0.781685799107731,
+      "mae_curve_m": 0.794917975418862,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.25438392387281156,
+        "ci_low_m": -0.3013722985157492,
+        "ci_high_m": -0.210717163422338,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.26761610018394294,
+        "ci_low_m": -0.3123274570828974,
+        "ci_high_m": -0.22720717960716577,
+        "blocks": 82,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.013232176311131374,
+        "ci_low_m": 0.0021112356162569846,
+        "ci_high_m": 0.025849453612773153,
+        "blocks": 82,
+        "draws": 2000
+      }
+    }
+  },
+  "spatial_sensitivities": {
+    "1000": {
+      "cells": 76980,
+      "blocks": 198,
+      "folds": 5,
+      "mae_no_change_m": 1.0493018992916734,
+      "mae_median_growth_m": 0.7778473411812445,
+      "mae_curve_m": 0.7804623896567318,
+      "literature_fallback_cells": 0,
+      "literature_fallback_classes": [],
+      "curve_minus_no_change": {
+        "difference_m": -0.2688395096349411,
+        "ci_low_m": -0.30697524678093036,
+        "ci_high_m": -0.23221907800464262,
+        "blocks": 198,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.2714545581104281,
+        "ci_low_m": -0.308084190460354,
+        "ci_high_m": -0.2401745088685193,
+        "blocks": 198,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.0026150484754870803,
+        "ci_low_m": -0.01000228879188835,
+        "ci_high_m": 0.01308564342186069,
+        "blocks": 198,
+        "draws": 2000
+      }
+    },
+    "5000": {
+      "cells": 76980,
+      "blocks": 18,
+      "folds": 5,
+      "mae_no_change_m": 1.0493018992916734,
+      "mae_median_growth_m": 0.783632450621153,
+      "mae_curve_m": 0.7895112010827725,
+      "literature_fallback_cells": 1153,
+      "literature_fallback_classes": [
+        "Acer macrophyllum Alliance",
+        "Hesperocyparis sargentii Alliance"
+      ],
+      "curve_minus_no_change": {
+        "difference_m": -0.2597906982089011,
+        "ci_low_m": -0.3113164767283399,
+        "ci_high_m": -0.21304628524561633,
+        "blocks": 18,
+        "draws": 2000
+      },
+      "median_minus_no_change": {
+        "difference_m": -0.26566944867052006,
+        "ci_low_m": -0.31907450119423103,
+        "ci_high_m": -0.22330216170287334,
+        "blocks": 18,
+        "draws": 2000
+      },
+      "curve_minus_median_growth": {
+        "difference_m": 0.005878750461618909,
+        "ci_low_m": -0.007165360995604647,
+        "ci_high_m": 0.022817305234216413,
+        "blocks": 18,
+        "draws": 2000
+      }
+    }
+  },
+  "mean_secondary": {
+    "cells": 76980,
+    "blocks": 82,
+    "folds": 5,
+    "mae_no_change_m": 1.2526041713450802,
+    "mae_median_growth_m": 0.7654768142282111,
+    "mae_curve_m": 0.7489136030176378,
+    "literature_fallback_cells": 0,
+    "literature_fallback_classes": [],
+    "curve_minus_no_change": {
+      "difference_m": -0.5036905683274427,
+      "ci_low_m": -0.5809696848925053,
+      "ci_high_m": -0.4316985852406146,
+      "blocks": 82,
+      "draws": 2000
+    },
+    "median_minus_no_change": {
+      "difference_m": -0.4871273571168696,
+      "ci_low_m": -0.5653998775186218,
+      "ci_high_m": -0.42268111458017055,
+      "blocks": 82,
+      "draws": 2000
+    },
+    "curve_minus_median_growth": {
+      "difference_m": -0.016563211210573074,
+      "ci_low_m": -0.03491333028176812,
+      "ci_high_m": 0.0013452492126989847,
+      "blocks": 82,
+      "draws": 2000
+    }
+  },
+  "median_growth_prior": {
+    "Acer macrophyllum Alliance": {
+      "fit_scope": "broad:hardwood forest",
+      "training_cells": 115387,
+      "median_increment_m": 0.44086493203874255
+    },
+    "Arbutus menziesii Alliance": {
+      "fit_scope": "type:Arbutus menziesii Alliance",
+      "training_cells": 7627,
+      "median_increment_m": 0.4902174996779465
+    },
+    "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": {
+      "fit_scope": "type:Eucalyptus (globulus, camaldulensis) Semi-natural Alliance",
+      "training_cells": 1335,
+      "median_increment_m": 0.7508415535735651
+    },
+    "Hesperocyparis sargentii Alliance": {
+      "fit_scope": "type:Hesperocyparis sargentii Alliance",
+      "training_cells": 1087,
+      "median_increment_m": 0.5809840646749391
+    },
+    "Pinus attenuata Alliance": {
+      "fit_scope": "type:Pinus attenuata Alliance",
+      "training_cells": 556,
+      "median_increment_m": 0.7970266423469585
+    },
+    "Pinus sabiniana / Quercus durata Provisional Alliance": {
+      "fit_scope": "type:Pinus sabiniana / Quercus durata Provisional Alliance",
+      "training_cells": 1166,
+      "median_increment_m": 1.3341607176857169
+    },
+    "Populus fremontii Alliance": {
+      "fit_scope": "type:Populus fremontii Alliance",
+      "training_cells": 7070,
+      "median_increment_m": 0.32714907729851816
+    },
+    "Pseudotsuga menziesii Alliance": {
+      "fit_scope": "type:Pseudotsuga menziesii Alliance",
+      "training_cells": 5578,
+      "median_increment_m": 1.0556953704314296
+    },
+    "Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": {
+      "fit_scope": "type:Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance",
+      "training_cells": 17665,
+      "median_increment_m": 0.3472028835727663
+    },
+    "Quercus agrifolia Alliance": {
+      "fit_scope": "type:Quercus agrifolia Alliance",
+      "training_cells": 25116,
+      "median_increment_m": 0.5064620476076644
+    },
+    "Quercus chrysolepis Alliance": {
+      "fit_scope": "type:Quercus chrysolepis Alliance",
+      "training_cells": 1520,
+      "median_increment_m": 0.6408435240980026
+    },
+    "Quercus douglasii Alliance": {
+      "fit_scope": "type:Quercus douglasii Alliance",
+      "training_cells": 11777,
+      "median_increment_m": 0.3557509185101537
+    },
+    "Quercus garryana Alliance": {
+      "fit_scope": "type:Quercus garryana Alliance",
+      "training_cells": 7856,
+      "median_increment_m": 0.3883459385491408
+    },
+    "Quercus kelloggii Alliance": {
+      "fit_scope": "type:Quercus kelloggii Alliance",
+      "training_cells": 7982,
+      "median_increment_m": 0.7056406177373269
+    },
+    "Quercus lobata Alliance": {
+      "fit_scope": "type:Quercus lobata Alliance",
+      "training_cells": 11855,
+      "median_increment_m": 0.42328700391801277
+    },
+    "Quercus wislizeni (tree) Alliance": {
+      "fit_scope": "type:Quercus wislizeni (tree) Alliance",
+      "training_cells": 3636,
+      "median_increment_m": 0.6647150808842204
+    },
+    "Sequoia sempervirens Alliance": {
+      "fit_scope": "type:Sequoia sempervirens Alliance",
+      "training_cells": 2114,
+      "median_increment_m": 1.2262355833923273
+    },
+    "Umbellularia californica Alliance": {
+      "fit_scope": "type:Umbellularia californica Alliance",
+      "training_cells": 11624,
+      "median_increment_m": 0.3986642966611029
+    }
+  },
+  "forest_saturation": {
+    "Acer macrophyllum Alliance": {
+      "cells": 171,
+      "A_min_m": 27.369984197207756,
+      "A_max_m": 28.50653331327199,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Arbutus menziesii Alliance": {
+      "cells": 4512,
+      "A_min_m": 40.0,
+      "A_max_m": 40.0,
+      "at_or_above_A": 5,
+      "share": 0.0011081560283687944
+    },
+    "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": {
+      "cells": 342,
+      "A_min_m": 55.0,
+      "A_max_m": 55.0,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Hesperocyparis sargentii Alliance": {
+      "cells": 982,
+      "A_min_m": 23.0,
+      "A_max_m": 23.0,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Pinus attenuata Alliance": {
+      "cells": 285,
+      "A_min_m": 24.10837799948816,
+      "A_max_m": 31.25340757056166,
+      "at_or_above_A": 5,
+      "share": 0.017543859649122806
+    },
+    "Pinus sabiniana / Quercus durata Provisional Alliance": {
+      "cells": 492,
+      "A_min_m": 27.845942785037447,
+      "A_max_m": 30.533464803998438,
+      "at_or_above_A": 2,
+      "share": 0.0040650406504065045
+    },
+    "Populus fremontii Alliance": {
+      "cells": 1433,
+      "A_min_m": 34.0,
+      "A_max_m": 34.0,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Pseudotsuga menziesii Alliance": {
+      "cells": 3322,
+      "A_min_m": 76.0,
+      "A_max_m": 76.0,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": {
+      "cells": 10875,
+      "A_min_m": 30.0,
+      "A_max_m": 30.156914767724167,
+      "at_or_above_A": 29,
+      "share": 0.0026666666666666666
+    },
+    "Quercus agrifolia Alliance": {
+      "cells": 17265,
+      "A_min_m": 27.69404359360305,
+      "A_max_m": 28.965638706666013,
+      "at_or_above_A": 59,
+      "share": 0.0034173182739646686
+    },
+    "Quercus chrysolepis Alliance": {
+      "cells": 1111,
+      "A_min_m": 30.0,
+      "A_max_m": 33.22897728231527,
+      "at_or_above_A": 10,
+      "share": 0.009000900090009001
+    },
+    "Quercus douglasii Alliance": {
+      "cells": 8343,
+      "A_min_m": 20.0,
+      "A_max_m": 20.0,
+      "at_or_above_A": 22,
+      "share": 0.0026369411482680093
+    },
+    "Quercus garryana Alliance": {
+      "cells": 4597,
+      "A_min_m": 30.098631366215024,
+      "A_max_m": 30.99561899281896,
+      "at_or_above_A": 21,
+      "share": 0.004568196649989123
+    },
+    "Quercus kelloggii Alliance": {
+      "cells": 4464,
+      "A_min_m": 37.77980069290389,
+      "A_max_m": 42.734268045304624,
+      "at_or_above_A": 42,
+      "share": 0.009408602150537635
+    },
+    "Quercus lobata Alliance": {
+      "cells": 7437,
+      "A_min_m": 28.79147147522171,
+      "A_max_m": 29.7218124552751,
+      "at_or_above_A": 23,
+      "share": 0.00309264488368966
+    },
+    "Quercus wislizeni (tree) Alliance": {
+      "cells": 3036,
+      "A_min_m": 23.0,
+      "A_max_m": 23.428189255192763,
+      "at_or_above_A": 3,
+      "share": 0.0009881422924901185
+    },
+    "Sequoia sempervirens Alliance": {
+      "cells": 1217,
+      "A_min_m": 91.0,
+      "A_max_m": 91.0,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Umbellularia californica Alliance": {
+      "cells": 7096,
+      "A_min_m": 36.74586542655599,
+      "A_max_m": 40.822289431364084,
+      "at_or_above_A": 38,
+      "share": 0.005355129650507328
+    }
+  },
+  "literature_saturation": {
+    "Acer macrophyllum Alliance": {
+      "cells": 171,
+      "A_m": 27,
+      "at_or_above_A": 1,
+      "share": 0.005847953216374269
+    },
+    "Arbutus menziesii Alliance": {
+      "cells": 4512,
+      "A_m": 40,
+      "at_or_above_A": 5,
+      "share": 0.0011081560283687944
+    },
+    "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": {
+      "cells": 342,
+      "A_m": 55,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Hesperocyparis sargentii Alliance": {
+      "cells": 982,
+      "A_m": 23,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Pinus attenuata Alliance": {
+      "cells": 285,
+      "A_m": 12,
+      "at_or_above_A": 103,
+      "share": 0.36140350877192984
+    },
+    "Pinus sabiniana / Quercus durata Provisional Alliance": {
+      "cells": 492,
+      "A_m": 24,
+      "at_or_above_A": 19,
+      "share": 0.03861788617886179
+    },
+    "Populus fremontii Alliance": {
+      "cells": 1433,
+      "A_m": 34,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Pseudotsuga menziesii Alliance": {
+      "cells": 3322,
+      "A_m": 76,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": {
+      "cells": 10875,
+      "A_m": 30,
+      "at_or_above_A": 30,
+      "share": 0.002758620689655172
+    },
+    "Quercus agrifolia Alliance": {
+      "cells": 17265,
+      "A_m": 25,
+      "at_or_above_A": 167,
+      "share": 0.00967274833478135
+    },
+    "Quercus chrysolepis Alliance": {
+      "cells": 1111,
+      "A_m": 30,
+      "at_or_above_A": 11,
+      "share": 0.009900990099009901
+    },
+    "Quercus douglasii Alliance": {
+      "cells": 8343,
+      "A_m": 20,
+      "at_or_above_A": 22,
+      "share": 0.0026369411482680093
+    },
+    "Quercus garryana Alliance": {
+      "cells": 4597,
+      "A_m": 30,
+      "at_or_above_A": 23,
+      "share": 0.005003262997607135
+    },
+    "Quercus kelloggii Alliance": {
+      "cells": 4464,
+      "A_m": 25,
+      "at_or_above_A": 317,
+      "share": 0.07101254480286738
+    },
+    "Quercus lobata Alliance": {
+      "cells": 7437,
+      "A_m": 25,
+      "at_or_above_A": 86,
+      "share": 0.011563802608578729
+    },
+    "Quercus wislizeni (tree) Alliance": {
+      "cells": 3036,
+      "A_m": 23,
+      "at_or_above_A": 3,
+      "share": 0.0009881422924901185
+    },
+    "Sequoia sempervirens Alliance": {
+      "cells": 1217,
+      "A_m": 91,
+      "at_or_above_A": 0,
+      "share": 0.0
+    },
+    "Umbellularia californica Alliance": {
+      "cells": 7096,
+      "A_m": 24,
+      "at_or_above_A": 815,
+      "share": 0.11485343855693349
+    }
+  },
+  "per_type": [
+    {
+      "vegetation_type": "Quercus agrifolia Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 17265,
+      "fit": {
+        "scope": "type:Quercus agrifolia Alliance",
+        "A": 28.553279553163478,
+        "k": 0.006185262434305002,
+        "c": 1.0100000000000002,
+        "n": 17265,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 17265,
+        "A_min_m": 27.69404359360305,
+        "A_max_m": 28.965638706666013,
+        "at_or_above_A": 59,
+        "share": 0.0034173182739646686
+      },
+      "mae_no_change_m": 1.038392778696787,
+      "mae_median_growth_m": 0.7909871974235207,
+      "mae_curve_m": 0.7805221563590042,
+      "curve_minus_no_change": {
+        "difference_m": -0.25787062233778235,
+        "ci_low_m": -0.3703499658931821,
+        "ci_high_m": -0.15432299860783943,
+        "blocks": 56,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 10875,
+      "fit": {
+        "scope": "type:Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance",
+        "A": 30.0,
+        "k": 0.00418389622748182,
+        "c": 1.010000000002299,
+        "n": 10875,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 10875,
+        "A_min_m": 30.0,
+        "A_max_m": 30.156914767724167,
+        "at_or_above_A": 29,
+        "share": 0.0026666666666666666
+      },
+      "mae_no_change_m": 0.8475812235596779,
+      "mae_median_growth_m": 0.6782357503854071,
+      "mae_curve_m": 0.6865215035330835,
+      "curve_minus_no_change": {
+        "difference_m": -0.1610597200265946,
+        "ci_low_m": -0.1989828583626547,
+        "ci_high_m": -0.11415802789209158,
+        "blocks": 48,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus douglasii Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 8343,
+      "fit": {
+        "scope": "type:Quercus douglasii Alliance",
+        "A": 20.0,
+        "k": 0.008190469414768139,
+        "c": 9.999999999948157,
+        "n": 8343,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 8343,
+        "A_min_m": 20.0,
+        "A_max_m": 20.0,
+        "at_or_above_A": 22,
+        "share": 0.0026369411482680093
+      },
+      "mae_no_change_m": 0.5124620161360429,
+      "mae_median_growth_m": 0.3297104901486988,
+      "mae_curve_m": 0.3311534781685831,
+      "curve_minus_no_change": {
+        "difference_m": -0.18130853796745922,
+        "ci_low_m": -0.2325341172469839,
+        "ci_high_m": -0.12363573294084594,
+        "blocks": 18,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus lobata Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 7437,
+      "fit": {
+        "scope": "type:Quercus lobata Alliance",
+        "A": 29.48085399903441,
+        "k": 0.006471775181421136,
+        "c": 1.0100000000045462,
+        "n": 7437,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 7437,
+        "A_min_m": 28.79147147522171,
+        "A_max_m": 29.7218124552751,
+        "at_or_above_A": 23,
+        "share": 0.00309264488368966
+      },
+      "mae_no_change_m": 1.0812930877103992,
+      "mae_median_growth_m": 0.8459505878179435,
+      "mae_curve_m": 0.8325574289697696,
+      "curve_minus_no_change": {
+        "difference_m": -0.24873565874062992,
+        "ci_low_m": -0.3600526741123876,
+        "ci_high_m": -0.12668144480506394,
+        "blocks": 59,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Umbellularia californica Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 7096,
+      "fit": {
+        "scope": "type:Umbellularia californica Alliance",
+        "A": 40.04102028758477,
+        "k": 0.004967514789636728,
+        "c": 9.99999999999984,
+        "n": 7096,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 7096,
+        "A_min_m": 36.74586542655599,
+        "A_max_m": 40.822289431364084,
+        "at_or_above_A": 38,
+        "share": 0.005355129650507328
+      },
+      "mae_no_change_m": 0.9781833851109015,
+      "mae_median_growth_m": 0.7857967342127676,
+      "mae_curve_m": 0.8002120683588569,
+      "curve_minus_no_change": {
+        "difference_m": -0.17797131675204428,
+        "ci_low_m": -0.22838882640466626,
+        "ci_high_m": -0.12409168583251884,
+        "blocks": 33,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus garryana Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 4597,
+      "fit": {
+        "scope": "type:Quercus garryana Alliance",
+        "A": 30.965214078321402,
+        "k": 0.005872539293878121,
+        "c": 9.99999999995094,
+        "n": 4597,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 4597,
+        "A_min_m": 30.098631366215024,
+        "A_max_m": 30.99561899281896,
+        "at_or_above_A": 21,
+        "share": 0.004568196649989123
+      },
+      "mae_no_change_m": 0.799626255394685,
+      "mae_median_growth_m": 0.6205312238276349,
+      "mae_curve_m": 0.6416363173868278,
+      "curve_minus_no_change": {
+        "difference_m": -0.15798993800785763,
+        "ci_low_m": -0.23403963253852267,
+        "ci_high_m": -0.004140720899438381,
+        "blocks": 18,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Arbutus menziesii Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 4512,
+      "fit": {
+        "scope": "type:Arbutus menziesii Alliance",
+        "A": 40.0,
+        "k": 0.005855304916614659,
+        "c": 9.999999999992985,
+        "n": 4512,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 4512,
+        "A_min_m": 40.0,
+        "A_max_m": 40.0,
+        "at_or_above_A": 5,
+        "share": 0.0011081560283687944
+      },
+      "mae_no_change_m": 1.0754860190101172,
+      "mae_median_growth_m": 0.7928990526876205,
+      "mae_curve_m": 0.8084462877309279,
+      "curve_minus_no_change": {
+        "difference_m": -0.26703973127918973,
+        "ci_low_m": -0.33023973960534736,
+        "ci_high_m": -0.19866909999672097,
+        "blocks": 22,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus kelloggii Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 4464,
+      "fit": {
+        "scope": "type:Quercus kelloggii Alliance",
+        "A": 41.42539213140404,
+        "k": 0.007848071350162671,
+        "c": 9.99999999998678,
+        "n": 4464,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 4464,
+        "A_min_m": 37.77980069290389,
+        "A_max_m": 42.734268045304624,
+        "at_or_above_A": 42,
+        "share": 0.009408602150537635
+      },
+      "mae_no_change_m": 1.336442762113683,
+      "mae_median_growth_m": 0.9199355498146247,
+      "mae_curve_m": 0.9528412081615455,
+      "curve_minus_no_change": {
+        "difference_m": -0.3836015539521378,
+        "ci_low_m": -0.5844506348974857,
+        "ci_high_m": -0.1559827669366416,
+        "blocks": 11,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Pseudotsuga menziesii Alliance",
+      "broader_group": "conifer forest",
+      "cells": 3322,
+      "fit": {
+        "scope": "type:Pseudotsuga menziesii Alliance",
+        "A": 76.0,
+        "k": 0.004142984618976541,
+        "c": 1.4468757073875287,
+        "n": 3322,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 3322,
+        "A_min_m": 76.0,
+        "A_max_m": 76.0,
+        "at_or_above_A": 0,
+        "share": 0.0
+      },
+      "mae_no_change_m": 1.8757096237836657,
+      "mae_median_growth_m": 1.2605310892001875,
+      "mae_curve_m": 1.2558458827431422,
+      "curve_minus_no_change": {
+        "difference_m": -0.6198637410405238,
+        "ci_low_m": -0.8072556155741535,
+        "ci_high_m": -0.43044514664928996,
+        "blocks": 23,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus wislizeni (tree) Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 3036,
+      "fit": {
+        "scope": "type:Quercus wislizeni (tree) Alliance",
+        "A": 23.0,
+        "k": 0.010707059058563902,
+        "c": 9.999999999990052,
+        "n": 3036,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 3036,
+        "A_min_m": 23.0,
+        "A_max_m": 23.428189255192763,
+        "at_or_above_A": 3,
+        "share": 0.0009881422924901185
+      },
+      "mae_no_change_m": 1.0496448512874126,
+      "mae_median_growth_m": 0.6869094347374607,
+      "mae_curve_m": 0.7207436426717186,
+      "curve_minus_no_change": {
+        "difference_m": -0.32890120861569394,
+        "ci_low_m": -0.4389826445453106,
+        "ci_high_m": -0.26205054311321413,
+        "blocks": 11,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Populus fremontii Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 1433,
+      "fit": {
+        "scope": "type:Populus fremontii Alliance",
+        "A": 34.0,
+        "k": 0.010489566201980983,
+        "c": 1.010000000000044,
+        "n": 1433,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 1433,
+        "A_min_m": 34.0,
+        "A_max_m": 34.0,
+        "at_or_above_A": 0,
+        "share": 0.0
+      },
+      "mae_no_change_m": 2.1522695033290873,
+      "mae_median_growth_m": 1.4587067516998982,
+      "mae_curve_m": 1.437437351207123,
+      "curve_minus_no_change": {
+        "difference_m": -0.7148321521219643,
+        "ci_low_m": -0.8727899394963129,
+        "ci_high_m": -0.5518573805411989,
+        "blocks": 24,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Sequoia sempervirens Alliance",
+      "broader_group": "conifer forest",
+      "cells": 1217,
+      "fit": {
+        "scope": "type:Sequoia sempervirens Alliance",
+        "A": 91.0,
+        "k": 0.0036395848814913785,
+        "c": 1.3513397255523467,
+        "n": 1217,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 1217,
+        "A_min_m": 91.0,
+        "A_max_m": 91.0,
+        "at_or_above_A": 0,
+        "share": 0.0
+      },
+      "mae_no_change_m": 2.280322065910224,
+      "mae_median_growth_m": 1.6828809357427874,
+      "mae_curve_m": 1.6746889989399387,
+      "curve_minus_no_change": {
+        "difference_m": -0.6056330669702864,
+        "ci_low_m": -0.885994481658878,
+        "ci_high_m": -0.3536732303480154,
+        "blocks": 14,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Quercus chrysolepis Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 1111,
+      "fit": {
+        "scope": "type:Quercus chrysolepis Alliance",
+        "A": 31.986321464723435,
+        "k": 0.006557326113893859,
+        "c": 2.27233900229187,
+        "n": 1111,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 1111,
+        "A_min_m": 30.0,
+        "A_max_m": 33.22897728231527,
+        "at_or_above_A": 10,
+        "share": 0.009000900090009001
+      },
+      "mae_no_change_m": 0.9822593383421862,
+      "mae_median_growth_m": 0.6582418381672293,
+      "mae_curve_m": 0.6716816323057645,
+      "curve_minus_no_change": {
+        "difference_m": -0.3105777060364217,
+        "ci_low_m": -0.46784063934150444,
+        "ci_high_m": -0.2013687922441995,
+        "blocks": 8,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Hesperocyparis sargentii Alliance",
+      "broader_group": "conifer forest",
+      "cells": 982,
+      "fit": {
+        "scope": "type:Hesperocyparis sargentii Alliance",
+        "A": 23.0,
+        "k": 0.008749873397047067,
+        "c": 9.999999999999925,
+        "n": 982,
+        "k_at_bound": false,
+        "c_at_bound": true
+      },
+      "saturation": {
+        "cells": 982,
+        "A_min_m": 23.0,
+        "A_max_m": 23.0,
+        "at_or_above_A": 0,
+        "share": 0.0
+      },
+      "mae_no_change_m": 0.7466443615473789,
+      "mae_median_growth_m": 0.8798845860309717,
+      "mae_curve_m": 0.4651787236213798,
+      "curve_minus_no_change": {
+        "difference_m": -0.28146563792599927,
+        "ci_low_m": -0.28365699030952096,
+        "ci_high_m": -0.21424060190248212,
+        "blocks": 2,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Pinus sabiniana / Quercus durata Provisional Alliance",
+      "broader_group": "conifer forest",
+      "cells": 492,
+      "fit": {
+        "scope": "broad:conifer forest",
+        "A": 29.843948954607527,
+        "k": 0.004858644678621465,
+        "c": 2.04610290535527,
+        "n": 6298,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 492,
+        "A_min_m": 27.845942785037447,
+        "A_max_m": 30.533464803998438,
+        "at_or_above_A": 2,
+        "share": 0.0040650406504065045
+      },
+      "mae_no_change_m": 2.095571359605101,
+      "mae_median_growth_m": 1.286662151085901,
+      "mae_curve_m": 1.7319712301638954,
+      "curve_minus_no_change": {
+        "difference_m": -0.3636001294412039,
+        "ci_low_m": -0.3925227065123277,
+        "ci_high_m": -0.2598932496641909,
+        "blocks": 7,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 342,
+      "fit": {
+        "scope": "broad:hardwood forest",
+        "A": 55.0,
+        "k": 0.006621014973471843,
+        "c": 2.9976001238733008,
+        "n": 70682,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 342,
+        "A_min_m": 55.0,
+        "A_max_m": 55.0,
+        "at_or_above_A": 0,
+        "share": 0.0
+      },
+      "mae_no_change_m": 2.275722960074817,
+      "mae_median_growth_m": 1.9182947934762957,
+      "mae_curve_m": 1.771672780162193,
+      "curve_minus_no_change": {
+        "difference_m": -0.5040501799126231,
+        "ci_low_m": -0.8169783971032544,
+        "ci_high_m": -0.14560183493322756,
+        "blocks": 17,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Pinus attenuata Alliance",
+      "broader_group": "conifer forest",
+      "cells": 285,
+      "fit": {
+        "scope": "broad:conifer forest",
+        "A": 28.68852596259528,
+        "k": 0.004858644678621465,
+        "c": 2.04610290535527,
+        "n": 6298,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 285,
+        "A_min_m": 24.10837799948816,
+        "A_max_m": 31.25340757056166,
+        "at_or_above_A": 5,
+        "share": 0.017543859649122806
+      },
+      "mae_no_change_m": 2.3606115289976755,
+      "mae_median_growth_m": 1.647195769867842,
+      "mae_curve_m": 1.9784236296206692,
+      "curve_minus_no_change": {
+        "difference_m": -0.3821878993770062,
+        "ci_low_m": -0.5126019334079184,
+        "ci_high_m": -0.30969583783608257,
+        "blocks": 5,
+        "draws": 2000
+      }
+    },
+    {
+      "vegetation_type": "Acer macrophyllum Alliance",
+      "broader_group": "hardwood forest",
+      "cells": 171,
+      "fit": {
+        "scope": "broad:hardwood forest",
+        "A": 28.429132737594312,
+        "k": 0.006621014973471843,
+        "c": 2.9976001238733008,
+        "n": 70682,
+        "k_at_bound": false,
+        "c_at_bound": false
+      },
+      "saturation": {
+        "cells": 171,
+        "A_min_m": 27.369984197207756,
+        "A_max_m": 28.50653331327199,
+        "at_or_above_A": 0,
+        "share": 0.0
+      },
+      "mae_no_change_m": 1.716961124656214,
+      "mae_median_growth_m": 1.2975117512342076,
+      "mae_curve_m": 1.294914048278587,
+      "curve_minus_no_change": {
+        "difference_m": -0.4220470763776274,
+        "ci_low_m": -0.47902417395747826,
+        "ci_high_m": -0.33360501446263435,
+        "blocks": 4,
+        "draws": 2000
+      }
+    }
+  ]
+}

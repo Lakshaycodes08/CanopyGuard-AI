@@ -41,6 +41,7 @@ uv.lock
 # Generated outputs
 reports/figures/*
 !reports/figures/.gitkeep
+!reports/figures/growth_curves_2013-2022.png
 paper/build/
 paper/*.aux
 paper/*.bbl
