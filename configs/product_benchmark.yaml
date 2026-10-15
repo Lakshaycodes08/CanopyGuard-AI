@@ -14,3 +14,15 @@ echosat_alignment:
   # Report all nine offsets as a positional uncertainty sensitivity.
   # Do not select the best offset using LiDAR truth.
   offset_sensitivity_m: [-2.0, 0.0, 2.0]
+
+echosat_benchmark:
+  year: 2022
+  reference: airborne_lidar_p95_end
+  primary_population: valid_2022_lidar_p95_after_overlap_and_wire_exclusions
+  block_size_m: 2000
+  bootstrap_draws: 2000
+  seed: 42
+  minimum_blocks: 2
+  metrics: [mae_m, median_signed_error_m, mean_signed_error_m, rmse_m]
+  report_path: reports/e8_echosat_benchmark_2022.md
+  metrics_path: reports/e8_echosat_benchmark_2022.json
