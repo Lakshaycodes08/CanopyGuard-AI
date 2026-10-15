@@ -1,0 +1,16 @@
+# E8 is a retrospective product benchmark, never a 2013 forecast predictor.
+echosat_alignment:
+  source_crs: EPSG:32610
+  target_crs: EPSG:6339
+  resolution_m: 10
+  resampling: bilinear
+  # Inverse of EPSG:9774, NAD83(2011) to WGS 84 (1).
+  # EPSG gives 2 m operation accuracy, not a measured 2 m pixel shift.
+  operation_epsg: 9774
+  operation_accuracy_m: 2.0
+  operation_proj: >-
+    +proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84
+    +step +proj=utm +zone=10 +ellps=GRS80
+  # Report all nine offsets as a positional uncertainty sensitivity.
+  # Do not select the best offset using LiDAR truth.
+  offset_sensitivity_m: [-2.0, 0.0, 2.0]
