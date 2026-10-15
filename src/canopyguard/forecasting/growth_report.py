@@ -305,12 +305,12 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         f"({settings['reviewer_spot_check']['session']}). This was an AI code "
         "spot-check by a reviewer who proposed the rule, not an independent "
         "human review; human sign-off remains pending.",
-        "The same reviewer checked the subsequent growth_curve.py and "
-        "growth_prior.py diffs through commit "
-        f"{settings['reviewer_spot_check']['follow_up_review']['commit']} on "
-        f"{settings['reviewer_spot_check']['follow_up_review']['date']}. "
-        "The six adversarial review tests, including a non-vacuity check, "
-        "are retained in tests/test_growth_curve_review.py.",
+        "The same AI reviewer re-reviewed the post-review hardening through "
+        f"commit {settings['reviewer_spot_check_followup']['commit']} during "
+        f"{settings['reviewer_spot_check_followup']['review_window_utc']}. "
+        "The six reviewer-authored adversarial tests, including a non-vacuity "
+        "check, are retained in "
+        f"{settings['reviewer_spot_check_followup']['evidence']}.",
         "",
         "## Reproduction",
         "",
