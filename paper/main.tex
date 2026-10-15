@@ -16,11 +16,15 @@ as a predictor. We compare no height change, a map-class median increment,
 and a Chapman--Richards curve on screened 2013--2022 observations in northern
 Sonoma County. Five-fold spatial cross-validation with 2 km blocks finds
 that the type-specific or pooled broad-group median reduces mean absolute
-error (MAE) relative to no change by 0.121 m on the forest
-LiDAR-loss-off screen. The height-dependent curve adds no measurable
+error (MAE) relative to no change by 0.121 m on forest cells selected
+using later fire and Hansen loss records. In a post hoc analysis of all
+eligible forest cells, the improvement is 0.062 m and its 2 km block
+interval includes zero. The height-dependent curve adds no measurable
 improvement. In a separately preregistered stage-two residual test,
-ridge and LightGBM both increase MAE on that screen and fail the gate.
-This is a preliminary growth-prior result, not a validated
+ridge and LightGBM both increase MAE on the screened population and fail
+the gate. A post hoc diagnostic shows that squared-error training can
+itself worsen MAE relative to the median prior. These are preliminary
+growth-prior results, not a validated
 corridor clearance forecast. The LiDAR-loss-on subset is retrospectively
 selected; persistent-forest selection still needs visual audit.
 Conductor geometry is unavailable, so future span rankings would be
@@ -123,6 +127,13 @@ comparison criterion. G3 evaluated both forest screens. The later
 stage-two residual gate was preregistered separately, with loss-off as
 its headline screen.
 
+A post hoc population sensitivity retains all forest cells passing label
+quality, 2013 canopy, vegetation, line-distance, and wire exclusions,
+including cells later mapped as burned or lost. It refits the median
+prior in the same five spatial folds at 1, 2, and 5 km block sizes.
+This analysis tests how much the retrospective fire and Hansen screens
+change the estimated gain; it was designed after the G3 result.
+
 \subsection{Stage-two residual comparison}
 The preregistered target is observed p95 height change minus the
 training-fold stage-one median increment. E4 ridge (regularization
@@ -139,6 +150,13 @@ use the same five-fold 2 km blocks and 2,000-draw paired whole-block
 intervals as the stage-one comparison. The loss-off screen is the
 preregistered decision screen; 1 km and 5 km blocks, all classes, and
 the LiDAR-loss-on screen are declared sensitivities.
+
+Ridge and LightGBM minimize squared-error objectives, whereas the
+decision metric is MAE. A post hoc diagnostic therefore compares the
+median prior with two models carrying no new predictors: one adds the
+training-fold mean residual as a global intercept, and the other
+replaces each training-group median increment with its mean. These
+comparisons quantify an objective mismatch, not added feature skill.
 
 \section{Results}
 \begin{table}[ht]
@@ -162,6 +180,18 @@ The type-specific or pooled median increment beats assuming no change
 on both screens. The larger loss-on gain is an upper-bound result for
 a selected subset.
 
+The post hoc all-forest population has 402,728 eligible cells before
+retrospective disturbance screening; fire and Hansen rules remove
+276,840 of them for the loss-off comparison. At 2 km, the all-forest
+median-minus-no-change MAE difference is $-0.062$ m
+($[-0.144,+0.012]$), versus $-0.121$ m
+($[-0.145,-0.097]$) after screening. The all-forest interval includes
+zero at 5 km ($-0.016$ m, $[-0.079,+0.052]$), while its 1 km interval
+is below zero ($-0.061$ m, $[-0.122,-0.002]$). The screened loss-off
+gain persists at 1 km ($-0.121$ m, $[-0.140,-0.103]$) and 5 km
+($-0.118$ m, $[-0.143,-0.093]$). These extra analyses are post hoc
+and do not change the recorded G3 gate.
+
 Curve minus median MAE was $+0.000$ m ($[-0.005,+0.005]$) with LiDAR
 loss off and $+0.002$ m ($[-0.007,+0.013]$) with it on. The
 height-dependent Chapman--Richards curve adds nothing measurable
@@ -183,10 +213,21 @@ does not reverse the loss-off decision. The loss-off result remains
 unfavorable at 1 km and 5 km blocks and across all admissible map
 classes.
 
+On the screened loss-off population, the post hoc intercept-only
+squared-error model increases MAE over the median prior by $+0.028$ m
+($[+0.015,+0.041]$); substituting type means increases it by
+$+0.044$ m ($[+0.027,+0.067]$). Thus an objective mismatch can account
+for part of the $+0.052$ m LightGBM and $+0.080$ m ridge deficits.
+It does not establish how much of either fitted model's deficit is
+caused by the objective rather than disturbance or other errors.
+
 \section{Discussion}
 The measured contribution is a map-class median increment that improves
-on no change. The curve sensitivity does not improve on that median,
-and its post hoc $A$ values are not species maxima. Sonoma map
+on no change in the retrospectively screened forest population. The
+post hoc all-forest comparison does not show a reliable gain at the
+2 km or 5 km block scale. The curve sensitivity does not improve on
+the screened median, and its post hoc $A$ values are not species
+maxima. Sonoma map
 polygons may contain mixed species; whether this or LiDAR outliers
 explains tall empirical cutoffs is unverified. The 27 m
 \emph{Acer macrophyllum} value is a champion-tree exception to the
@@ -207,12 +248,19 @@ do not improve the median prior on this screened population. Better
 loss-on scores may reflect retrospective exclusion of loss cells;
 they cannot establish operational forecast skill. The present result
 does not justify changing the preregistered feature set or settings
-after inspection.
+after inspection. Because the models minimize squared error while the
+gate uses MAE, their failure cannot be attributed solely to
+unpredictable disturbance.
+The stage-two analysis plan appears before the fit in local Git
+history, but its commits were first pushed together after the fit;
+there is no independent server timestamp for the plan before fitting.
 
 \section{Conclusion}
 A type-specific or pooled broad-group median height increment improves
-the screened 2013--2022 p95 comparison over no change. Height-dependent
-Chapman--Richards curves add no measurable benefit. Independent scientific
+the retrospectively screened 2013--2022 p95 comparison over no change.
+The post hoc all-forest gain is smaller and uncertain at 2 km and 5 km.
+Height-dependent Chapman--Richards curves add no measurable benefit.
+Independent scientific
 review of the post hoc curve rule and validation of persistent-forest
 selection remain open before broader claims are made.
 The preregistered ridge and LightGBM residual models fail their

@@ -1,0 +1,161 @@
+{
+  "generated_utc": "2026-10-15T19:14:15.717859+00:00",
+  "git_base_revision": "e660e926e9ac17e095e3136bbdc01b50082347f6",
+  "analysis": "posthoc",
+  "block_sizes_m": [
+    2000,
+    1000,
+    5000
+  ],
+  "folds": 5,
+  "bootstrap_draws": 2000,
+  "seed": 42,
+  "input_sha256": {
+    "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
+    "clean_cells": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
+    "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee",
+    "analysis_code": "873ba3900b3ff79a16910ffb687c33174554922414fbc9bd516118053e96d643",
+    "forecast_config": "08bea713cd9feadd49a45436765bb5937379d137a3c71287e8881f9c8a2d64f5",
+    "posthoc_config": "d8639f7191ab15d6bf7468bc3a0de1ac497750af754e369592201a0f4ed41d20"
+  },
+  "selection_settings": {
+    "forest_groups": [
+      "conifer forest",
+      "hardwood forest"
+    ],
+    "excluded_map_classes": [
+      "Urban Window",
+      "Developed",
+      "Vineyard",
+      "Orchard or Grove",
+      "Nursery or Ornamental Horticultural Area",
+      "Major Roads",
+      "Water",
+      "Annual Cropland",
+      "Irrigated Pasture",
+      "Perennial Agriculture"
+    ],
+    "p95_wire_exclusion_m": 10.0,
+    "min_fit_cells": 500
+  },
+  "excluded_from_all_forest": 276840,
+  "all_forest": {
+    "2000": {
+      "cells": 402728,
+      "blocks": 129,
+      "block_size_m": 2000,
+      "candidate_mae_m": 1.8899612323992032,
+      "reference_mae_m": 1.951541763798592,
+      "candidate_minus_reference": {
+        "difference_m": -0.061580531399388634,
+        "ci_low_m": -0.14357486070235784,
+        "ci_high_m": 0.011867268766706367,
+        "blocks": 129,
+        "draws": 2000
+      }
+    },
+    "1000": {
+      "cells": 402728,
+      "blocks": 363,
+      "block_size_m": 1000,
+      "candidate_mae_m": 1.8906944401942027,
+      "reference_mae_m": 1.951541763798592,
+      "candidate_minus_reference": {
+        "difference_m": -0.06084732360438968,
+        "ci_low_m": -0.12239538314193253,
+        "ci_high_m": -0.002165040661484095,
+        "blocks": 363,
+        "draws": 2000
+      }
+    },
+    "5000": {
+      "cells": 402728,
+      "blocks": 24,
+      "block_size_m": 5000,
+      "candidate_mae_m": 1.935326550793085,
+      "reference_mae_m": 1.951541763798592,
+      "candidate_minus_reference": {
+        "difference_m": -0.01621521300550571,
+        "ci_low_m": -0.0791190287230986,
+        "ci_high_m": 0.051923347286958625,
+        "blocks": 24,
+        "draws": 2000
+      }
+    }
+  },
+  "forest_loss_off": {
+    "2000": {
+      "cells": 125888,
+      "blocks": 83,
+      "block_size_m": 2000,
+      "candidate_mae_m": 1.2564058237559559,
+      "reference_mae_m": 1.37750216072966,
+      "candidate_minus_reference": {
+        "difference_m": -0.12109633697370328,
+        "ci_low_m": -0.14525691387540246,
+        "ci_high_m": -0.09702721176994858,
+        "blocks": 83,
+        "draws": 2000
+      }
+    },
+    "1000": {
+      "cells": 125888,
+      "blocks": 202,
+      "block_size_m": 1000,
+      "candidate_mae_m": 1.2565872726431473,
+      "reference_mae_m": 1.37750216072966,
+      "candidate_minus_reference": {
+        "difference_m": -0.12091488808651284,
+        "ci_low_m": -0.14004905890891398,
+        "ci_high_m": -0.10345577436564937,
+        "blocks": 202,
+        "draws": 2000
+      }
+    },
+    "5000": {
+      "cells": 125888,
+      "blocks": 18,
+      "block_size_m": 5000,
+      "candidate_mae_m": 1.2594203301324969,
+      "reference_mae_m": 1.37750216072966,
+      "candidate_minus_reference": {
+        "difference_m": -0.11808183059716255,
+        "ci_low_m": -0.1426522107716715,
+        "ci_high_m": -0.09284107731165593,
+        "blocks": 18,
+        "draws": 2000
+      }
+    }
+  },
+  "objective_mismatch": {
+    "fold_mean_residual_offsets_m": [
+      -0.2357002478796083,
+      -0.23484545183665198,
+      -0.205276444429836,
+      -0.263117791439856,
+      -0.23349998984198939
+    ],
+    "intercept_only": {
+      "candidate_mae_m": 1.2842724576398226,
+      "reference_mae_m": 1.2564058237559559,
+      "candidate_minus_reference": {
+        "difference_m": 0.027866633883865212,
+        "ci_low_m": 0.014882359175111255,
+        "ci_high_m": 0.041334343124689456,
+        "blocks": 83,
+        "draws": 2000
+      }
+    },
+    "type_mean": {
+      "candidate_mae_m": 1.2999554166732286,
+      "reference_mae_m": 1.2564058237559559,
+      "candidate_minus_reference": {
+        "difference_m": 0.04354959291727298,
+        "ci_low_m": 0.02669384496222789,
+        "ci_high_m": 0.06721355992195507,
+        "blocks": 83,
+        "draws": 2000
+      }
+    }
+  }
+}
