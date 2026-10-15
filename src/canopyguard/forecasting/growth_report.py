@@ -88,16 +88,22 @@ def _score_table(rows: list[tuple[str, dict, str]]) -> list[str]:
 
 def _type_rows(metrics: dict) -> list[str]:
     rows = [
-        "| Forest map class | Cells | Fit scope | A (m) | 2013 p95 >= A "
+        "| Forest map class | Cells | Fit scope | Full-fit A (m) | Fold A range (m) "
+        "| Held-out 2013 p95 >= fold A "
         "| k (/yr) | c | No change MAE | Median MAE | Curve MAE | Bound? |",
-        "| --- | ---: | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- |",
+        "| --- | ---: | --- | ---: | --- | --- | ---: | ---: | ---: "
+        "| ---: | ---: | --- |",
     ]
     for item in metrics["per_type"]:
         fit = item["fit"]
+        saturation = item["saturation"]
         bound = fit["k_at_bound"] or fit["c_at_bound"]
         rows.append(
             f"| {item['vegetation_type']} | {item['cells']:,} | {fit['scope']} "
-            f"| {fit['A']:.0f} | {item['saturation']['share']:.2%} "
+            f"| {fit['A']:.1f} "
+            f"| {saturation['A_min_m']:.1f}-{saturation['A_max_m']:.1f} "
+            f"| {saturation['at_or_above_A']}/{saturation['cells']} "
+            f"({saturation['share']:.2%}) "
             f"| {fit['k']:.4f} | {fit['c']:.2f} "
             f"| {item['mae_no_change_m']:.3f} "
             f"| {item['mae_median_growth_m']:.3f} "
@@ -154,6 +160,13 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
     lines = [
         "# Growth-curve check, 2013-2022",
         "",
+        "**Post hoc A rule.** The original literature-only A preflight exceeded "
+        "0.5% in nine classes. The revised primary A is the maximum of the "
+        "literature typical-upper value and the 99.5th percentile of "
+        "max(2013 p95, 2022 p95), calculated within each spatial training fold. "
+        "The 2022 heights in a held-out fold never set that fold's A. This "
+        "revised gate is exploratory and must not be presented as predeclared.",
+        "",
         f"Run: {metrics['generated_utc']}. Issue #8. Base revision: "
         f"{metrics['git_base_revision']}.",
         "",
@@ -177,15 +190,15 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "The LiDAR-loss-off rows keep the fire and Hansen screens. "
         "All-class rows are secondary and use the former free-A model because "
         "literature A values were specified for forest alliances only. "
-        "The p99.5 A sensitivity uses 2013 training-fold heights only. "
-        "The record sensitivity changes Douglas-fir and redwood A to the "
-        "reported record-tree heights; all other classes keep literature A.",
+        "The literature-only row keeps Douglas-fir and redwood at 76 and 91 m. "
+        "The record-tree row uses 101 and 111 m for those classes; all other "
+        "classes keep their literature A. The free-A row is the former fit.",
         "",
         "## Spatial sensitivity and mean-height check",
         "",
         *_score_table(
             [
-                (f"forest loss on, {size} m", score, "literature")
+                (f"forest loss on, {size} m", score, settings["primary_a_mode"])
                 for size, score in metrics["spatial_sensitivities"].items()
             ]
             + [("forest mean, 2 km", metrics["mean_secondary"], "literature")]
@@ -193,11 +206,12 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "",
         "## Forest map classes and height ceilings",
         "",
-        "The literature A is fixed before fitting k and c. Cells starting at "
-        "or above A are predicted to have no growth. Mixed classes use the "
-        "largest member A; pooled fits share k and c while each class keeps A. "
-        "Per-class saturation is measured after the wire-suspect and "
-        "within-10-m line exclusions. Values above 0.5% require review.",
+        "The post hoc A is fixed within each training fold before fitting k "
+        "and c. Cells starting at or above A are predicted to have no growth. "
+        "Mixed classes use the largest member literature A; pooled fits share "
+        "k and c while each class keeps its own fold A. The table reports "
+        "held-out exceedance after wire and 10 m line exclusions. Its share "
+        "need not equal 0.5%, because held-out blocks can have taller trees.",
         "",
         *_type_rows(metrics),
         "",

@@ -73,6 +73,9 @@ stage1_growth_model:
         url: https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif
         path: data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif
   growth_curve:
+    primary_a_mode: posthoc
+    a_rule: max_literature_and_training_p995_pair_max_p95
+    a_rule_post_hoc: true
     mixed_class_rule: max_of_members
     pooled_rule: shared_k_c_class_specific_A
     unit_mismatch_rule: max_of_printed_metres_and_converted_feet
@@ -88,7 +91,7 @@ stage1_growth_model:
       Arbutus menziesii Alliance: 40
       Acer macrophyllum Alliance: 27
       Populus fremontii Alliance: 34
-      Eucalyptus (globulus, camaldulensis) Semi-natural Alliance: 55
+      Eucalyptus (globulus, camaldulensis) Semi-natural Alliance: null
       Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance: 30
       Pseudotsuga menziesii Alliance: 76
       Sequoia sempervirens Alliance: 91
@@ -99,7 +102,7 @@ stage1_growth_model:
       Pseudotsuga menziesii Alliance: 101
       Sequoia sempervirens Alliance: 111
     pending_source_review: [Eucalyptus camaldulensis Jepson height]
-    source_review_confirmed: true
+    source_review_confirmed: false
     reviewer_spot_checked: true
     p95_wire_exclusion_m: 10.0
     saturation_review_fraction: 0.005

@@ -76,3 +76,21 @@ def saturation_shares(
             "share": None if ceiling is None else float((start[use] >= ceiling).mean()),
         }
     return result
+
+
+def fold_saturation_shares(
+    frame: pd.DataFrame, start: np.ndarray, fold_a: np.ndarray
+) -> dict[str, dict]:
+    """Report held-out start heights reaching their training-derived A."""
+    result = {}
+    names = frame["vegetation_type"].to_numpy()
+    for name in np.unique(names):
+        use = names == name
+        result[name] = {
+            "cells": int(use.sum()),
+            "A_min_m": float(fold_a[use].min()),
+            "A_max_m": float(fold_a[use].max()),
+            "at_or_above_A": int((start[use] >= fold_a[use]).sum()),
+            "share": float((start[use] >= fold_a[use]).mean()),
+        }
+    return result

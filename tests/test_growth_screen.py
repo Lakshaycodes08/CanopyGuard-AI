@@ -6,6 +6,7 @@ import pytest
 
 from canopyguard.evaluation.growth_gate import _check_fit_permission
 from canopyguard.evaluation.growth_screen import (
+    fold_saturation_shares,
     saturation_shares,
     selection_masks,
     wire_exclusion,
@@ -68,12 +69,24 @@ def test_saturation_is_per_class_after_selection():
     assert shares["pine"]["share"] == 0.0
 
 
-def test_saturation_above_review_threshold_blocks_fit():
+def test_posthoc_rule_allows_reviewed_literature_exceedance_but_requires_source():
     settings = {
         "saturation_review_fraction": 0.005,
         "source_review_confirmed": True,
         "reviewer_spot_checked": True,
     }
     shares = {"oak": {"A_m": 25, "share": 0.006}}
-    with pytest.raises(ValueError, match="oak"):
+    _check_fit_permission(settings, shares)
+    shares["eucalyptus"] = {"A_m": None, "share": None}
+    with pytest.raises(ValueError, match="eucalyptus"):
         _check_fit_permission(settings, shares)
+
+
+def test_fold_exceedance_uses_each_held_out_cells_training_a():
+    frame = pd.DataFrame({"vegetation_type": ["oak", "oak", "pine"]})
+    shares = fold_saturation_shares(
+        frame, np.array([21.0, 23.0, 18.0]), np.array([22.0, 22.0, 30.0])
+    )
+    assert shares["oak"]["at_or_above_A"] == 1
+    assert shares["oak"]["share"] == 0.5
+    assert shares["pine"]["share"] == 0.0

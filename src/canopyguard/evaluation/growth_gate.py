@@ -17,6 +17,7 @@ from canopyguard.evaluation.growth_outputs import (
     _save_preflight,
 )
 from canopyguard.evaluation.growth_screen import (
+    fold_saturation_shares,
     saturation_shares,
     selection_masks,
     wire_exclusion,
@@ -111,19 +112,8 @@ def _score(
 
 def _check_fit_permission(settings: dict, shares: dict) -> None:
     missing = [name for name, item in shares.items() if item["A_m"] is None]
-    saturated = [
-        name
-        for name, item in shares.items()
-        if item["share"] is not None
-        and item["share"] > settings["saturation_review_fraction"]
-    ]
     if missing:
         raise ValueError(f"Unconfirmed literature A: {', '.join(missing)}")
-    if saturated:
-        threshold = settings["saturation_review_fraction"]
-        raise ValueError(
-            f"Review A saturation above {threshold:.1%}: {', '.join(saturated)}"
-        )
     if not settings["source_review_confirmed"] or not settings["reviewer_spot_checked"]:
         raise ValueError(
             "Height table needs Lakshay confirmation and reviewer spot-check"
@@ -165,7 +155,9 @@ def run_growth_gate(forecast: dict) -> dict:
         "all_loss_off",
     ):
         frame, values = _selected(table, heights, masks[screen_name])
-        mode = "literature" if screen_name.startswith("forest") else "free"
+        mode = (
+            settings["primary_a_mode"] if screen_name.startswith("forest") else "free"
+        )
         score, predicted = _score(
             frame,
             values["p95_start"],
@@ -180,7 +172,7 @@ def run_growth_gate(forecast: dict) -> dict:
             primary_predictions = predicted
     primary = screens["forest_loss_on"]
     sensitivities = {}
-    for mode in ("train_p995", "free", "record"):
+    for mode in ("literature", "free", "record"):
         sensitivities[mode], _ = _score(
             forest_frame,
             forest_heights["p95_start"],
@@ -201,7 +193,7 @@ def run_growth_gate(forecast: dict) -> dict:
             dt,
             size,
             settings,
-            a_mode="literature",
+            a_mode=settings["primary_a_mode"],
         )
     mean_score, _ = _score(
         forest_frame,
@@ -219,13 +211,16 @@ def run_growth_gate(forecast: dict) -> dict:
         dt,
         settings,
     )
+    fold_shares = fold_saturation_shares(
+        forest_frame, forest_heights["p95_start"], primary_predictions["A"]
+    )
     per_type = _per_type(
         forest_frame,
         forest_heights["p95_start"],
         forest_heights["p95_end"],
         primary_predictions,
         fitted,
-        shares,
+        fold_shares,
         settings,
     )
     decision = "PASS" if primary["curve_minus_no_change"]["ci_high_m"] < 0 else "FAIL"
@@ -256,7 +251,8 @@ def run_growth_gate(forecast: dict) -> dict:
         "height_sensitivities": sensitivities,
         "spatial_sensitivities": spatial,
         "mean_secondary": mean_score,
-        "forest_saturation": shares,
+        "forest_saturation": fold_shares,
+        "literature_saturation": shares,
         "per_type": per_type,
     }
     path = ensure_parent(root / settings["metrics_path"])

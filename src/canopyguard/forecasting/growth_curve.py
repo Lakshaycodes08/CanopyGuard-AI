@@ -32,7 +32,7 @@ def fit_growth_curve(
     *,
     max_height_m: float | np.ndarray,
 ) -> dict[str, float]:
-    """Fit k and c with an independently sourced fixed height ceiling."""
+    """Fit k and c with a supplied height ceiling."""
     x = np.asarray(start, dtype=float)
     y = np.asarray(end, dtype=float)
     valid = np.isfinite(x) & np.isfinite(y) & (x >= 0) & (y >= 0)
@@ -113,16 +113,14 @@ def fit_free_growth_curve(
 
 
 def class_heights(
-    names: np.ndarray, start: np.ndarray, settings: dict, mode: str
+    names: np.ndarray,
+    start: np.ndarray,
+    end: np.ndarray,
+    settings: dict,
+    mode: str,
 ) -> dict[str, float]:
-    """Choose class-specific A values, even when k and c share a pool."""
-    if mode == "train_p995":
-        quantile = settings["training_height_quantile"]
-        return {
-            name: float(np.quantile(start[names == name], quantile))
-            for name in np.unique(names)
-        }
-    if mode not in ("literature", "record"):
+    """Choose class A from literature or the training pair's upper tail."""
+    if mode not in ("posthoc", "literature", "record"):
         raise ValueError(f"Unknown A mode: {mode}")
     heights = dict(settings["max_height_m"])
     if mode == "record":
@@ -130,6 +128,16 @@ def class_heights(
     missing = sorted({name for name in names if heights.get(name) is None})
     if missing:
         raise ValueError(f"Unconfirmed maximum height for: {', '.join(missing)}")
+    if mode == "posthoc":
+        paired_max = np.maximum(start, end)
+        quantile = settings["training_height_quantile"]
+        return {
+            name: max(
+                float(heights[name]),
+                float(np.quantile(paired_max[names == name], quantile)),
+            )
+            for name in np.unique(names)
+        }
     return {name: float(heights[name]) for name in np.unique(names)}
 
 
@@ -168,6 +176,7 @@ def blocked_predictions(
     names = frame["vegetation_type"].to_numpy()
     curve = np.full(len(frame), np.nan)
     median = np.full(len(frame), np.nan)
+    fold_a = np.full(len(frame), np.nan)
     scopes: dict[str, int] = {}
     for fold in range(settings["folds"]):
         train, test = folds != fold, folds == fold
@@ -191,7 +200,11 @@ def blocked_predictions(
                     ceilings = None
                 else:
                     ceilings = class_heights(
-                        names[fit_rows], start[fit_rows], settings, a_mode
+                        names[fit_rows],
+                        start[fit_rows],
+                        end[fit_rows],
+                        settings,
+                        a_mode,
                     )
                     a = np.array([ceilings[name] for name in names[fit_rows]])
                     fit = fit_growth_curve(
@@ -205,16 +218,18 @@ def blocked_predictions(
                 if ceilings is None
                 else np.array([ceilings[name] for name in names[use]])
             )
+            fold_a[use] = a
             curve[use] = chapman_richards(start[use], dt, a, fit["k"], fit["c"])
             median[use] = start[use] + median_growth
             scopes[scope] = scopes.get(scope, 0) + int(use.sum())
-    if not np.isfinite(curve).all() or not np.isfinite(median).all():
+    if not all(np.isfinite(values).all() for values in (curve, median, fold_a)):
         raise ValueError("Some held-out cells lack growth predictions")
     return {
         "blocks": block_ids,
         "folds": folds,
         "curve": curve,
         "median": median,
+        "A": fold_a,
         "fit_scope_counts": scopes,
     }
 

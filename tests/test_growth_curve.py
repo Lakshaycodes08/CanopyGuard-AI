@@ -88,15 +88,53 @@ def test_pooled_fit_keeps_class_specific_height_ceilings():
     cfg = settings()
     cfg["max_height_m"]["pine"] = 100.0
     names = np.array(["oak", "pine"])
-    assert class_heights(names, np.array([10.0, 10.0]), cfg, "literature") == {
+    start = np.array([10.0, 10.0])
+    end = np.array([12.0, 12.0])
+    assert class_heights(names, start, end, cfg, "literature") == {
         "oak": 70.0,
         "pine": 100.0,
     }
-    assert class_heights(names, np.array([10.0, 10.0]), cfg, "record")["oak"] == 90.0
+    assert class_heights(names, start, end, cfg, "record")["oak"] == 90.0
     with pytest.raises(ValueError, match="Unconfirmed"):
-        class_heights(
-            np.array(["oak", "eucalyptus"]), np.array([10.0, 10.0]), cfg, "literature"
-        )
+        class_heights(np.array(["oak", "eucalyptus"]), start, end, cfg, "literature")
+
+
+def test_posthoc_a_uses_training_pair_max_and_literature_floor():
+    cfg = settings()
+    cfg["max_height_m"] = {"oak": 20.0, "pine": 60.0}
+    names = np.array(["oak", "oak", "pine", "pine"])
+    start = np.array([15.0, 21.0, 12.0, 14.0])
+    end = np.array([27.0, 23.0, 18.0, 20.0])
+    heights = class_heights(names, start, end, cfg, "posthoc")
+    assert heights["oak"] == pytest.approx(26.98)
+    assert heights["pine"] == 60.0
+
+
+def test_held_out_2022_heights_cannot_change_fold_a_or_prediction():
+    generator = np.random.default_rng(19)
+    cfg = settings()
+    cfg["max_height_m"] = {"oak": 10.0}
+    block = np.repeat(np.arange(20), 25)
+    start = generator.uniform(5.0, 15.0, len(block))
+    end = start + generator.uniform(1.0, 5.0, len(block))
+    frame = pd.DataFrame(
+        {
+            "x": block * 1000.0,
+            "y": np.zeros(len(block)),
+            "model_group": ["oak"] * len(block),
+            "broader_group": ["hardwood forest"] * len(block),
+            "vegetation_type": ["oak"] * len(block),
+        }
+    )
+    original = blocked_predictions(frame, start, end, 8.96, 1000, cfg, a_mode="posthoc")
+    held_out = original["folds"] == 0
+    altered_end = end.copy()
+    altered_end[held_out] += 500.0
+    changed = blocked_predictions(
+        frame, start, altered_end, 8.96, 1000, cfg, a_mode="posthoc"
+    )
+    np.testing.assert_array_equal(changed["A"][held_out], original["A"][held_out])
+    np.testing.assert_allclose(changed["curve"][held_out], original["curve"][held_out])
 
 
 def test_pooled_predictions_use_each_class_height_ceiling():

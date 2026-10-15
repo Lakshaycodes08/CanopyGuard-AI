@@ -1,12 +1,12 @@
 {
-  "generated_utc": "2026-10-15T07:30:36.527176+00:00",
-  "git_revision": "2414a92b672b31ed605227bfeade8872a3a3fc3f",
+  "generated_utc": "2026-10-15T07:57:06.132792+00:00",
+  "git_revision": "28a866f478496eb39522c7939c6df3af0273b279",
   "inputs_sha256": {
     "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
     "clean_cells": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
     "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee"
   },
-  "source_review_confirmed": true,
+  "source_review_confirmed": false,
   "reviewer_spot_checked": true,
   "screen_counts": {
     "all_loss_off": 140530,
@@ -31,9 +31,9 @@
     },
     "Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": {
       "cells": 342,
-      "A_m": 55,
-      "at_or_above_A": 0,
-      "share": 0.0
+      "A_m": null,
+      "at_or_above_A": null,
+      "share": null
     },
     "Hesperocyparis sargentii Alliance": {
       "cells": 982,

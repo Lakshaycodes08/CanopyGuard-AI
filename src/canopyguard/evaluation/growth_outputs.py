@@ -21,6 +21,8 @@ def _fit_parameters(frame: pd.DataFrame, start, end, dt, settings) -> dict:
     groups = frame["model_group"].to_numpy()
     broad = frame["broader_group"].to_numpy()
     names = frame["vegetation_type"].to_numpy()
+    mode = settings["primary_a_mode"]
+    all_heights = class_heights(names, start, end, settings, mode)
     fitted, output = {}, {}
     for name in np.unique(names):
         use = names == name
@@ -36,7 +38,7 @@ def _fit_parameters(frame: pd.DataFrame, start, end, dt, settings) -> dict:
             scope, training = "broad:" + broad_group, broad == broad_group
         if scope not in fitted:
             ceilings = class_heights(
-                names[training], start[training], settings, "literature"
+                names[training], start[training], end[training], settings, mode
             )
             ceiling = np.array([ceilings[item] for item in names[training]])
             fitted[scope] = fit_growth_curve(
@@ -45,7 +47,7 @@ def _fit_parameters(frame: pd.DataFrame, start, end, dt, settings) -> dict:
         output[name] = {
             "scope": scope,
             **fitted[scope],
-            "A": float(settings["max_height_m"][name]),
+            "A": all_heights[name],
         }
     return output
 
@@ -121,6 +123,7 @@ def _save_oof(frame, start, end, predicted, settings, forecast) -> None:
             "p95_no_change": start,
             "p95_median_growth": predicted["median"],
             "p95_curve": predicted["curve"],
+            "p95_fold_A": predicted["A"],
         }
     )
     path = ensure_parent(root / settings["oof_path"])

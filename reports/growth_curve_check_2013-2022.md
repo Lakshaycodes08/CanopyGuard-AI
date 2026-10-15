@@ -1,13 +1,22 @@
 # Growth-curve check, 2013-2022
 
-## Revised fixed-A preflight, 2026-10-15
+## Post hoc A revision, pending rerun
 
-**G3 fit paused for height-ceiling review.** The revised forest screen has 76,980
+The requested primary rule is now A = max(literature typical-upper A, training-fold
+p99.5 of max(2013 p95, 2022 p95)) for each forest class. This rule was selected
+after inspecting the literature-A exceedances below and is **post hoc**. Each
+spatial fold must derive A from its training cells only; the held-out 2022 p95
+cannot set that fold's A. The mixed Eucalyptus literature A is unset until the
+E. camaldulensis source is confirmed. No revised G3 result is available yet.
+
+## Historical literature-A preflight, 2026-10-15
+
+**G3 fit was paused for height-ceiling review.** The forest screen has 76,980
 cells with the LiDAR-loss filter and 125,888 without it. The PR #13 wire archive
 was generated locally; 1,620 cells have a wire-suspect flag and 33,139 lie
 within 10 m of a mapped line before the other screens. Nine forest classes have
 more than 0.5% of screened 2013 p95 heights at or above their confirmed A.
-The rule requires Lakshay to review these values before fitting.
+These exceedances motivated the post hoc A rule above.
 
 | Forest map class | A (m) | Forest cells | At or above A | Share | Review? |
 | --- | ---: | ---: | ---: | ---: | --- |
@@ -33,8 +42,9 @@ The rule requires Lakshay to review these values before fitting.
 The full counts and exact fractions are in
 `reports/growth_curve_preflight_2013-2022.json`. The fixed-literature-A,
 training-fold p99.5-A, free-A and record-tree-A fits have not been run.
-The E. camaldulensis Jepson height check remains open; the confirmed mixed
-Eucalyptus A of 55 m uses E. globulus until that check is complete.
+The E. camaldulensis Jepson height check remains open. The old provisional
+mixed Eucalyptus A of 55 m was based only on E. globulus and is now unset in
+the configuration until the second member has a verified source.
 
 > Historical pre-revision result (free A; PR #13 wire exclusions unavailable).
 > Superseded as a G3 decision pending the fixed-A forest rerun. Do not cite the
