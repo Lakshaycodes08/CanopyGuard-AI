@@ -143,10 +143,10 @@ stages:
           suspects_per_group: 50
           labels_path: data/processed/labels_2013-2022_unique.npz
           lines_path: data/interim/cec/cec_lines_study_box.geojson
-          lines_source_url: 
+          lines_source_url:
             https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
-            (envelope -122.90,38.475,-122.74,38.82, outFields=*, outSR=4326, 
-            f=geojson; Sonoma County copy of the California Energy Commission 
+            (envelope -122.90,38.475,-122.74,38.82, outFields=*, outSR=4326,
+            f=geojson; Sonoma County copy of the California Energy Commission
             layer, retrieved 2026-10-12)
           out_dir: data/processed/wire_check
           flags_path: data/processed/labels_2013-2022_wire_flags.npz
@@ -446,3 +446,175 @@ stages:
       hash: md5
       md5: 4cd97681ade7edd1b2215cb0b0036f90
       size: 496
+  terrain_dem_2012:
+    cmd: python scripts/fetch_terrain_dem.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: 2cf33fe6830eeadfcf1eaf2f60d22b5e
+      size: 9267
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: scripts/fetch_terrain_dem.py
+      hash: md5
+      md5: 9993d0805b17b060eebe17d003b8884f
+      size: 419
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/data/terrain_dem.py
+      hash: md5
+      md5: 60ff1f5229fd55c356a58eff4ebcfa0e
+      size: 1514
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    outs:
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif
+      hash: md5
+      md5: f41e91dc7d0394224e3a93732f23cb1d
+      size: 469967805
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json
+      hash: md5
+      md5: 125678c1fdf619d72017442ea6068771
+      size: 545
+  terrain_features_10m:
+    cmd: python scripts/build_terrain.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: 2cf33fe6830eeadfcf1eaf2f60d22b5e
+      size: 9267
+    - path: configs/lidar.yaml
+      hash: md5
+      md5: 86a977c4e78e589810da8694eabe89e0
+      size: 11895
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/clean_cells_2013_2022.parquet.provenance.json
+      hash: md5
+      md5: 2ece3c64b305f1ad45c9c52f43e8d37d
+      size: 493
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif
+      hash: md5
+      md5: f41e91dc7d0394224e3a93732f23cb1d
+      size: 469967805
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json
+      hash: md5
+      md5: 125678c1fdf619d72017442ea6068771
+      size: 545
+    - path: scripts/build_terrain.py
+      hash: md5
+      md5: 89d6cb950f9520b3c674f5e6c6a0f25d
+      size: 517
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/features/terrain.py
+      hash: md5
+      md5: dcd8156321f0b51a9d6513e3c8b80248
+      size: 7457
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    outs:
+    - path: data/interim/terrain_10m.parquet
+      hash: md5
+      md5: 5f38f475b9cc08ab3711b12540807f6c
+      size: 39912414
+    - path: data/interim/terrain_10m.parquet.provenance.json
+      hash: md5
+      md5: cee5725b3a6e14ab4501936c86cc985a
+      size: 791
+  stage2_residual_gate_2013_2022:
+    cmd: python scripts/run_stage2_residual_check.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: ccce8cf58d17aee85d3e2b650ad24354
+      size: 9512
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/terrain_10m.parquet
+      hash: md5
+      md5: 5f38f475b9cc08ab3711b12540807f6c
+      size: 39912414
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240
+    - path: data/processed/labels_2013-2022_wire_flags.npz
+      hash: md5
+      md5: 98d5ee04e0a7bc8b1dab61a8a4e31d9a
+      size: 7647531
+    - path: reports/stage2_gate_prereg.md
+      hash: md5
+      md5: 1a6a22ca172be6389c2c0a46b2b355a4
+      size: 4385
+    - path: scripts/run_stage2_residual_check.py
+      hash: md5
+      md5: df781b232a5e6e24abe46a68958d7f21
+      size: 627
+    - path: src/canopyguard/evaluation/blocks.py
+      hash: md5
+      md5: d643efa79173517c4fb245293d20c4bc
+      size: 7425
+    - path: src/canopyguard/evaluation/growth_gate.py
+      hash: md5
+      md5: c526b679cb0e8ac06a75ed53b432022b
+      size: 10757
+    - path: src/canopyguard/evaluation/growth_screen.py
+      hash: md5
+      md5: 3c5b737b8a594c2b58eb16fb2e0eea8e
+      size: 3682
+    - path: src/canopyguard/evaluation/stage2_gate.py
+      hash: md5
+      md5: c3c068cbab7d2f9e9f7640085961447c
+      size: 8837
+    - path: src/canopyguard/forecasting/growth_curve.py
+      hash: md5
+      md5: 837ea608cec780570dd35a5a1e5cff0e
+      size: 10752
+    - path: src/canopyguard/forecasting/growth_prior.py
+      hash: md5
+      md5: fbfd7e37a3302daa4a04d167d8a0e0b5
+      size: 2792
+    - path: src/canopyguard/forecasting/stage2_report.py
+      hash: md5
+      md5: d5a9d6711b1b5734c2497793cce045bf
+      size: 6105
+    - path: src/canopyguard/forecasting/stage2_residual.py
+      hash: md5
+      md5: 7ef5cd22d28745d941446f605396908d
+      size: 3114
+    outs:
+    - path: data/interim/stage2_residual_oof_2013-2022.parquet
+      hash: md5
+      md5: 958a1bed0a587e991e8d48f9eea20c1c
+      size: 5873644
+    - path: data/interim/stage2_residual_oof_2013-2022.parquet.provenance.json
+      hash: md5
+      md5: 34f51984157c04045557ea2e60f36ab1
+      size: 997

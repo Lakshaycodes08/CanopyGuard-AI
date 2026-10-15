@@ -63,7 +63,9 @@ also holds a 2024 band, which is outside this check.
 
 - Projection mismatch: the study config is lon/lat (EPSG:4326) and the raster is
   UTM zone 10N (EPSG:32610). The check handles it by testing pixel centres in
-  lon/lat. Any later stage must do the same and not compare raw coordinates.
+  lon/lat. LiDAR labels use EPSG:6339, so E8 must use the pinned operation and
+  pixel-centre alignment in `reports/e8_alignment_protocol.md`; raw projected
+  coordinates must not be treated as the same grid.
 - Band order is inferred, not documented. The authors do not label the 7 bands.
   The repo reads them as 2018 to 2024 in order. Evidence for that order:
   - Large drops and large gains are very unbalanced. Summed over consecutive

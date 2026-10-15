@@ -1,0 +1,811 @@
+{
+  "generated_utc": "2026-10-15T13:02:48.068794+00:00",
+  "git_base_revision": "c6b342fe96950c7e3986b131733d49438ccab387",
+  "implementation_revision": "12296cf5712af4d1da009881f13396447d128f78",
+  "preregistration": "reports/stage2_gate_prereg.md",
+  "settings": {
+    "target": "delta_h_minus_stage1",
+    "families": [
+      "ridge",
+      "lightgbm"
+    ],
+    "terrain": {
+      "dem_url": "https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/historical/n39w123/USGS_13_n39w123_20120801.tif",
+      "dem_path": "data/raw/usgs_3dep_13_n39w123_20120801.tif",
+      "output_path": "data/interim/terrain_10m.parquet",
+      "target_crs": "EPSG:6339",
+      "resolution_m": 10,
+      "padding_m": 500,
+      "tpi_radius_m": 450,
+      "resampling": "bilinear"
+    },
+    "numeric_features": [
+      "mean_start",
+      "p95_start",
+      "max_start",
+      "elevation_m",
+      "slope_deg",
+      "heat_load",
+      "tpi_450"
+    ],
+    "categorical_features": [
+      "vegetation_type"
+    ],
+    "ridge": {
+      "alpha": 1.0
+    },
+    "lightgbm": {
+      "objective": "regression",
+      "max_depth": 4,
+      "num_leaves": 15,
+      "n_estimators": 400,
+      "learning_rate": 0.03,
+      "min_data_in_leaf": 200,
+      "feature_fraction": 0.6,
+      "deterministic": true,
+      "force_col_wise": true,
+      "n_jobs": 4,
+      "verbosity": -1
+    },
+    "oof_path": "data/interim/stage2_residual_oof_2013-2022.parquet",
+    "metrics_path": "reports/stage2_residual_check_2013-2022.json",
+    "report_path": "reports/stage2_residual_check_2013-2022.md",
+    "capacity_ceiling": {
+      "max_depth": 4,
+      "num_leaves": 15,
+      "n_estimators": 400,
+      "learning_rate": 0.03,
+      "min_data_in_leaf": 200,
+      "feature_fraction": 0.6
+    },
+    "heads": {
+      "loss_event": {
+        "objective": "binary",
+        "threshold": "negative_lod95"
+      },
+      "magnitude": {
+        "objective": "quantile",
+        "quantiles": [
+          0.05,
+          0.25,
+          0.5,
+          0.75,
+          0.95
+        ]
+      }
+    }
+  },
+  "stage1_settings": {
+    "folds": 5,
+    "seed": 42,
+    "min_fit_cells": 500,
+    "bootstrap_draws": 2000,
+    "block_sizes_m": [
+      2000,
+      1000,
+      5000
+    ]
+  },
+  "versions": {
+    "sklearn": "1.9.0",
+    "lightgbm": "4.7.0"
+  },
+  "input_sha256": {
+    "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
+    "clean_cells": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
+    "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee",
+    "terrain": "d69bba6949cd27209f4140be19bbf436223d373d0e4ace3d641f337aae8a15ea"
+  },
+  "terrain_excluded": {
+    "all_loss_off": 0,
+    "all_loss_on": 0,
+    "forest_loss_off": 0,
+    "forest_loss_on": 0
+  },
+  "screens": {
+    "forest_loss_off_2000m": {
+      "cells": 125888,
+      "blocks": 83,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 106364,
+          "test": 19524
+        },
+        {
+          "fold": 1,
+          "train": 105901,
+          "test": 19987
+        },
+        {
+          "fold": 2,
+          "train": 87773,
+          "test": 38115
+        },
+        {
+          "fold": 3,
+          "train": 105040,
+          "test": 20848
+        },
+        {
+          "fold": 4,
+          "train": 98474,
+          "test": 27414
+        }
+      ],
+      "mae_stage1_m": 1.2564058237559559,
+      "ridge": {
+        "mae_m": 1.3364802204619561,
+        "minus_stage1": {
+          "difference_m": 0.08007439670599865,
+          "ci_low_m": 0.06044556123028305,
+          "ci_high_m": 0.10118079837746582,
+          "blocks": 83,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 1.3088620062946739,
+        "minus_stage1": {
+          "difference_m": 0.05245618253871725,
+          "ci_low_m": 0.028705397535530808,
+          "ci_high_m": 0.08278966557655301,
+          "blocks": 83,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "forest_loss_on_2000m": {
+      "cells": 76980,
+      "blocks": 82,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 62305,
+          "test": 14675
+        },
+        {
+          "fold": 1,
+          "train": 64738,
+          "test": 12242
+        },
+        {
+          "fold": 2,
+          "train": 53210,
+          "test": 23770
+        },
+        {
+          "fold": 3,
+          "train": 63723,
+          "test": 13257
+        },
+        {
+          "fold": 4,
+          "train": 63944,
+          "test": 13036
+        }
+      ],
+      "mae_stage1_m": 0.781685799107731,
+      "ridge": {
+        "mae_m": 0.7621227735433292,
+        "minus_stage1": {
+          "difference_m": -0.01956302556440116,
+          "ci_low_m": -0.03720942664091912,
+          "ci_high_m": -0.0009228320116743172,
+          "blocks": 82,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      },
+      "lightgbm": {
+        "mae_m": 0.7507210211237274,
+        "minus_stage1": {
+          "difference_m": -0.030964777984003475,
+          "ci_low_m": -0.053841102395596745,
+          "ci_high_m": -0.008103588648087167,
+          "blocks": 82,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      }
+    },
+    "all_loss_off_2000m": {
+      "cells": 140530,
+      "blocks": 84,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 113534,
+          "test": 26996
+        },
+        {
+          "fold": 1,
+          "train": 106313,
+          "test": 34217
+        },
+        {
+          "fold": 2,
+          "train": 125495,
+          "test": 15035
+        },
+        {
+          "fold": 3,
+          "train": 98048,
+          "test": 42482
+        },
+        {
+          "fold": 4,
+          "train": 118730,
+          "test": 21800
+        }
+      ],
+      "mae_stage1_m": 1.357738701438032,
+      "ridge": {
+        "mae_m": 1.4388327984987983,
+        "minus_stage1": {
+          "difference_m": 0.08109409706076642,
+          "ci_low_m": 0.06273639019081298,
+          "ci_high_m": 0.09994236817171501,
+          "blocks": 84,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 1.4100302042470223,
+        "minus_stage1": {
+          "difference_m": 0.05229150280899093,
+          "ci_low_m": 0.031233033051591516,
+          "ci_high_m": 0.0752314009205089,
+          "blocks": 84,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "all_loss_on_2000m": {
+      "cells": 83772,
+      "blocks": 83,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 69478,
+          "test": 14294
+        },
+        {
+          "fold": 1,
+          "train": 73791,
+          "test": 9981
+        },
+        {
+          "fold": 2,
+          "train": 65945,
+          "test": 17827
+        },
+        {
+          "fold": 3,
+          "train": 58285,
+          "test": 25487
+        },
+        {
+          "fold": 4,
+          "train": 67589,
+          "test": 16183
+        }
+      ],
+      "mae_stage1_m": 0.8246423208526371,
+      "ridge": {
+        "mae_m": 0.8104367267076653,
+        "minus_stage1": {
+          "difference_m": -0.014205594144972489,
+          "ci_low_m": -0.03304945231802265,
+          "ci_high_m": 0.0034348251793933416,
+          "blocks": 83,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 0.7933468278914076,
+        "minus_stage1": {
+          "difference_m": -0.03129549296122941,
+          "ci_low_m": -0.05169925104148986,
+          "ci_high_m": -0.011690757314544541,
+          "blocks": 83,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      }
+    },
+    "forest_loss_off_1000m": {
+      "cells": 125888,
+      "blocks": 202,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 100393,
+          "test": 25495
+        },
+        {
+          "fold": 1,
+          "train": 98190,
+          "test": 27698
+        },
+        {
+          "fold": 2,
+          "train": 98340,
+          "test": 27548
+        },
+        {
+          "fold": 3,
+          "train": 97107,
+          "test": 28781
+        },
+        {
+          "fold": 4,
+          "train": 109522,
+          "test": 16366
+        }
+      ],
+      "mae_stage1_m": 1.2565872726431473,
+      "ridge": {
+        "mae_m": 1.3281493071427035,
+        "minus_stage1": {
+          "difference_m": 0.07156203449955628,
+          "ci_low_m": 0.05433107569741979,
+          "ci_high_m": 0.08790606829666796,
+          "blocks": 202,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 1.3093795294608375,
+        "minus_stage1": {
+          "difference_m": 0.05279225681769043,
+          "ci_low_m": 0.0333492302174104,
+          "ci_high_m": 0.07288825152221252,
+          "blocks": 202,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "forest_loss_on_1000m": {
+      "cells": 76980,
+      "blocks": 198,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 64439,
+          "test": 12541
+        },
+        {
+          "fold": 1,
+          "train": 57736,
+          "test": 19244
+        },
+        {
+          "fold": 2,
+          "train": 61754,
+          "test": 15226
+        },
+        {
+          "fold": 3,
+          "train": 59639,
+          "test": 17341
+        },
+        {
+          "fold": 4,
+          "train": 64352,
+          "test": 12628
+        }
+      ],
+      "mae_stage1_m": 0.7778473411812447,
+      "ridge": {
+        "mae_m": 0.7606939064424466,
+        "minus_stage1": {
+          "difference_m": -0.017153434738798115,
+          "ci_low_m": -0.03382733931850913,
+          "ci_high_m": -0.0009639642818477769,
+          "blocks": 198,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      },
+      "lightgbm": {
+        "mae_m": 0.7500442489993118,
+        "minus_stage1": {
+          "difference_m": -0.027803092181933126,
+          "ci_low_m": -0.04956417389283903,
+          "ci_high_m": -0.007538583503117701,
+          "blocks": 198,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      }
+    },
+    "all_loss_off_1000m": {
+      "cells": 140530,
+      "blocks": 211,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 110871,
+          "test": 29659
+        },
+        {
+          "fold": 1,
+          "train": 107230,
+          "test": 33300
+        },
+        {
+          "fold": 2,
+          "train": 118768,
+          "test": 21762
+        },
+        {
+          "fold": 3,
+          "train": 113936,
+          "test": 26594
+        },
+        {
+          "fold": 4,
+          "train": 111315,
+          "test": 29215
+        }
+      ],
+      "mae_stage1_m": 1.359405249246066,
+      "ridge": {
+        "mae_m": 1.4351539241525075,
+        "minus_stage1": {
+          "difference_m": 0.07574867490644158,
+          "ci_low_m": 0.05885292290151749,
+          "ci_high_m": 0.09239390056188249,
+          "blocks": 211,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 1.407743462723595,
+        "minus_stage1": {
+          "difference_m": 0.048338213477528785,
+          "ci_low_m": 0.03137248524528409,
+          "ci_high_m": 0.06701982479994224,
+          "blocks": 211,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "all_loss_on_1000m": {
+      "cells": 83772,
+      "blocks": 207,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 70217,
+          "test": 13555
+        },
+        {
+          "fold": 1,
+          "train": 60419,
+          "test": 23353
+        },
+        {
+          "fold": 2,
+          "train": 68157,
+          "test": 15615
+        },
+        {
+          "fold": 3,
+          "train": 69612,
+          "test": 14160
+        },
+        {
+          "fold": 4,
+          "train": 66683,
+          "test": 17089
+        }
+      ],
+      "mae_stage1_m": 0.8221911790469516,
+      "ridge": {
+        "mae_m": 0.8012557771122641,
+        "minus_stage1": {
+          "difference_m": -0.020935401934687698,
+          "ci_low_m": -0.03613576578145097,
+          "ci_high_m": -0.005425640396862444,
+          "blocks": 207,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      },
+      "lightgbm": {
+        "mae_m": 0.7971044852634729,
+        "minus_stage1": {
+          "difference_m": -0.025086693783479136,
+          "ci_low_m": -0.04530185396694667,
+          "ci_high_m": -0.006521920148630724,
+          "blocks": 207,
+          "draws": 2000
+        },
+        "decision": "PASS"
+      }
+    },
+    "forest_loss_off_5000m": {
+      "cells": 125888,
+      "blocks": 18,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 102479,
+          "test": 23409
+        },
+        {
+          "fold": 1,
+          "train": 104395,
+          "test": 21493
+        },
+        {
+          "fold": 2,
+          "train": 93221,
+          "test": 32667
+        },
+        {
+          "fold": 3,
+          "train": 97940,
+          "test": 27948
+        },
+        {
+          "fold": 4,
+          "train": 105517,
+          "test": 20371
+        }
+      ],
+      "mae_stage1_m": 1.2594203301324969,
+      "ridge": {
+        "mae_m": 1.3358713858654037,
+        "minus_stage1": {
+          "difference_m": 0.07645105573290754,
+          "ci_low_m": 0.046518294590523736,
+          "ci_high_m": 0.11634575724803659,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 1.339833543304359,
+        "minus_stage1": {
+          "difference_m": 0.0804132131718607,
+          "ci_low_m": 0.0440881721869821,
+          "ci_high_m": 0.13003325193957058,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "forest_loss_on_5000m": {
+      "cells": 76980,
+      "blocks": 18,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 64121,
+          "test": 12859
+        },
+        {
+          "fold": 1,
+          "train": 63012,
+          "test": 13968
+        },
+        {
+          "fold": 2,
+          "train": 57014,
+          "test": 19966
+        },
+        {
+          "fold": 3,
+          "train": 59782,
+          "test": 17198
+        },
+        {
+          "fold": 4,
+          "train": 63991,
+          "test": 12989
+        }
+      ],
+      "mae_stage1_m": 0.783632450621153,
+      "ridge": {
+        "mae_m": 0.7907075201856528,
+        "minus_stage1": {
+          "difference_m": 0.007075069564499609,
+          "ci_low_m": -0.03671769639074534,
+          "ci_high_m": 0.05025134419431926,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 0.7968375798840085,
+        "minus_stage1": {
+          "difference_m": 0.013205129262856123,
+          "ci_low_m": -0.05173906644492831,
+          "ci_high_m": 0.09856126229420269,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "all_loss_off_5000m": {
+      "cells": 140530,
+      "blocks": 18,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 114553,
+          "test": 25977
+        },
+        {
+          "fold": 1,
+          "train": 116468,
+          "test": 24062
+        },
+        {
+          "fold": 2,
+          "train": 104361,
+          "test": 36169
+        },
+        {
+          "fold": 3,
+          "train": 107153,
+          "test": 33377
+        },
+        {
+          "fold": 4,
+          "train": 119585,
+          "test": 20945
+        }
+      ],
+      "mae_stage1_m": 1.362026412498077,
+      "ridge": {
+        "mae_m": 1.444684452929108,
+        "minus_stage1": {
+          "difference_m": 0.0826580404310359,
+          "ci_low_m": 0.05365311965665015,
+          "ci_high_m": 0.11955024410513472,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 1.4409551352930805,
+        "minus_stage1": {
+          "difference_m": 0.07892872279500358,
+          "ci_low_m": 0.043682739693868586,
+          "ci_high_m": 0.13000321430737707,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    },
+    "all_loss_on_5000m": {
+      "cells": 83772,
+      "blocks": 18,
+      "fold_counts": [
+        {
+          "fold": 0,
+          "train": 69837,
+          "test": 13935
+        },
+        {
+          "fold": 1,
+          "train": 68461,
+          "test": 15311
+        },
+        {
+          "fold": 2,
+          "train": 62271,
+          "test": 21501
+        },
+        {
+          "fold": 3,
+          "train": 64189,
+          "test": 19583
+        },
+        {
+          "fold": 4,
+          "train": 70330,
+          "test": 13442
+        }
+      ],
+      "mae_stage1_m": 0.8265103935808172,
+      "ridge": {
+        "mae_m": 0.8251378370741084,
+        "minus_stage1": {
+          "difference_m": -0.0013725565067086718,
+          "ci_low_m": -0.03729067236660744,
+          "ci_high_m": 0.03463301508977367,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      },
+      "lightgbm": {
+        "mae_m": 0.8285868432383007,
+        "minus_stage1": {
+          "difference_m": 0.0020764496574844716,
+          "ci_low_m": -0.053016517657800154,
+          "ci_high_m": 0.07056559207050818,
+          "blocks": 18,
+          "draws": 2000
+        },
+        "decision": "FAIL"
+      }
+    }
+  },
+  "primary_feature_weights": {
+    "ridge": {
+      "numeric__elevation_m": -0.050293410995035925,
+      "numeric__heat_load": -0.11132386810899,
+      "numeric__max_start": 1.9551895662269683,
+      "numeric__mean_start": 0.9381426466926932,
+      "numeric__p95_start": -3.2044367584499156,
+      "numeric__slope_deg": 0.02117794129067132,
+      "numeric__tpi_450": -0.017023094850982252,
+      "vegetation__vegetation_type_Acer macrophyllum Alliance": 0.6650456962015326,
+      "vegetation__vegetation_type_Arbutus menziesii Alliance": -0.08605755168676957,
+      "vegetation__vegetation_type_Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": -0.13755903018544627,
+      "vegetation__vegetation_type_Hesperocyparis sargentii Alliance": -0.2294029038753928,
+      "vegetation__vegetation_type_Pinus attenuata Alliance": -0.28493534176383556,
+      "vegetation__vegetation_type_Pinus sabiniana / Quercus durata Provisional Alliance": -0.1913550757349361,
+      "vegetation__vegetation_type_Populus fremontii Alliance": -0.12182795568871371,
+      "vegetation__vegetation_type_Pseudotsuga menziesii Alliance": 0.3245897191245238,
+      "vegetation__vegetation_type_Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": -0.09684872968863598,
+      "vegetation__vegetation_type_Quercus agrifolia Alliance": -0.005206750147220623,
+      "vegetation__vegetation_type_Quercus chrysolepis Alliance": -0.11025862247586553,
+      "vegetation__vegetation_type_Quercus douglasii Alliance": -0.1945098360668819,
+      "vegetation__vegetation_type_Quercus garryana Alliance": 0.011028362593506208,
+      "vegetation__vegetation_type_Quercus kelloggii Alliance": 0.10613640901820169,
+      "vegetation__vegetation_type_Quercus lobata Alliance": -0.3452270014397244,
+      "vegetation__vegetation_type_Quercus wislizeni (tree) Alliance": -0.10838447306671047,
+      "vegetation__vegetation_type_Sequoia sempervirens Alliance": 0.7293476911247669,
+      "vegetation__vegetation_type_Umbellularia californica Alliance": 0.07542539375726809
+    },
+    "lightgbm": {
+      "numeric__elevation_m": 417795.5788545132,
+      "numeric__heat_load": 107878.49402794242,
+      "numeric__max_start": 229175.35359015464,
+      "numeric__mean_start": 205783.25234279633,
+      "numeric__p95_start": 305869.79662942886,
+      "numeric__slope_deg": 178270.63448593617,
+      "numeric__tpi_450": 195969.23780700564,
+      "vegetation__vegetation_type_Acer macrophyllum Alliance": 1359.7928592681885,
+      "vegetation__vegetation_type_Arbutus menziesii Alliance": 18852.569796848296,
+      "vegetation__vegetation_type_Eucalyptus (globulus, camaldulensis) Semi-natural Alliance": 10908.865586566924,
+      "vegetation__vegetation_type_Hesperocyparis sargentii Alliance": 830.2115432739258,
+      "vegetation__vegetation_type_Pinus attenuata Alliance": 6311.870699310302,
+      "vegetation__vegetation_type_Pinus sabiniana / Quercus durata Provisional Alliance": 3762.9700813293457,
+      "vegetation__vegetation_type_Populus fremontii Alliance": 8834.381310081482,
+      "vegetation__vegetation_type_Pseudotsuga menziesii Alliance": 6168.060309314727,
+      "vegetation__vegetation_type_Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance": 29465.18741836548,
+      "vegetation__vegetation_type_Quercus agrifolia Alliance": 14573.066795921326,
+      "vegetation__vegetation_type_Quercus chrysolepis Alliance": 94.55580215454101,
+      "vegetation__vegetation_type_Quercus douglasii Alliance": 7760.2052188873295,
+      "vegetation__vegetation_type_Quercus garryana Alliance": 311.88015785217283,
+      "vegetation__vegetation_type_Quercus kelloggii Alliance": 13058.708613967896,
+      "vegetation__vegetation_type_Quercus lobata Alliance": 46846.46551971436,
+      "vegetation__vegetation_type_Quercus wislizeni (tree) Alliance": 3418.519895553589,
+      "vegetation__vegetation_type_Sequoia sempervirens Alliance": 7115.27907371521,
+      "vegetation__vegetation_type_Umbellularia californica Alliance": 5134.317709875107
+    }
+  }
+}
