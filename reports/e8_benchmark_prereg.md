@@ -1,7 +1,9 @@
 # E8 ECHOSAT 2022 product benchmark preregistration
 
-Status: frozen analysis plan; no E8 height score has run. This file and
-`configs/product_benchmark.yaml` must be pushed to GitHub before any E8 score.
+Status: pre-score analysis plan. The initial plan was pushed as `e660e92`;
+the 16 October 2026 amendment below must also be pushed before any E8 height
+score. No E8 height score has run. This file and
+`configs/product_benchmark.yaml` must be on GitHub before scoring.
 Year-specific scoring also waits until PR #17, which records the author-confirmed
 band order and joint-prediction design, merges into main.
 
@@ -53,12 +55,51 @@ in metres. Use 2 km spatial blocks and 2,000 whole-block bootstrap draws with
 seed 42 for 95% descriptive intervals. Report the nine-offset range for each
 metric. There is no success threshold or model choice based on this result.
 
+## Pre-score amendment: resolution, height, and reference sensitivities
+
+The following analyses were added on 16 October 2026, before any E8 score.
+They are descriptive sensitivities. They cannot replace the primary 10 m,
+zero-offset p95 result, and no result may be selected by its agreement.
+
+- **Resolution:** At the zero offset only, aggregate the *same paired valid
+  10 m cells* into fixed 30 m and 100 m square bins in EPSG:6339. Anchor bin
+  edges to the southwest outer edge of the full 10 m label grid (minimum
+  label-cell centre minus 5 m in each axis), before any exclusions. A bin is
+  eligible when at least half its possible 10 m cells are paired and valid:
+  at least 5 of 9 at 30 m or 50 of 100 at 100 m. Average ECHOSAT and p95
+  separately over exactly those cells, then score one paired mean per bin
+  with equal bin weights. Use the same four metrics and 2 km block bootstrap,
+  assigning each bin by its centre. Report eligible bin count, contributing
+  10 m cell counts, and the occupancy distribution. These are E8 resolution
+  sensitivities only; G3 and stage two retain their existing 10 m study unit.
+- **Reference-height strata:** For the primary zero-offset 10 m result, group
+  paired cells by LiDAR `p95_end` in the fixed intervals [0,2), [2,5),
+  [5,10), [10,20), [20,30), and [30,infinity) metres. Report cell and block
+  counts and the four metrics in each interval, with the same block bootstrap
+  intervals when at least two blocks contribute. Flag an interval with fewer
+  than two blocks as too sparse for an interval estimate. These are
+  conditional descriptions, not independently sampled tests. Binning on the
+  reference can make signed errors near bin edges appear to regress toward
+  the mean; do not interpret that pattern alone as height-dependent bias.
+- **Secondary height reference:** At the zero offset and 10 m resolution,
+  repeat the four metrics against `max_end` from the same LiDAR archive. Use
+  only cells with both finite `p95_end` and `max_end`, the same disputed-overlap
+  and `exclude_max_p95` wire exclusions, and valid ECHOSAT values; report the
+  paired common-mask count. Use the same 2 km block bootstrap. This checks
+  sensitivity to the LiDAR height summary; it does not replace p95 as the
+  primary reference or establish a product's absolute bias.
+
+Temporal change is outside this benchmark. In particular, ECHOSAT's
+2018-to-2022 modeled difference and LiDAR's 2013-to-2022 difference have
+different intervals, so E8 will not score them as interchangeable change
+estimates. This limitation must be stated in the E8 report.
+
 The output JSON and report must record the Git revision; source raster,
 reference archive, wire archive and config hashes; source and target CRS;
 EPSG operation and pipeline; PROJ/GDAL versions; resampling; 10 m cell-grid
-test; each offset; nodata and exclusion counts; and the fact that 2022 is a
-joint prediction informed through 2024. The referenced raster and labels
-remain outside Git.
+test; each offset; nodata and exclusion counts; sensitivity bin, stratum, and
+common-mask counts; and the fact that 2022 is a joint prediction informed
+through 2024. The referenced raster and labels remain outside Git.
 
 ## Analysis boundary
 

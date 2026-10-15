@@ -18,7 +18,17 @@ echosat_alignment:
 echosat_benchmark:
   year: 2022
   reference: airborne_lidar_p95_end
+  secondary_reference: airborne_lidar_max_end
+  secondary_reference_scope: zero_offset_10m_common_valid_cells
   primary_population: valid_2022_lidar_p95_after_overlap_and_wire_exclusions
+  # E8-only sensitivities; these do not change the G3/stage-two 10 m unit.
+  aggregation_scales_m: [30, 100]
+  aggregation_scope: zero_offset_paired_valid_10m_cells
+  aggregation_anchor: southwest_outer_edge_of_full_10m_label_grid
+  aggregation_min_valid_fraction: 0.5
+  height_strata_reference: airborne_lidar_p95_end
+  height_strata_scope: zero_offset_10m_primary_population
+  height_strata_edges_m: [0, 2, 5, 10, 20, 30]
   block_size_m: 2000
   bootstrap_draws: 2000
   seed: 42
