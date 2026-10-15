@@ -112,6 +112,15 @@ stage1_growth_model:
       scope: A-rule implementation and held-out-fold leakage checks
       independence_limit: reviewer proposed the A rule
       human_review: pending
+      follow_up_review:
+        reviewer: Claude Opus 5
+        reviewer_type: ai
+        session: https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E
+        date: "2026-10-15"
+        commit: a4e272edbd3ea983348d5a7beb5670ee1791d615
+        compared_to: 32b94cefc8e6530ed4fe65c751f10b96e77319e0
+        scope: diffs in growth_curve.py and growth_prior.py
+        independence_limit: reviewer proposed the A rule; human review pending
     p95_wire_exclusion_m: 10.0
     saturation_review_fraction: 0.005
     training_height_quantile: 0.995
