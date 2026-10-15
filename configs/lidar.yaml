@@ -262,3 +262,60 @@ tiers:
   stratify_by: [vegetation_group, slope_band, burn_state]
   slope_bands_deg: [[0, 15], [15, 30], [30, 90]]
   seed: 42
+
+wire_check:
+  cell_m: 10.0
+  min_valid_fraction: 0.5
+  epochs: ["start", "end"]
+  spike:
+    min_max_height_m: 10.0
+    max_neighbour_median_m: 3.0
+    min_neighbours: 4
+    wire_like_gap_m: 5.0
+  bands_m:
+    near: [0.0, 30.0]
+    secondary: [30.0, 100.0]
+  control_min_distance_m: 250.0
+  profile_edges_m: [0, 10, 20, 30, 50, 75, 100, 150, 200, 250, 400, 800]
+  canopy_share_bin: 0.1
+  valid_fraction_edges: [0.5, 0.75, 0.9, 1.0001]
+  pass_rule:
+    max_ratio_upper_ci: 1.25
+    confidence: 0.95
+  bootstrap_reps: 2000
+  seed: 42
+  suspects_per_group: 50
+  labels_path: data/processed/labels_2013-2022_unique.npz
+  lines_path: data/interim/cec/cec_lines_study_box.geojson
+  lines_source_url: >-
+    https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
+    (envelope -122.90,38.475,-122.74,38.82, outFields=*, outSR=4326, f=geojson;
+    Sonoma County copy of the California Energy Commission layer, retrieved 2026-10-12)
+  out_dir: data/processed/wire_check
+  flags_path: data/processed/labels_2013-2022_wire_flags.npz
+  flags_summary_path: data/processed/wire_flags_summary.json
+  exclusion:
+    within_line_m: 10.0
+    max_p95_columns:
+      - max_start
+      - max_end
+      - max_change
+      - p95_start
+      - p95_end
+      - p95_change
+    modelling_min_mean_start_m: 2.0
+  inspect:
+    epochs: ["2013", "2022"]
+    cell_m: 10.0
+    window_m: 20.0
+    beneath_radius_m: 2.0
+    beneath_min_height_m: 2.0
+    beneath_gap_m: 1.0
+    thin_max_points_beneath: 10
+    per_group: 30
+    pause_s: 0.2
+    retry_failed: true
+  verify:
+    placebo_shifts_m: [[400, 0], [-400, 0], [0, 400], [0, -400]]
+    placebo_exclude_within_m: 100.0
+    sensitivity_min_height_m: 15.0

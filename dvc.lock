@@ -37,8 +37,8 @@ stages:
     deps:
     - path: configs/lidar.yaml
       hash: md5
-      md5: a84b3e55ac0abced621f7ed849602dd6
-      size: 10149
+      md5: 86a977c4e78e589810da8694eabe89e0
+      size: 11895
     - path: data/interim/labels_2013-2022.npz
       hash: md5
       md5: 8bdc617ea17a1a77d60cf9f13b69cede
@@ -49,12 +49,12 @@ stages:
       size: 412
     - path: src/canopyguard/config.py
       hash: md5
-      md5: 6831473e26f947a6ceaed4378369f39e
-      size: 2289
+      md5: dc40329a11cf38fa3925c990f130dd32
+      size: 2361
     - path: src/canopyguard/io.py
       hash: md5
-      md5: 7860402382d495aae9b8663a4567565f
-      size: 2419
+      md5: 44b1e6e88442227f34cf39d838a46dbd
+      size: 2489
     - path: src/canopyguard/lidar/label_quality.py
       hash: md5
       md5: a83f5a4bf0cd07624064131c7787092c
@@ -68,3 +68,130 @@ stages:
       hash: md5
       md5: 449032f5fcb1db0e54c9e455fe1b2cdf
       size: 111596240
+  wire_suspect_flags:
+    cmd: python scripts/flag_wire_suspects.py
+    deps:
+    - path: data/interim/cec/cec_lines_study_box.geojson
+      hash: md5
+      md5: 72c68b5eae18a3d33a5c6ea5e2f9a85a
+      size: 95725
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240
+    - path: scripts/flag_wire_suspects.py
+      hash: md5
+      md5: 48e97347fbdfd6b0c7e778fc3358faf8
+      size: 506
+    - path: src/canopyguard/lidar/wire_check.py
+      hash: md5
+      md5: cfc3655471fdfd18f636d848b8d4ca7c
+      size: 6146
+    - path: src/canopyguard/lidar/wire_check_run.py
+      hash: md5
+      md5: 001230567d5e2981094155b061c60324
+      size: 5657
+    - path: src/canopyguard/lidar/wire_flags.py
+      hash: md5
+      md5: 7978c8067f78b2d393386a9d0539dc1d
+      size: 4384
+    params:
+      configs/lidar.yaml:
+        wire_check:
+          cell_m: 10.0
+          min_valid_fraction: 0.5
+          epochs:
+          - start
+          - end
+          spike:
+            min_max_height_m: 10.0
+            max_neighbour_median_m: 3.0
+            min_neighbours: 4
+            wire_like_gap_m: 5.0
+          bands_m:
+            near:
+            - 0.0
+            - 30.0
+            secondary:
+            - 30.0
+            - 100.0
+          control_min_distance_m: 250.0
+          profile_edges_m:
+          - 0
+          - 10
+          - 20
+          - 30
+          - 50
+          - 75
+          - 100
+          - 150
+          - 200
+          - 250
+          - 400
+          - 800
+          canopy_share_bin: 0.1
+          valid_fraction_edges:
+          - 0.5
+          - 0.75
+          - 0.9
+          - 1.0001
+          pass_rule:
+            max_ratio_upper_ci: 1.25
+            confidence: 0.95
+          bootstrap_reps: 2000
+          seed: 42
+          suspects_per_group: 50
+          labels_path: data/processed/labels_2013-2022_unique.npz
+          lines_path: data/interim/cec/cec_lines_study_box.geojson
+          lines_source_url: 
+            https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
+            (envelope -122.90,38.475,-122.74,38.82, outFields=*, outSR=4326, 
+            f=geojson; Sonoma County copy of the California Energy Commission 
+            layer, retrieved 2026-10-12)
+          out_dir: data/processed/wire_check
+          flags_path: data/processed/labels_2013-2022_wire_flags.npz
+          flags_summary_path: data/processed/wire_flags_summary.json
+          exclusion:
+            within_line_m: 10.0
+            max_p95_columns:
+            - max_start
+            - max_end
+            - max_change
+            - p95_start
+            - p95_end
+            - p95_change
+            modelling_min_mean_start_m: 2.0
+          inspect:
+            epochs:
+            - '2013'
+            - '2022'
+            cell_m: 10.0
+            window_m: 20.0
+            beneath_radius_m: 2.0
+            beneath_min_height_m: 2.0
+            beneath_gap_m: 1.0
+            thin_max_points_beneath: 10
+            per_group: 30
+            pause_s: 0.2
+            retry_failed: true
+          verify:
+            placebo_shifts_m:
+            - - 400
+              - 0
+            - - -400
+              - 0
+            - - 0
+              - 400
+            - - 0
+              - -400
+            placebo_exclude_within_m: 100.0
+            sensitivity_min_height_m: 15.0
+    outs:
+    - path: data/processed/labels_2013-2022_wire_flags.npz
+      hash: md5
+      md5: 98d5ee04e0a7bc8b1dab61a8a4e31d9a
+      size: 7647531
+    - path: data/processed/wire_flags_summary.json
+      hash: md5
+      md5: a327d9b13ccff7536517ac027e9b6699
+      size: 1382
