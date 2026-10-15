@@ -9,16 +9,19 @@ from canopyguard.evaluation.blocks import assign_blocks, systematic_folds
 
 
 def chapman_richards(
-    start: np.ndarray, dt: float, a: float, k: float, c: float
+    start: np.ndarray, dt: float, a: float | np.ndarray, k: float, c: float
 ) -> np.ndarray:
     """Age-free Chapman-Richards height at the second survey."""
     height = np.asarray(start, dtype=float)
-    if dt <= 0 or a <= 0 or k <= 0 or c <= 1:
+    ceiling = np.asarray(a, dtype=float)
+    if dt <= 0 or np.any(ceiling <= 0) or k <= 0 or c <= 1:
         raise ValueError("Growth curve requires dt, A, k > 0 and c > 1")
     if np.any(height < 0):
         raise ValueError("Start heights must be nonnegative")
-    base = 1 - (1 - np.power(height / a, 1 / c)) * np.exp(-k * dt)
-    return a * np.power(base, c)
+    active = np.minimum(height, ceiling)
+    base = 1 - (1 - np.power(active / ceiling, 1 / c)) * np.exp(-k * dt)
+    fitted = ceiling * np.power(base, c)
+    return np.where(height >= ceiling, height, fitted)
 
 
 def fit_growth_curve(
@@ -27,16 +30,54 @@ def fit_growth_curve(
     dt: float,
     settings: dict,
     *,
-    maximum_start_height: float,
+    max_height_m: float | np.ndarray,
 ) -> dict[str, float]:
-    """Robustly fit A, k, c using training outcomes only."""
+    """Fit k and c with an independently sourced fixed height ceiling."""
+    x = np.asarray(start, dtype=float)
+    y = np.asarray(end, dtype=float)
+    valid = np.isfinite(x) & np.isfinite(y) & (x >= 0) & (y >= 0)
+    if valid.sum() < settings["min_fit_cells"]:
+        raise ValueError("Too few training cells for a growth curve")
+    ceiling = np.broadcast_to(np.asarray(max_height_m, dtype=float), x.shape)
+    if not np.isfinite(ceiling).all() or np.any(ceiling <= 0):
+        raise ValueError("A must be a positive, finite height")
+    x, y, ceiling = x[valid], y[valid], ceiling[valid]
+    if (x < ceiling).sum() < 3:
+        raise ValueError("Too few training cells below fixed A")
+    lower = [settings["k_bounds"][0], settings["c_bounds"][0]]
+    upper = [settings["k_bounds"][1], settings["c_bounds"][1]]
+    result = least_squares(
+        lambda values: chapman_richards(x, dt, ceiling, *values) - y,
+        x0=[settings["initial_k"], settings["initial_c"]],
+        bounds=(lower, upper),
+        loss="soft_l1",
+        f_scale=settings["soft_l1_scale_m"],
+        max_nfev=settings["max_nfev"],
+    )
+    if not result.success:
+        raise ValueError(f"Growth fit failed: {result.message}")
+    k, c = result.x
+    return {
+        "A": float(ceiling[0]) if np.all(ceiling == ceiling[0]) else None,
+        "k": float(k),
+        "c": float(c),
+        "n": int(len(x)),
+        "k_at_bound": bool(np.isclose(k, lower[0]) or np.isclose(k, upper[0])),
+        "c_at_bound": bool(np.isclose(c, lower[1]) or np.isclose(c, upper[1])),
+    }
+
+
+def fit_free_growth_curve(
+    start: np.ndarray, end: np.ndarray, dt: float, settings: dict
+) -> dict[str, float]:
+    """Retain the former free-A fit as a sensitivity calculation."""
     x = np.asarray(start, dtype=float)
     y = np.asarray(end, dtype=float)
     valid = np.isfinite(x) & np.isfinite(y) & (x >= 0) & (y >= 0)
     if valid.sum() < settings["min_fit_cells"]:
         raise ValueError("Too few training cells for a growth curve")
     x, y = x[valid], y[valid]
-    lower_a = max(float(x.max()), float(y.max()), maximum_start_height)
+    lower_a = max(float(x.max()), float(y.max()))
     lower_a += settings["a_margin_m"]
     upper_a = settings["a_upper_m"]
     if lower_a >= upper_a:
@@ -66,7 +107,30 @@ def fit_growth_curve(
         "c": float(c),
         "n": int(len(x)),
         "a_at_upper_bound": bool(a > upper_a * settings["a_upper_warning_fraction"]),
+        "k_at_bound": bool(np.isclose(k, lower[1]) or np.isclose(k, upper[1])),
+        "c_at_bound": bool(np.isclose(c, lower[2]) or np.isclose(c, upper[2])),
     }
+
+
+def class_heights(
+    names: np.ndarray, start: np.ndarray, settings: dict, mode: str
+) -> dict[str, float]:
+    """Choose class-specific A values, even when k and c share a pool."""
+    if mode == "train_p995":
+        quantile = settings["training_height_quantile"]
+        return {
+            name: float(np.quantile(start[names == name], quantile))
+            for name in np.unique(names)
+        }
+    if mode not in ("literature", "record"):
+        raise ValueError(f"Unknown A mode: {mode}")
+    heights = dict(settings["max_height_m"])
+    if mode == "record":
+        heights.update(settings["record_tree_height_m"])
+    missing = sorted({name for name in names if heights.get(name) is None})
+    if missing:
+        raise ValueError(f"Unconfirmed maximum height for: {', '.join(missing)}")
+    return {name: float(heights[name]) for name in np.unique(names)}
 
 
 def _training_scope(
@@ -93,12 +157,15 @@ def blocked_predictions(
     dt: float,
     block_size_m: float,
     settings: dict,
+    *,
+    a_mode: str = "literature",
 ) -> dict:
     """Out-of-fold curve and training-median predictions on held-out blocks."""
     block_ids = assign_blocks(frame["x"], frame["y"], block_size_m)
     folds = systematic_folds(block_ids, settings["folds"], settings["seed"])
     group = frame["model_group"].to_numpy()
     broad = frame["broader_group"].to_numpy()
+    names = frame["vegetation_type"].to_numpy()
     curve = np.full(len(frame), np.nan)
     median = np.full(len(frame), np.nan)
     scopes: dict[str, int] = {}
@@ -117,22 +184,28 @@ def blocked_predictions(
                 settings["min_fit_cells"],
             )
             if scope not in cache:
-                population = (
-                    group == model_group
-                    if scope.startswith("type:")
-                    else broad == broad_group
-                )
-                fit = fit_growth_curve(
-                    start[fit_rows],
-                    end[fit_rows],
-                    dt,
-                    settings,
-                    maximum_start_height=float(np.max(start[population])),
-                )
+                if a_mode == "free":
+                    fit = fit_free_growth_curve(
+                        start[fit_rows], end[fit_rows], dt, settings
+                    )
+                    ceilings = None
+                else:
+                    ceilings = class_heights(
+                        names[fit_rows], start[fit_rows], settings, a_mode
+                    )
+                    a = np.array([ceilings[name] for name in names[fit_rows]])
+                    fit = fit_growth_curve(
+                        start[fit_rows], end[fit_rows], dt, settings, max_height_m=a
+                    )
                 median_growth = float(np.median(end[fit_rows] - start[fit_rows]))
-                cache[scope] = fit, median_growth
-            fit, median_growth = cache[scope]
-            curve[use] = chapman_richards(start[use], dt, fit["A"], fit["k"], fit["c"])
+                cache[scope] = fit, median_growth, ceilings
+            fit, median_growth, ceilings = cache[scope]
+            a = (
+                fit["A"]
+                if ceilings is None
+                else np.array([ceilings[name] for name in names[use]])
+            )
+            curve[use] = chapman_richards(start[use], dt, a, fit["k"], fit["c"])
             median[use] = start[use] + median_growth
             scopes[scope] = scopes.get(scope, 0) + int(use.sum())
     if not np.isfinite(curve).all() or not np.isfinite(median).all():

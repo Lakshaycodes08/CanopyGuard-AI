@@ -1,0 +1,79 @@
+"""Offline tests for the forest and wire selection preflight."""
+
+import numpy as np
+import pandas as pd
+import pytest
+
+from canopyguard.evaluation.growth_gate import _check_fit_permission
+from canopyguard.evaluation.growth_screen import (
+    saturation_shares,
+    selection_masks,
+    wire_exclusion,
+)
+
+
+def test_wire_flags_join_by_cell_id_and_include_ten_metre_distance():
+    archive = {
+        "cell_id": np.array([30, 10, 20]),
+        "wire_suspect": np.array([False, True, False]),
+        "dist_to_line_m": np.array([10.0, 50.0, 9.9]),
+    }
+    excluded = wire_exclusion(np.array([10, 20, 30]), archive, 10.0)
+    assert excluded["excluded"].tolist() == [True, True, False]
+    assert excluded["wire_suspect"].tolist() == [True, False, False]
+    assert excluded["within_line"].tolist() == [False, True, False]
+    with pytest.raises(ValueError, match="missing"):
+        wire_exclusion(np.array([10, 40]), archive, 10.0)
+
+
+def test_loss_off_retains_loss_cells_but_keeps_fire_hansen_and_wire():
+    frame = pd.DataFrame(
+        {
+            "vegetation_type": ["oak", "oak", "oak", "Urban Window", "shrub"],
+            "broader_group": [
+                "hardwood forest",
+                "hardwood forest",
+                "hardwood forest",
+                "other",
+                "shrub",
+            ],
+            "overlap_disputed": [False] * 5,
+            "label_change_valid": [True] * 5,
+            "canopy_at_start": [True] * 5,
+            "vegetation_known": [True] * 5,
+            "hansen_valid": [True] * 5,
+            "burned_2013_2022": [False, False, True, False, False],
+            "hansen_loss": [False] * 5,
+            "near_line": [False] * 5,
+            "p95_wire_excluded": [False] * 5,
+            "lidar_loss": [False, True, False, False, False],
+        }
+    )
+    cfg = {
+        "excluded_map_classes": ["Urban Window"],
+        "forest_groups": ["hardwood forest"],
+    }
+    masks = selection_masks(frame, cfg)
+    assert masks["forest_loss_on"].tolist() == [True, False, False, False, False]
+    assert masks["forest_loss_off"].tolist() == [True, True, False, False, False]
+    assert masks["all_loss_off"].tolist() == [True, True, False, False, True]
+
+
+def test_saturation_is_per_class_after_selection():
+    frame = pd.DataFrame({"vegetation_type": ["oak", "oak", "pine"]})
+    shares = saturation_shares(
+        frame, np.array([10.0, 25.0, 30.0]), {"oak": 25, "pine": 40}
+    )
+    assert shares["oak"]["share"] == 0.5
+    assert shares["pine"]["share"] == 0.0
+
+
+def test_saturation_above_review_threshold_blocks_fit():
+    settings = {
+        "saturation_review_fraction": 0.005,
+        "source_review_confirmed": True,
+        "reviewer_spot_checked": True,
+    }
+    shares = {"oak": {"A_m": 25, "share": 0.006}}
+    with pytest.raises(ValueError, match="oak"):
+        _check_fit_permission(settings, shares)

@@ -17,12 +17,14 @@ from typing import Any
 import numpy as np
 from numpy.typing import NDArray
 
+from canopyguard.config import load_config
 from canopyguard.lidar.wire_check import analysis_rows
 from canopyguard.lidar.wire_check_run import (
     epoch_flags,
     line_distance,
     suspect_mask,
 )
+from canopyguard.provenance import study_area_box, write_provenance
 
 
 def file_sha256(path: str) -> str:
@@ -114,7 +116,17 @@ def run_flags(cfg: dict[str, Any]) -> dict[str, Any]:
             "lines_source_url": cfg["lines_source_url"],
         },
     }
-    Path(cfg["flags_summary_path"]).write_text(
-        json.dumps(summary, indent=2), encoding="utf-8"
-    )
+    summary_path = Path(cfg["flags_summary_path"])
+    summary_path.write_text(json.dumps(summary, indent=2), encoding="utf-8")
+    bbox = study_area_box(load_config("configs/study_area.yaml"))
+    crs = load_config("configs/lidar.yaml")["harmonization"]["target_crs"]
+    for path, count in ((flags_path, len(arrays["cell_id"])), (summary_path, 1)):
+        write_provenance(
+            path,
+            source_url=cfg["lines_source_url"],
+            script_name="flag_wire_suspects.py",
+            bbox_wgs84=bbox,
+            crs=crs,
+            row_count=count,
+        )
     return summary

@@ -10,269 +10,256 @@ import numpy as np
 import pandas as pd
 
 from canopyguard.data.fire_perimeters import file_hash
+from canopyguard.evaluation.growth_outputs import (
+    _fit_parameters,
+    _per_type,
+    _save_oof,
+    _save_preflight,
+)
+from canopyguard.evaluation.growth_screen import (
+    saturation_shares,
+    selection_masks,
+    wire_exclusion,
+)
 from canopyguard.forecasting.growth_curve import (
     block_mae_interval,
     blocked_predictions,
-    fit_growth_curve,
 )
 from canopyguard.forecasting.growth_report import write_growth_report
 from canopyguard.io import ensure_parent, project_root
-from canopyguard.provenance import write_provenance
 
 
-def _load_cells(forecast: dict) -> tuple[pd.DataFrame, dict]:
+def _load_inputs(forecast: dict, settings: dict) -> tuple[pd.DataFrame, dict]:
     root = project_root()
     with np.load(root / forecast["labels_path"], allow_pickle=False) as source:
         labels = {name: source[name] for name in source.files}
     table = pd.read_parquet(root / forecast["clean_screen"]["output_path"])
     if not np.array_equal(table["cell_id"].to_numpy(), labels["cell_id"]):
         raise ValueError("Clean screen and label archive have different cell order")
-    chosen = table["clean"].to_numpy()
-    frame = table.loc[chosen].reset_index(drop=True)
-    heights = {
-        key: labels[key][chosen]
-        for key in ("p95_start", "p95_end", "mean_start", "mean_end")
+    flags_path = root / forecast["clean_screen"]["wire_flags_path"]
+    if not flags_path.exists():
+        raise FileNotFoundError(f"PR 13 wire flags are required: {flags_path}")
+    with np.load(flags_path, allow_pickle=False) as source:
+        archive = {name: source[name] for name in source.files}
+    eligible = ~table["overlap_disputed"].to_numpy() & np.isfinite(
+        labels["mean_change"]
+    )
+    joined = wire_exclusion(
+        labels["cell_id"][eligible], archive, settings["p95_wire_exclusion_m"]
+    )
+    columns = {
+        "wire_suspect": "p95_wire_suspect",
+        "within_line": "p95_within_line",
+        "excluded": "p95_wire_excluded",
     }
-    if any(not np.isfinite(values).all() for values in heights.values()):
-        raise ValueError("Clean cells contain missing canopy heights")
-    return frame, heights
+    for name, values in joined.items():
+        column = np.zeros(len(table), dtype=bool)
+        column[eligible] = values
+        table[columns[name]] = column
+    table["label_change_valid"] = np.isfinite(labels["mean_change"])
+    heights = {
+        name: labels[name]
+        for name in ("p95_start", "p95_end", "mean_start", "mean_end")
+    }
+    return table, heights
 
 
-def _scores(
+def _selected(table: pd.DataFrame, heights: dict, mask: np.ndarray) -> tuple:
+    frame = table.loc[mask].reset_index(drop=True)
+    values = {name: data[mask] for name, data in heights.items()}
+    if any(not np.isfinite(array).all() for array in values.values()):
+        raise ValueError("Selected cells contain missing canopy heights")
+    return frame, values
+
+
+def _score(
     frame: pd.DataFrame,
     start: np.ndarray,
     end: np.ndarray,
     dt: float,
     block_size: int,
     settings: dict,
+    *,
+    a_mode: str,
 ) -> tuple[dict, dict]:
-    predictions = blocked_predictions(frame, start, end, dt, block_size, settings)
-    curve_error = predictions["curve"] - end
-    median_error = predictions["median"] - end
-    no_change_error = start - end
-    interval = block_mae_interval(
-        curve_error,
-        no_change_error,
-        predictions["blocks"],
-        draws=settings["bootstrap_draws"],
-        seed=settings["seed"],
+    predicted = blocked_predictions(
+        frame, start, end, dt, block_size, settings, a_mode=a_mode
     )
-    median_interval = block_mae_interval(
-        curve_error,
-        median_error,
-        predictions["blocks"],
-        draws=settings["bootstrap_draws"],
-        seed=settings["seed"],
-    )
+    curve_error = predicted["curve"] - end
+    median_error = predicted["median"] - end
+    zero_error = start - end
+    interval_settings = {
+        "draws": settings["bootstrap_draws"],
+        "seed": settings["seed"],
+    }
     score = {
         "cells": len(frame),
-        "blocks": int(np.unique(predictions["blocks"]).size),
+        "blocks": int(np.unique(predicted["blocks"]).size),
         "folds": settings["folds"],
-        "mae_no_change_m": float(np.mean(np.abs(no_change_error))),
-        "mae_median_growth_m": float(np.mean(np.abs(median_error))),
-        "mae_curve_m": float(np.mean(np.abs(curve_error))),
-        "curve_minus_no_change": interval,
-        "curve_minus_median_growth": median_interval,
-    }
-    return score, predictions
-
-
-def _final_parameters(
-    frame: pd.DataFrame, start: np.ndarray, end: np.ndarray, dt: float, settings: dict
-) -> dict:
-    groups = frame["model_group"].to_numpy()
-    broad = frame["broader_group"].to_numpy()
-    names = frame["vegetation_type"].to_numpy()
-    fitted = {}
-    output = {}
-    for name in np.unique(names):
-        use = names == name
-        model_group = groups[np.flatnonzero(use)[0]]
-        broad_group = broad[np.flatnonzero(use)[0]]
-        own = groups == model_group
-        if (
-            not model_group.startswith("group:")
-            and own.sum() >= settings["min_fit_cells"]
-        ):
-            scope, training = "type:" + model_group, own
-        else:
-            scope, training = "broad:" + broad_group, broad == broad_group
-        if scope not in fitted:
-            fitted[scope] = fit_growth_curve(
-                start[training],
-                end[training],
-                dt,
-                settings,
-                maximum_start_height=float(np.max(start[training])),
-            )
-        output[name] = {"scope": scope, **fitted[scope]}
-    return output
-
-
-def _per_type(
-    frame: pd.DataFrame,
-    start: np.ndarray,
-    end: np.ndarray,
-    predictions: dict,
-    parameters: dict,
-    settings: dict,
-) -> list[dict]:
-    rows = []
-    names = frame["vegetation_type"].to_numpy()
-    for name in np.unique(names):
-        use = names == name
-        curve_error = predictions["curve"][use] - end[use]
-        zero_error = start[use] - end[use]
-        block_ids = predictions["blocks"][use]
-        interval = None
-        if np.unique(block_ids).size >= 2:
-            interval = block_mae_interval(
-                curve_error,
-                zero_error,
-                block_ids,
-                draws=settings["bootstrap_draws"],
-                seed=settings["seed"],
-            )
-        rows.append(
-            {
-                "vegetation_type": name,
-                "broader_group": frame.loc[use, "broader_group"].iloc[0],
-                "cells": int(use.sum()),
-                "fit": parameters[name],
-                "mae_no_change_m": float(np.mean(np.abs(zero_error))),
-                "mae_median_growth_m": float(
-                    np.mean(np.abs(predictions["median"][use] - end[use]))
-                ),
-                "mae_curve_m": float(np.mean(np.abs(curve_error))),
-                "curve_minus_no_change": interval,
-            }
-        )
-    return sorted(rows, key=lambda row: -row["cells"])
-
-
-def _forest_only_score(
-    frame: pd.DataFrame,
-    start: np.ndarray,
-    end: np.ndarray,
-    predictions: dict,
-    settings: dict,
-) -> dict:
-    forest = frame["broader_group"].isin(settings["forest_groups"]).to_numpy()
-    blocks = predictions["blocks"][forest]
-    curve_error = predictions["curve"][forest] - end[forest]
-    median_error = predictions["median"][forest] - end[forest]
-    zero_error = start[forest] - end[forest]
-    return {
-        "cells": int(forest.sum()),
-        "blocks": int(np.unique(blocks).size),
         "mae_no_change_m": float(np.mean(np.abs(zero_error))),
         "mae_median_growth_m": float(np.mean(np.abs(median_error))),
         "mae_curve_m": float(np.mean(np.abs(curve_error))),
         "curve_minus_no_change": block_mae_interval(
-            curve_error,
-            zero_error,
-            blocks,
-            draws=settings["bootstrap_draws"],
-            seed=settings["seed"],
+            curve_error, zero_error, predicted["blocks"], **interval_settings
         ),
         "curve_minus_median_growth": block_mae_interval(
-            curve_error,
-            median_error,
-            blocks,
-            draws=settings["bootstrap_draws"],
-            seed=settings["seed"],
+            curve_error, median_error, predicted["blocks"], **interval_settings
         ),
     }
+    return score, predicted
+
+
+def _check_fit_permission(settings: dict, shares: dict) -> None:
+    missing = [name for name, item in shares.items() if item["A_m"] is None]
+    saturated = [
+        name
+        for name, item in shares.items()
+        if item["share"] is not None
+        and item["share"] > settings["saturation_review_fraction"]
+    ]
+    if missing:
+        raise ValueError(f"Unconfirmed literature A: {', '.join(missing)}")
+    if saturated:
+        threshold = settings["saturation_review_fraction"]
+        raise ValueError(
+            f"Review A saturation above {threshold:.1%}: {', '.join(saturated)}"
+        )
+    if not settings["source_review_confirmed"] or not settings["reviewer_spot_checked"]:
+        raise ValueError(
+            "Height table needs Lakshay confirmation and reviewer spot-check"
+        )
+
+
+def growth_preflight(forecast: dict) -> tuple:
+    """Write selection and A-saturation checks without fitting any curve."""
+    settings = forecast["growth_curve"]
+    table, heights = _load_inputs(forecast, settings)
+    masks = selection_masks(table, settings)
+    forest_frame, forest_heights = _selected(table, heights, masks["forest_loss_on"])
+    shares = saturation_shares(
+        forest_frame, forest_heights["p95_start"], settings["max_height_m"]
+    )
+    _save_preflight(forecast, settings, shares, masks, table)
+    return table, heights, masks, forest_frame, forest_heights, shares
 
 
 def run_growth_gate(forecast: dict) -> dict:
-    """Fit, compare, bootstrap and render the tracked G3 report."""
+    """Compare forest growth curves after explicit source and wire preflight."""
     root = project_root()
     settings = forecast["growth_curve"]
-    frame, heights = _load_cells(forecast)
+    table, heights, masks, forest_frame, forest_heights, shares = growth_preflight(
+        forecast
+    )
+    _check_fit_permission(settings, shares)
     dt = float(
         json.loads((root / settings["time_gap_source"]).read_text(encoding="utf-8"))[
             "baseline_years"
         ]
     )
-    results = {}
+    screens = {}
     primary_predictions = None
-    for block_size in settings["block_sizes_m"]:
-        size_results = {}
-        for target in ("p95", "mean"):
-            start, end = heights[f"{target}_start"], heights[f"{target}_end"]
-            score, predictions = _scores(
-                frame, start, end, dt, int(block_size), settings
-            )
-            size_results[target] = score
-            print(
-                f"{block_size} m {target}: curve {score['mae_curve_m']:.3f}, "
-                f"no change {score['mae_no_change_m']:.3f}",
-                flush=True,
-            )
-            if int(block_size) == settings["primary_block_m"] and target == "p95":
-                primary_predictions = predictions
-        results[str(block_size)] = size_results
-    if primary_predictions is None:
-        raise ValueError("Primary block size is absent from sensitivity sizes")
-    p95_start, p95_end = heights["p95_start"], heights["p95_end"]
-    parameters = _final_parameters(frame, p95_start, p95_end, dt, settings)
+    for screen_name in (
+        "forest_loss_on",
+        "forest_loss_off",
+        "all_loss_on",
+        "all_loss_off",
+    ):
+        frame, values = _selected(table, heights, masks[screen_name])
+        mode = "literature" if screen_name.startswith("forest") else "free"
+        score, predicted = _score(
+            frame,
+            values["p95_start"],
+            values["p95_end"],
+            dt,
+            settings["primary_block_m"],
+            settings,
+            a_mode=mode,
+        )
+        screens[screen_name] = {"model": mode, **score}
+        if screen_name == "forest_loss_on":
+            primary_predictions = predicted
+    primary = screens["forest_loss_on"]
+    sensitivities = {}
+    for mode in ("train_p995", "free", "record"):
+        sensitivities[mode], _ = _score(
+            forest_frame,
+            forest_heights["p95_start"],
+            forest_heights["p95_end"],
+            dt,
+            settings["primary_block_m"],
+            settings,
+            a_mode=mode,
+        )
+    spatial = {}
+    for size in settings["block_sizes_m"]:
+        if size == settings["primary_block_m"]:
+            continue
+        spatial[str(size)], _ = _score(
+            forest_frame,
+            forest_heights["p95_start"],
+            forest_heights["p95_end"],
+            dt,
+            size,
+            settings,
+            a_mode="literature",
+        )
+    mean_score, _ = _score(
+        forest_frame,
+        forest_heights["mean_start"],
+        forest_heights["mean_end"],
+        dt,
+        settings["primary_block_m"],
+        settings,
+        a_mode="literature",
+    )
+    fitted = _fit_parameters(
+        forest_frame,
+        forest_heights["p95_start"],
+        forest_heights["p95_end"],
+        dt,
+        settings,
+    )
     per_type = _per_type(
-        frame, p95_start, p95_end, primary_predictions, parameters, settings
+        forest_frame,
+        forest_heights["p95_start"],
+        forest_heights["p95_end"],
+        primary_predictions,
+        fitted,
+        shares,
+        settings,
     )
-    primary = results[str(settings["primary_block_m"])]["p95"]
     decision = "PASS" if primary["curve_minus_no_change"]["ci_high_m"] < 0 else "FAIL"
-    oof = pd.DataFrame(
-        {
-            "cell_id": frame["cell_id"],
-            "block_id": primary_predictions["blocks"],
-            "fold": primary_predictions["folds"],
-            "p95_start": p95_start,
-            "p95_end": p95_end,
-            "p95_no_change": p95_start,
-            "p95_median_growth": primary_predictions["median"],
-            "p95_curve": primary_predictions["curve"],
-        }
+    _save_oof(
+        forest_frame,
+        forest_heights["p95_start"],
+        forest_heights["p95_end"],
+        primary_predictions,
+        settings,
+        forecast,
     )
-    oof_path = ensure_parent(root / settings["oof_path"])
-    oof.to_parquet(oof_path, index=False)
-    screen_record = json.loads(
-        (root / forecast["clean_screen"]["output_path"])
-        .with_suffix(".provenance.json")
-        .read_text(encoding="utf-8")
-    )
-    bbox = screen_record["study_bbox"]
-    write_provenance(
-        oof_path,
-        source_url="https://github.com/Lakshaycodes08/CanopyGuard-AI/issues/8",
-        script_name="run_growth_curve_check.py",
-        bbox_wgs84=tuple(float(value) for value in bbox),
-        crs="EPSG:6339",
-        row_count=len(oof),
-    )
-    revision = subprocess.check_output(
-        ["git", "rev-parse", "HEAD"], cwd=root, text=True
-    ).strip()
     metrics = {
         "issue": 8,
         "generated_utc": datetime.now(UTC).isoformat(),
-        "git_base_revision": revision,
+        "git_base_revision": subprocess.check_output(
+            ["git", "rev-parse", "HEAD"], cwd=root, text=True
+        ).strip(),
         "baseline_years": dt,
         "decision": decision,
-        "screened_cells": len(frame),
         "settings": settings,
         "input_sha256": {
             "labels": file_hash(root / forecast["labels_path"]),
             "clean_cells": file_hash(root / forecast["clean_screen"]["output_path"]),
+            "wire_flags": file_hash(root / forecast["clean_screen"]["wire_flags_path"]),
             "vegetation": file_hash(root / forecast["vegetation_join"]["output_path"]),
         },
-        "results": results,
-        "forest_only": _forest_only_score(
-            frame, p95_start, p95_end, primary_predictions, settings
-        ),
+        "screens": screens,
+        "height_sensitivities": sensitivities,
+        "spatial_sensitivities": spatial,
+        "mean_secondary": mean_score,
+        "forest_saturation": shares,
         "per_type": per_type,
     }
-    metrics_path = ensure_parent(root / settings["metrics_path"])
-    metrics_path.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
+    path = ensure_parent(root / settings["metrics_path"])
+    path.write_text(json.dumps(metrics, indent=2) + "\n", encoding="utf-8")
     write_growth_report(metrics, forecast)
     return metrics

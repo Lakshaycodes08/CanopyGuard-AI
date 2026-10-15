@@ -8,6 +8,7 @@ from canopyguard.forecasting.growth_curve import (
     block_mae_interval,
     blocked_predictions,
     chapman_richards,
+    class_heights,
     fit_growth_curve,
 )
 
@@ -26,6 +27,9 @@ def settings() -> dict:
         "initial_c": 2.0,
         "soft_l1_scale_m": 1.0,
         "max_nfev": 200,
+        "max_height_m": {"oak": 70.0},
+        "record_tree_height_m": {"oak": 90.0},
+        "training_height_quantile": 0.995,
     }
 
 
@@ -43,6 +47,7 @@ def test_known_curve_beats_no_change_on_unseen_spatial_blocks():
             "y": y,
             "model_group": ["oak"] * len(x),
             "broader_group": ["hardwood forest"] * len(x),
+            "vegetation_type": ["oak"] * len(x),
         }
     )
     predictions = blocked_predictions(frame, start, end, 8.96, 1000, settings())
@@ -60,12 +65,10 @@ def test_known_curve_beats_no_change_on_unseen_spatial_blocks():
 def test_fit_is_bounded_and_short_trees_gain_more():
     start = np.linspace(2, 40, 600)
     end = chapman_richards(start, 8.96, 70.0, 0.04, 2.0)
-    fit = fit_growth_curve(
-        start, end, 8.96, settings(), maximum_start_height=float(start.max())
-    )
+    fit = fit_growth_curve(start, end, 8.96, settings(), max_height_m=70.0)
     fitted = chapman_richards(start, 8.96, fit["A"], fit["k"], fit["c"])
     assert np.mean(np.abs(fitted - end)) < 0.1
-    assert fit["A"] > end.max()
+    assert fit["A"] == 70.0
     assert fit["k"] > 0
     assert fit["c"] > 1
     gains = chapman_richards(
@@ -74,9 +77,45 @@ def test_fit_is_bounded_and_short_trees_gain_more():
     assert gains[0] > gains[1] > 0
 
 
-def test_height_above_asymptote_ceiling_fails_closed():
+def test_height_at_or_above_fixed_ceiling_has_no_predicted_growth():
+    start = np.array([10.0, 20.0, 70.0, 80.0])
+    predicted = chapman_richards(start, 8.96, 70.0, 0.04, 2.0)
+    assert predicted[0] > start[0]
+    assert predicted[-2:].tolist() == [70.0, 80.0]
+
+
+def test_pooled_fit_keeps_class_specific_height_ceilings():
     cfg = settings()
-    cfg["a_upper_m"] = 20.0
-    start = np.linspace(5, 30, 200)
-    with pytest.raises(ValueError, match="ceiling"):
-        fit_growth_curve(start, start + 1, 8.96, cfg, maximum_start_height=30)
+    cfg["max_height_m"]["pine"] = 100.0
+    names = np.array(["oak", "pine"])
+    assert class_heights(names, np.array([10.0, 10.0]), cfg, "literature") == {
+        "oak": 70.0,
+        "pine": 100.0,
+    }
+    assert class_heights(names, np.array([10.0, 10.0]), cfg, "record")["oak"] == 90.0
+    with pytest.raises(ValueError, match="Unconfirmed"):
+        class_heights(
+            np.array(["oak", "eucalyptus"]), np.array([10.0, 10.0]), cfg, "literature"
+        )
+
+
+def test_pooled_predictions_use_each_class_height_ceiling():
+    generator = np.random.default_rng(11)
+    cfg = settings()
+    cfg["max_height_m"] = {"oak": 20.0, "pine": 60.0}
+    block = np.repeat(np.arange(20), 50)
+    names = np.tile(np.repeat(["oak", "pine"], 25), 20)
+    start = generator.uniform(7.0, 17.0, len(block))
+    ceilings = np.array([cfg["max_height_m"][name] for name in names])
+    end = chapman_richards(start, 8.96, ceilings, 0.04, 2.0)
+    frame = pd.DataFrame(
+        {
+            "x": block * 1000.0,
+            "y": np.zeros(len(block)),
+            "model_group": ["group:forest"] * len(block),
+            "broader_group": ["forest"] * len(block),
+            "vegetation_type": names,
+        }
+    )
+    predicted = blocked_predictions(frame, start, end, 8.96, 1000, cfg)
+    assert np.mean(np.abs(predicted["curve"] - end)) < 0.1

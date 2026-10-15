@@ -1,5 +1,45 @@
 # Growth-curve check, 2013-2022
 
+## Revised fixed-A preflight, 2026-10-15
+
+**G3 fit paused for height-ceiling review.** The revised forest screen has 76,980
+cells with the LiDAR-loss filter and 125,888 without it. The PR #13 wire archive
+was generated locally; 1,620 cells have a wire-suspect flag and 33,139 lie
+within 10 m of a mapped line before the other screens. Nine forest classes have
+more than 0.5% of screened 2013 p95 heights at or above their confirmed A.
+The rule requires Lakshay to review these values before fitting.
+
+| Forest map class | A (m) | Forest cells | At or above A | Share | Review? |
+| --- | ---: | ---: | ---: | ---: | --- |
+| Acer macrophyllum | 27 | 171 | 1 | 0.585% | yes |
+| Arbutus menziesii | 40 | 4,512 | 5 | 0.111% | no |
+| Eucalyptus globulus / camaldulensis | 55 | 342 | 0 | 0% | no |
+| Hesperocyparis sargentii | 23 | 982 | 0 | 0% | no |
+| Pinus attenuata | 12 | 285 | 103 | 36.140% | yes |
+| Pinus sabiniana / Quercus durata | 24 | 492 | 19 | 3.862% | yes |
+| Populus fremontii | 34 | 1,433 | 0 | 0% | no |
+| Pseudotsuga menziesii | 76 | 3,322 | 0 | 0% | no |
+| Mixed six Quercus species | 30 | 10,875 | 30 | 0.276% | no |
+| Quercus agrifolia | 25 | 17,265 | 167 | 0.967% | yes |
+| Quercus chrysolepis | 30 | 1,111 | 11 | 0.990% | yes |
+| Quercus douglasii | 20 | 8,343 | 22 | 0.264% | no |
+| Quercus garryana | 30 | 4,597 | 23 | 0.5003% | yes |
+| Quercus kelloggii | 25 | 4,464 | 317 | 7.101% | yes |
+| Quercus lobata | 25 | 7,437 | 86 | 1.156% | yes |
+| Quercus wislizeni (tree) | 23 | 3,036 | 3 | 0.099% | no |
+| Sequoia sempervirens | 91 | 1,217 | 0 | 0% | no |
+| Umbellularia californica | 24 | 7,096 | 815 | 11.485% | yes |
+
+The full counts and exact fractions are in
+`reports/growth_curve_preflight_2013-2022.json`. The fixed-literature-A,
+training-fold p99.5-A, free-A and record-tree-A fits have not been run.
+The E. camaldulensis Jepson height check remains open; the confirmed mixed
+Eucalyptus A of 55 m uses E. globulus until that check is complete.
+
+> Historical pre-revision result (free A; PR #13 wire exclusions unavailable).
+> Superseded as a G3 decision pending the fixed-A forest rerun. Do not cite the
+> PASS below as the revised gate outcome.
+
 Run: 2026-10-14T08:10:36.292047+00:00. Issue #8. Base revision: 79b64329ec29b9c32fe8fae7720e943614f2632c.
 
 ## Gate G3

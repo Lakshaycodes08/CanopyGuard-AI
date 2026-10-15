@@ -111,11 +111,14 @@ stages:
     - data/interim/clean_cells_2013_2022.provenance.json
     - data/interim/veg_type_2013.parquet
     - data/processed/labels_2013-2022_unique.npz
+    - data/processed/labels_2013-2022_wire_flags.npz
     - scripts/run_growth_curve_check.py
     - src/canopyguard/config.py
     - src/canopyguard/data/fire_perimeters.py
     - src/canopyguard/evaluation/blocks.py
     - src/canopyguard/evaluation/growth_gate.py
+    - src/canopyguard/evaluation/growth_outputs.py
+    - src/canopyguard/evaluation/growth_screen.py
     - src/canopyguard/forecasting/growth_curve.py
     - src/canopyguard/forecasting/growth_report.py
     - src/canopyguard/io.py
