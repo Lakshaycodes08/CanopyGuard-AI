@@ -103,7 +103,7 @@ def _save_preflight(
             ),
         },
         "source_review_confirmed": settings["source_review_confirmed"],
-        "reviewer_spot_checked": settings["reviewer_spot_checked"],
+        "reviewer_spot_check": settings["reviewer_spot_check"],
         "screen_counts": {name: int(mask.sum()) for name, mask in masks.items()},
         "wire_suspect_cells": int(table["p95_wire_suspect"].sum()),
         "within_10m_line_cells": int(table["p95_within_line"].sum()),

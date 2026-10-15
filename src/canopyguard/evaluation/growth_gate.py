@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import re
 import subprocess
 from datetime import UTC, datetime
 
@@ -26,7 +27,7 @@ from canopyguard.forecasting.growth_curve import (
     block_mae_interval,
     blocked_predictions,
 )
-from canopyguard.forecasting.growth_prior import fit_type_median_prior
+from canopyguard.forecasting.growth_prior import fit_full_sample_type_median_prior
 from canopyguard.forecasting.growth_report import write_growth_report
 from canopyguard.io import ensure_parent, project_root
 
@@ -134,10 +135,27 @@ def _check_fit_permission(settings: dict, shares: dict) -> None:
     missing = [name for name, item in shares.items() if item["A_m"] is None]
     if missing:
         raise ValueError(f"Unconfirmed literature A: {', '.join(missing)}")
-    if not settings["source_review_confirmed"] or not settings["reviewer_spot_checked"]:
-        raise ValueError(
-            "Height table needs Lakshay confirmation and reviewer spot-check"
-        )
+    if not settings["source_review_confirmed"]:
+        raise ValueError("Height table needs Lakshay confirmation")
+    review = settings.get("reviewer_spot_check")
+    required = (
+        "reviewer",
+        "reviewer_type",
+        "session",
+        "review_window_utc",
+        "commit",
+        "scope",
+        "independence_limit",
+        "human_review",
+    )
+    if not isinstance(review, dict) or any(not review.get(key) for key in required):
+        raise ValueError("A-rule spot-check needs reviewer, session, time, and commit")
+    if review["reviewer_type"] not in ("ai", "human") or not re.fullmatch(
+        r"[0-9a-f]{40}", review["commit"]
+    ):
+        raise ValueError("A-rule spot-check needs a valid type and full commit")
+    if review["reviewer_type"] == "ai" and review["human_review"] != "pending":
+        raise ValueError("AI spot-check cannot certify human review")
 
 
 def growth_preflight(forecast: dict) -> tuple:
@@ -243,7 +261,7 @@ def run_growth_gate(forecast: dict) -> dict:
         settings,
     )
     prior_frame, prior_heights = _selected(table, heights, masks["forest_loss_off"])
-    median_prior = fit_type_median_prior(
+    median_prior = fit_full_sample_type_median_prior(
         prior_frame,
         prior_heights["p95_start"],
         prior_heights["p95_end"],

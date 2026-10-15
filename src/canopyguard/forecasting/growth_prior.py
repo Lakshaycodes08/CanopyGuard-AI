@@ -23,8 +23,10 @@ def training_scope(
     return "broad:" + broad_group, pooled
 
 
-def fit_type_median_prior(frame, start, end, minimum: int) -> dict[str, dict]:
-    """Fit one median 2013-2022 increment per map class or pooled group."""
+def fit_full_sample_type_median_prior(
+    frame, start, end, minimum: int
+) -> dict[str, dict]:
+    """Fit a forecast prior on all rows; never score it on those same rows."""
     x = np.asarray(start, dtype=float)
     y = np.asarray(end, dtype=float)
     if len(frame) != len(x) or len(x) != len(y):
@@ -37,7 +39,12 @@ def fit_type_median_prior(frame, start, end, minimum: int) -> dict[str, dict]:
     train = np.ones(len(frame), dtype=bool)
     output = {}
     for name in np.unique(names):
-        first = np.flatnonzero(names == name)[0]
+        class_rows = names == name
+        first = np.flatnonzero(class_rows)[0]
+        if not np.all(groups[class_rows] == groups[first]):
+            raise ValueError(f"Multiple model groups for vegetation type {name}")
+        if not np.all(broad[class_rows] == broad[first]):
+            raise ValueError(f"Multiple broad groups for vegetation type {name}")
         scope, rows = training_scope(
             groups[first], broad[first], train, groups, broad, minimum
         )

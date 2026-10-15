@@ -140,7 +140,17 @@ def test_held_out_2022_heights_cannot_change_fold_a_or_prediction():
     )
 
 
-def test_spatially_isolated_class_uses_literature_a_without_held_out_leak():
+def test_spatially_isolated_class_uses_literature_a_without_held_out_leak(monkeypatch):
+    training_ceilings = []
+
+    def tracked_class_heights(names, start, end, settings, mode):
+        heights = class_heights(names, start, end, settings, mode)
+        training_ceilings.append((heights, set(names)))
+        return heights
+
+    monkeypatch.setattr(
+        "canopyguard.forecasting.growth_curve.class_heights", tracked_class_heights
+    )
     cfg = settings()
     cfg["min_fit_cells"] = 20
     cfg["max_height_m"] = {"oak": 40.0, "pine": 60.0}
@@ -158,6 +168,7 @@ def test_spatially_isolated_class_uses_literature_a_without_held_out_leak():
         }
     )
     original = blocked_predictions(frame, start, end, 8.96, 1000, cfg, a_mode="posthoc")
+    assert all(set(heights) == names for heights, names in training_ceilings)
     isolated = names == "pine"
     assert original["literature_fallback"].sum() == isolated.sum()
     np.testing.assert_array_equal(original["A"][isolated], 60.0)

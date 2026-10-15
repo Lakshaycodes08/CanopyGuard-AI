@@ -141,6 +141,11 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         )
         if score["literature_fallback_cells"]
     ]
+    acer = next(
+        item
+        for item in metrics["per_type"]
+        if item["vegetation_type"].startswith("Acer macrophyllum ")
+    )
     lines = [
         "# Growth-prior check, 2013-2022",
         "",
@@ -274,6 +279,15 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "species heights. Taller crowns of other species within polygons "
         "and residual LiDAR outliers are possible explanations, not verified "
         "causes. The empirical A is not a biological ceiling.",
+        f"The Acer macrophyllum literature A of "
+        f"{settings['max_height_m'][acer['vegetation_type']]} m uses a 2011 Oregon "
+        "champion tree, an explicit exception to the typical-upper source "
+        "rule. Held-out Acer exceedance was "
+        f"{acer['saturation']['at_or_above_A']}/{acer['cells']}; the class "
+        f"uses {acer['fit']['scope']} for curve fitting.",
+        "Whole-block bootstrap intervals resample spatial blocks while "
+        "holding the fitted fold models fixed; they omit refit variance "
+        "and may therefore be too narrow.",
         "The LiDAR-loss screen selects a retrospective subset; it is never "
         "a forecast feature. No random visual audit of persistent forest "
         "cells has been completed. Fire, Hansen and LiDAR screens alone do "
@@ -284,8 +298,13 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "Australian range; a person still needs to verify the Jepson entry. "
         "The exact excerpts and source dates are in reports/claims_log.md.",
         "An offline test changes a held-out fold's 2022 heights and confirms "
-        "that fold's A and predictions do not change. An independent reviewer "
-        "spot-check of the A-rule implementation remains pending.",
+        "that fold's A and predictions do not change. "
+        f"{settings['reviewer_spot_check']['reviewer']} reviewed the A-rule "
+        f"implementation at {settings['reviewer_spot_check']['commit']} "
+        f"during {settings['reviewer_spot_check']['review_window_utc']} "
+        f"({settings['reviewer_spot_check']['session']}). This was an AI code "
+        "spot-check by a reviewer who proposed the rule, not an independent "
+        "human review; human sign-off remains pending.",
         "",
         "## Reproduction",
         "",

@@ -6,7 +6,7 @@ import pytest
 
 from canopyguard.evaluation.growth_gate import median_gate_decision
 from canopyguard.forecasting.growth_prior import (
-    fit_type_median_prior,
+    fit_full_sample_type_median_prior,
     predict_type_median_prior,
 )
 
@@ -22,7 +22,7 @@ def test_type_median_prior_pools_sparse_class_without_losing_class_mapping():
     )
     start = np.full(len(names), 10.0)
     end = start + np.array([1, 2, 3, 4, 10, 12])
-    prior = fit_type_median_prior(frame, start, end, minimum=3)
+    prior = fit_full_sample_type_median_prior(frame, start, end, minimum=3)
     assert prior["oak"]["fit_scope"] == "type:oak"
     assert prior["oak"]["median_increment_m"] == 2.5
     assert prior["maple"]["fit_scope"] == "broad:hardwood forest"
@@ -33,6 +33,18 @@ def test_type_median_prior_pools_sparse_class_without_losing_class_mapping():
     )
     with pytest.raises(ValueError, match="No growth prior"):
         predict_type_median_prior(["unknown"], [10], prior)
+
+
+def test_full_sample_prior_requires_one_model_group_per_map_class():
+    frame = pd.DataFrame(
+        {
+            "vegetation_type": ["oak", "oak"],
+            "model_group": ["oak", "group:hardwood forest"],
+            "broader_group": ["hardwood forest", "hardwood forest"],
+        }
+    )
+    with pytest.raises(ValueError, match="Multiple model groups"):
+        fit_full_sample_type_median_prior(frame, [10, 10], [11, 12], minimum=1)
 
 
 def test_median_gate_requires_both_forest_screens_to_beat_no_change():

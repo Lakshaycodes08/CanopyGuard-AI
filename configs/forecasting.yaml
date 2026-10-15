@@ -88,7 +88,7 @@ stage1_growth_model:
       Quercus chrysolepis Alliance: 30
       Umbellularia californica Alliance: 24
       Arbutus menziesii Alliance: 40
-      Acer macrophyllum Alliance: 27
+      Acer macrophyllum Alliance: 27  # 2011 Oregon champion; documented exception to typical-upper rule
       Populus fremontii Alliance: 34
       Eucalyptus (globulus, camaldulensis) Semi-natural Alliance: 55
       Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance: 30
@@ -103,7 +103,15 @@ stage1_growth_model:
     pending_source_review: []
     open_verification_items: [Eucalyptus camaldulensis Jepson height; check whether above 55 m]
     source_review_confirmed: true
-    reviewer_spot_checked: true
+    reviewer_spot_check:
+      reviewer: Claude Opus 5
+      reviewer_type: ai
+      session: https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E
+      review_window_utc: 2026-10-15T09:54:00Z/2026-10-15T10:04:00Z
+      commit: 32b94cefc8e6530ed4fe65c751f10b96e77319e0
+      scope: A-rule implementation and held-out-fold leakage checks
+      independence_limit: reviewer proposed the A rule
+      human_review: pending
     p95_wire_exclusion_m: 10.0
     saturation_review_fraction: 0.005
     training_height_quantile: 0.995

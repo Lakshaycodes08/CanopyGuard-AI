@@ -73,13 +73,45 @@ def test_posthoc_rule_allows_reviewed_literature_exceedance_but_requires_source(
     settings = {
         "saturation_review_fraction": 0.005,
         "source_review_confirmed": True,
-        "reviewer_spot_checked": True,
+        "reviewer_spot_check": {
+            "reviewer": "test reviewer",
+            "reviewer_type": "ai",
+            "session": "test session",
+            "review_window_utc": "2026-10-15T09:54:00Z/2026-10-15T10:04:00Z",
+            "commit": "a" * 40,
+            "scope": "A-rule code",
+            "independence_limit": "reviewer proposed rule",
+            "human_review": "pending",
+        },
     }
     shares = {"oak": {"A_m": 25, "share": 0.006}}
     _check_fit_permission(settings, shares)
     shares["eucalyptus"] = {"A_m": None, "share": None}
     with pytest.raises(ValueError, match="eucalyptus"):
         _check_fit_permission(settings, shares)
+
+
+def test_fit_permission_requires_review_provenance_and_keeps_human_status_distinct():
+    review = {
+        "reviewer": "Claude Opus 5",
+        "reviewer_type": "ai",
+        "session": "session-id",
+        "review_window_utc": "2026-10-15T09:54:00Z/2026-10-15T10:04:00Z",
+        "commit": "a" * 40,
+        "scope": "A-rule code",
+        "independence_limit": "reviewer proposed rule",
+        "human_review": "pending",
+    }
+    settings = {"source_review_confirmed": True, "reviewer_spot_check": review}
+    shares = {"oak": {"A_m": 25}}
+    _check_fit_permission(settings, shares)
+    with pytest.raises(ValueError, match="spot-check needs"):
+        _check_fit_permission({**settings, "reviewer_spot_check": None}, shares)
+    with pytest.raises(ValueError, match="cannot certify human review"):
+        _check_fit_permission(
+            {**settings, "reviewer_spot_check": {**review, "human_review": "complete"}},
+            shares,
+        )
 
 
 def test_fold_exceedance_uses_each_held_out_cells_training_a():

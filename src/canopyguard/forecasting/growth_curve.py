@@ -197,7 +197,8 @@ def blocked_predictions(
                     )
                 median_growth = float(np.median(end[fit_rows] - start[fit_rows]))
                 cache[scope] = fit, median_growth, ceilings
-            fit, median_growth, ceilings = cache[scope]
+            fit, median_growth, cached_ceilings = cache[scope]
+            ceilings = None if cached_ceilings is None else cached_ceilings.copy()
             if ceilings is not None:
                 training_names = np.unique(names[fit_rows])
                 absent = ~np.isin(names[use], training_names)
