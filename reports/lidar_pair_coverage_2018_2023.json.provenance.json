@@ -1,0 +1,17 @@
+{
+  "bbox_wgs84": [
+    -122.9,
+    38.475,
+    -122.74,
+    38.82
+  ],
+  "config_sha256": "f4be5a212c13f0ae5c4e8e8dd25ff0dfc042d8972d5e84a4844d9c66e937a42c",
+  "crs": "EPSG:4326",
+  "fetch_utc": "2026-10-15T10:19:13.864830+00:00",
+  "git_commit": "66f8966d6264d824bbe8011a3e03e9f5c5f247ab",
+  "http_status": null,
+  "row_count": null,
+  "script_name": "scripts/check_lidar_pair_coverage.py",
+  "sha256": "f20823974794fad093c0424ac4f4f52b037247c9ca7c61a7ba8ab295e67ad342",
+  "source_url": "https://services.arcgis.com/jIL9msH9OI208GCb/ArcGIS/rest/services/California_Fire_Perimeters_1878_2019/FeatureServer/1/query"
+}
