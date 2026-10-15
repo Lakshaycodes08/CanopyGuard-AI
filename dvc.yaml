@@ -168,3 +168,26 @@ stages:
         cache: false
     - data/interim/terrain_10m.parquet.provenance.json:
         cache: false
+  stage2_residual_gate_2013_2022:
+    cmd: python scripts/run_stage2_residual_check.py
+    deps:
+    - configs/forecasting.yaml
+    - reports/stage2_gate_prereg.md
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/terrain_10m.parquet
+    - data/processed/labels_2013-2022_unique.npz
+    - data/processed/labels_2013-2022_wire_flags.npz
+    - scripts/run_stage2_residual_check.py
+    - src/canopyguard/evaluation/stage2_gate.py
+    - src/canopyguard/forecasting/stage2_residual.py
+    - src/canopyguard/forecasting/stage2_report.py
+    - src/canopyguard/evaluation/blocks.py
+    - src/canopyguard/evaluation/growth_gate.py
+    - src/canopyguard/evaluation/growth_screen.py
+    - src/canopyguard/forecasting/growth_prior.py
+    - src/canopyguard/forecasting/growth_curve.py
+    outs:
+    - data/interim/stage2_residual_oof_2013-2022.parquet:
+        cache: false
+    - data/interim/stage2_residual_oof_2013-2022.parquet.provenance.json:
+        cache: false
