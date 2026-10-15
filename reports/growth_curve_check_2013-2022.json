@@ -1,7 +1,7 @@
 {
   "issue": 8,
-  "generated_utc": "2026-10-15T08:35:44.630766+00:00",
-  "git_base_revision": "aab06c8b782dcfcee464f4e3446891e8176031c5",
+  "generated_utc": "2026-10-15T10:11:06.555838+00:00",
+  "git_base_revision": "a4e272edbd3ea983348d5a7beb5670ee1791d615",
   "baseline_years": 8.958247775496236,
   "decision": "PASS",
   "settings": {
@@ -40,7 +40,16 @@
       "Eucalyptus camaldulensis Jepson height; check whether above 55 m"
     ],
     "source_review_confirmed": true,
-    "reviewer_spot_checked": true,
+    "reviewer_spot_check": {
+      "reviewer": "Claude Opus 5",
+      "reviewer_type": "ai",
+      "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
+      "review_window_utc": "2026-10-15T09:54:00Z/2026-10-15T10:04:00Z",
+      "commit": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
+      "scope": "A-rule implementation and held-out-fold leakage checks",
+      "independence_limit": "reviewer proposed the A rule",
+      "human_review": "pending"
+    },
     "p95_wire_exclusion_m": 10.0,
     "saturation_review_fraction": 0.005,
     "training_height_quantile": 0.995,

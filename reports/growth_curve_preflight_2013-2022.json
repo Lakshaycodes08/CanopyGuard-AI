@@ -1,13 +1,22 @@
 {
-  "generated_utc": "2026-10-15T08:35:19.974463+00:00",
-  "git_revision": "aab06c8b782dcfcee464f4e3446891e8176031c5",
+  "generated_utc": "2026-10-15T10:10:43.248676+00:00",
+  "git_revision": "a4e272edbd3ea983348d5a7beb5670ee1791d615",
   "inputs_sha256": {
     "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
     "clean_cells": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
     "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee"
   },
   "source_review_confirmed": true,
-  "reviewer_spot_checked": true,
+  "reviewer_spot_check": {
+    "reviewer": "Claude Opus 5",
+    "reviewer_type": "ai",
+    "session": "https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E",
+    "review_window_utc": "2026-10-15T09:54:00Z/2026-10-15T10:04:00Z",
+    "commit": "32b94cefc8e6530ed4fe65c751f10b96e77319e0",
+    "scope": "A-rule implementation and held-out-fold leakage checks",
+    "independence_limit": "reviewer proposed the A rule",
+    "human_review": "pending"
+  },
   "screen_counts": {
     "all_loss_off": 140530,
     "all_loss_on": 83772,

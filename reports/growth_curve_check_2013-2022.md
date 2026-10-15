@@ -2,7 +2,7 @@
 
 **Post hoc empirical height ceiling by map class.** The original literature-only A preflight exceeded 0.5% in nine classes. The Chapman-Richards sensitivity uses the maximum of the literature typical-upper value and the 99.5th percentile of max(2013 p95, 2022 p95), calculated within each spatial training fold. The 2022 heights in a held-out fold never set that fold's A. This A is an empirical map-class cutoff, not a biological maximum or a species asymptote. The rule was selected after seeing exceedances and must not be presented as predeclared. Promoting the median increment and treating both forest screens as co-primary were also decisions made after inspecting the earlier curve results.
 
-Run: 2026-10-15T08:35:44.630766+00:00. Issue #8. Base revision: aab06c8b782dcfcee464f4e3446891e8176031c5.
+Run: 2026-10-15T10:11:06.555838+00:00. Issue #8. Base revision: a4e272edbd3ea983348d5a7beb5670ee1791d615.
 
 ## Gate G3: co-primary forest median-increment prior
 
@@ -122,9 +122,11 @@ The 10 m versus 20 m check partly follows from forcing no growth when starting h
 The original clean screen retained 111,672 of 1,478,103 label cells. The revised selections and wire exclusions are recorded in the machine metrics and preflight JSON.
 2013 vegetation groups come from the [Sonoma Veg Map](https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query); fire from [FRAP](https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/California_Fire_Perimeters/FeatureServer/0/query) and [MTBS](https://apps.fs.usda.gov/ArcX/rest/services/EDW/EDW_MTBS_01/MapServer/63/query); Hansen supplies [loss year](https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif).
 Sonoma MAP_CLASS is a mapping unit, not a species-pure cell label. Several empirical map-class A values exceed the cited typical-upper species heights. Taller crowns of other species within polygons and residual LiDAR outliers are possible explanations, not verified causes. The empirical A is not a biological ceiling.
+The Acer macrophyllum literature A of 27 m uses a 2011 Oregon champion tree, an explicit exception to the typical-upper source rule. Held-out Acer exceedance was 0/171; the class uses broad:hardwood forest for curve fitting.
+Whole-block bootstrap intervals resample spatial blocks while holding the fitted fold models fixed; they omit refit variance and may therefore be too narrow.
 The LiDAR-loss screen selects a retrospective subset; it is never a forecast feature. No random visual audit of persistent forest cells has been completed. Fire, Hansen and LiDAR screens alone do not verify continuous undisturbed forest, so the growth-only sample and its upper-bound interpretation remain provisional.
 The mixed Eucalyptus literature A is 55 m from FEIS E. globulus. Kew and ANBG describe E. camaldulensis up to 45 m in its native Australian range; a person still needs to verify the Jepson entry. The exact excerpts and source dates are in reports/claims_log.md.
-An offline test changes a held-out fold's 2022 heights and confirms that fold's A and predictions do not change. An independent reviewer spot-check of the A-rule implementation remains pending.
+An offline test changes a held-out fold's 2022 heights and confirms that fold's A and predictions do not change. Claude Opus 5 reviewed the A-rule implementation at 32b94cefc8e6530ed4fe65c751f10b96e77319e0 during 2026-10-15T09:54:00Z/2026-10-15T10:04:00Z (https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E). This was an AI code spot-check by a reviewer who proposed the rule, not an independent human review; human sign-off remains pending.
 
 ## Reproduction
 
