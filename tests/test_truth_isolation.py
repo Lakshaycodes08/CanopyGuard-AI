@@ -265,35 +265,59 @@ def test_scan_allows_importing_the_checked_selectors(name):
 
 
 ECHOSAT_YEARS = list(range(2018, 2025))
+ECHOSAT_LAST_INPUT_YEAR = 2024
 
 
-def _echosat_years(lidar_config, target_epoch, cutoff):
+def _echosat_years(lidar_config, target_epoch, cutoff, allowed=True):
     return select_echosat_feature_years(
         ECHOSAT_YEARS,
         lidar_config,
         target_epoch=target_epoch,
         prediction_cutoff=cutoff,
+        last_input_year=ECHOSAT_LAST_INPUT_YEAR,
+        allowed_as_feature=allowed,
     )
+
+
+@pytest.fixture
+def far_future_lidar_config(lidar_config):
+    """A config whose target survey starts after ECHOSAT's last input year."""
+    future = {"name": "2030", "start": "2030-01-01", "end": "2030-03-01"}
+    return {**lidar_config, "epochs": [*lidar_config["epochs"], future]}
 
 
 def test_no_echosat_year_can_be_a_feature_for_the_2013_cutoff(lidar_config):
     assert _echosat_years(lidar_config, "2022", "2013-11-26") == []
 
 
-def test_echosat_before_the_2022_survey_can_be_a_feature_for_2023(lidar_config):
-    years = _echosat_years(lidar_config, "2023", "2022-11-11")
-    assert years == [2018, 2019, 2020, 2021]
+def test_no_echosat_year_can_be_a_feature_for_the_2023_target(lidar_config):
+    # Every ECHOSAT year is predicted from imagery through 2024, so even the
+    # years before the 2022 flight carry information from after it.
+    assert _echosat_years(lidar_config, "2023", "2022-11-11") == []
+    assert _echosat_years(lidar_config, "2023", "2023-06-01") == []
 
 
-def test_echosat_year_ending_on_the_cutoff_is_admitted(lidar_config):
-    years = _echosat_years(lidar_config, "2023", "2022-12-31")
-    assert years == [2018, 2019, 2020, 2021, 2022]
+def test_echosat_is_admitted_only_after_its_last_input_year(far_future_lidar_config):
+    before = _echosat_years(far_future_lidar_config, "2030", "2024-12-30")
+    on_last_day = _echosat_years(far_future_lidar_config, "2030", "2024-12-31")
+
+    assert before == []
+    assert on_last_day == ECHOSAT_YEARS
 
 
-def test_echosat_target_year_is_never_admitted(lidar_config):
-    years = _echosat_years(lidar_config, "2023", "2023-06-01")
-    assert 2023 not in years
-    assert years == [2018, 2019, 2020, 2021, 2022]
+def test_echosat_flag_off_blocks_every_year_even_after_the_last_input(
+    far_future_lidar_config,
+):
+    years = _echosat_years(far_future_lidar_config, "2030", "2024-12-31", allowed=False)
+
+    assert years == []
+
+
+def test_project_config_keeps_echosat_as_benchmark_only():
+    source = load_config("configs/ingestion.yaml")["echosat"]
+
+    assert source["allowed_as_feature"] is False
+    assert source["last_input_year"] == max(source["band_years"])
 
 
 @pytest.mark.parametrize("cutoff", ["2022-09-13", "2023-01-01"])

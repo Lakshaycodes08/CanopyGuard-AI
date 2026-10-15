@@ -2,7 +2,7 @@
 
 Fire causes abrupt height loss. If the bands run forward in time, large drops
 inside a known fire perimeter should peak in the step after the fire year. This
-is a consistency check on the inferred band order, not proof of it.
+is an independent consistency check on the band order the authors confirmed.
 """
 
 from __future__ import annotations
