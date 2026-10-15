@@ -446,3 +446,103 @@ stages:
       hash: md5
       md5: 4cd97681ade7edd1b2215cb0b0036f90
       size: 496
+  terrain_dem_2012:
+    cmd: python scripts/fetch_terrain_dem.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: 2cf33fe6830eeadfcf1eaf2f60d22b5e
+      size: 9267
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: scripts/fetch_terrain_dem.py
+      hash: md5
+      md5: 9993d0805b17b060eebe17d003b8884f
+      size: 419
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/data/terrain_dem.py
+      hash: md5
+      md5: 60ff1f5229fd55c356a58eff4ebcfa0e
+      size: 1514
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    outs:
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif
+      hash: md5
+      md5: f41e91dc7d0394224e3a93732f23cb1d
+      size: 469967805
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json
+      hash: md5
+      md5: 125678c1fdf619d72017442ea6068771
+      size: 545
+  terrain_features_10m:
+    cmd: python scripts/build_terrain.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: 2cf33fe6830eeadfcf1eaf2f60d22b5e
+      size: 9267
+    - path: configs/lidar.yaml
+      hash: md5
+      md5: 86a977c4e78e589810da8694eabe89e0
+      size: 11895
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/clean_cells_2013_2022.parquet.provenance.json
+      hash: md5
+      md5: 2ece3c64b305f1ad45c9c52f43e8d37d
+      size: 493
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif
+      hash: md5
+      md5: f41e91dc7d0394224e3a93732f23cb1d
+      size: 469967805
+    - path: data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json
+      hash: md5
+      md5: 125678c1fdf619d72017442ea6068771
+      size: 545
+    - path: scripts/build_terrain.py
+      hash: md5
+      md5: 89d6cb950f9520b3c674f5e6c6a0f25d
+      size: 517
+    - path: src/canopyguard/config.py
+      hash: md5
+      md5: 6831473e26f947a6ceaed4378369f39e
+      size: 2289
+    - path: src/canopyguard/features/terrain.py
+      hash: md5
+      md5: dcd8156321f0b51a9d6513e3c8b80248
+      size: 7457
+    - path: src/canopyguard/io.py
+      hash: md5
+      md5: 7860402382d495aae9b8663a4567565f
+      size: 2419
+    - path: src/canopyguard/provenance.py
+      hash: md5
+      md5: 270422e2e2e93b8f9f50645fdaa6beb1
+      size: 4456
+    outs:
+    - path: data/interim/terrain_10m.parquet
+      hash: md5
+      md5: 5f38f475b9cc08ab3711b12540807f6c
+      size: 39912414
+    - path: data/interim/terrain_10m.parquet.provenance.json
+      hash: md5
+      md5: cee5725b3a6e14ab4501936c86cc985a
+      size: 791

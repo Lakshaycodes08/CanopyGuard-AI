@@ -131,3 +131,40 @@ stages:
         cache: false
     - data/interim/growth_curve_oof_2013-2022.parquet.provenance.json:
         cache: false
+  terrain_dem_2012:
+    cmd: python scripts/fetch_terrain_dem.py
+    deps:
+    - configs/forecasting.yaml
+    - configs/study_area.yaml
+    - scripts/fetch_terrain_dem.py
+    - src/canopyguard/config.py
+    - src/canopyguard/data/terrain_dem.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    outs:
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif:
+        cache: false
+        persist: true
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json:
+        cache: false
+        persist: true
+  terrain_features_10m:
+    cmd: python scripts/build_terrain.py
+    deps:
+    - configs/forecasting.yaml
+    - configs/lidar.yaml
+    - configs/study_area.yaml
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/clean_cells_2013_2022.parquet.provenance.json
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json
+    - scripts/build_terrain.py
+    - src/canopyguard/config.py
+    - src/canopyguard/features/terrain.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    outs:
+    - data/interim/terrain_10m.parquet:
+        cache: false
+    - data/interim/terrain_10m.parquet.provenance.json:
+        cache: false
