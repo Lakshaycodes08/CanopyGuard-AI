@@ -18,7 +18,9 @@ Sonoma County. Five-fold spatial cross-validation with 2 km blocks finds
 that the type-specific or pooled broad-group median reduces mean absolute
 error (MAE) relative to no change by 0.121 m on the forest
 LiDAR-loss-off screen. The height-dependent curve adds no measurable
-improvement. This is a preliminary growth-prior result, not a validated
+improvement. In a separately preregistered stage-two residual test,
+ridge and LightGBM both increase MAE on that screen and fail the gate.
+This is a preliminary growth-prior result, not a validated
 corridor clearance forecast. The LiDAR-loss-on subset is retrospectively
 selected; persistent-forest selection still needs visual audit.
 Conductor geometry is unavailable, so future span rankings would be
@@ -121,6 +123,23 @@ comparison criterion. G3 evaluated both forest screens. The later
 stage-two residual gate was preregistered separately, with loss-off as
 its headline screen.
 
+\subsection{Stage-two residual comparison}
+The preregistered target is observed p95 height change minus the
+training-fold stage-one median increment. E4 ridge (regularization
+parameter 1) and E5 LightGBM (maximum depth 4, 15 leaves, 400 trees,
+learning rate 0.03, minimum 200 cells per leaf, feature fraction 0.6)
+use 2013 LiDAR mean, p95, and maximum height; 2013 Sonoma map class;
+and static elevation, slope, heat load, and 450 m topographic position.
+The static terrain source is a 2012 USGS 3DEP 1/3 arc-second DEM
+\cite{usgsdem}. Terrain is resampled to the existing 10 m label cells;
+heat load follows McCune and Keon \cite{mccune2002}. All preprocessing
+is fitted on each spatial training fold. Neither target-epoch LiDAR nor
+post-2013 satellite observations enter the predictors. Both models
+use the same five-fold 2 km blocks and 2,000-draw paired whole-block
+intervals as the stage-one comparison. The loss-off screen is the
+preregistered decision screen; 1 km and 5 km blocks, all classes, and
+the LiDAR-loss-on screen are declared sensitivities.
+
 \section{Results}
 \begin{table}[ht]
 \centering
@@ -152,8 +171,17 @@ was worse than the median on the loss-on screen: $+0.012$ m
 or $c$ bound, so their shape parameters are not interpreted biologically.
 
 \subsection{Stage-two residual models}
-The preregistered ridge and LightGBM residual comparisons have not
-yet been run. No stage-two result or pass decision is claimed here.
+On the forest LiDAR-loss-off 2 km screen (125,888 cells), the matched
+stage-one MAE is 1.256 m. Ridge MAE is 1.336 m, a difference of
+$+0.080$ m (95\% whole-block interval $[+0.060,+0.101]$). LightGBM
+MAE is 1.309 m, a difference of $+0.052$ m ($[+0.029,+0.083]$).
+Both fail the preregistered rule, which requires the entire interval
+below zero. No further settings were tried. On the retrospectively
+selected loss-on subset, ridge and LightGBM improve over stage one by
+$0.020$ and $0.031$ m respectively, but this upper-bound sensitivity
+does not reverse the loss-off decision. The loss-off result remains
+unfavorable at 1 km and 5 km blocks and across all admissible map
+classes.
 
 \section{Discussion}
 The measured contribution is a map-class median increment that improves
@@ -174,12 +202,22 @@ omit refit variance, so they may be too narrow. No conductor
 geometry is available. Eventual span rankings would be research
 prioritization, not clearance or safety determinations.
 
+The stage-two loss-off failure shows that these fixed residual models
+do not improve the median prior on this screened population. Better
+loss-on scores may reflect retrospective exclusion of loss cells;
+they cannot establish operational forecast skill. The present result
+does not justify changing the preregistered feature set or settings
+after inspection.
+
 \section{Conclusion}
 A type-specific or pooled broad-group median height increment improves
 the screened 2013--2022 p95 comparison over no change. Height-dependent
 Chapman--Richards curves add no measurable benefit. Independent scientific
 review of the post hoc curve rule and validation of persistent-forest
 selection remain open before broader claims are made.
+The preregistered ridge and LightGBM residual models fail their
+loss-off improvement gate. These comparisons do not support replacing
+the median prior with either fitted residual model.
 
 \section*{AI Assistance Disclosure}
 AI assistance was used for project planning, code drafting, and manuscript
@@ -209,5 +247,11 @@ and citations under the target venue's policy.
 \href{https://mtbs.gov/mapping-methods}{Source}.
 \bibitem{hansensource} Hansen Global Forest Change loss year.
 \href{https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif}{Source data}.
+\bibitem{usgsdem} U.S. Geological Survey. 2012 3DEP 1/3 arc-second
+digital elevation model, n39w123 tile.
+\href{https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/historical/n39w123/USGS_13_n39w123_20120801.tif}{Source data}.
+\bibitem{mccune2002} McCune and Keon (2002). Equations for potential
+annual direct incident radiation and heat load.
+\href{https://sites.science.oregonstate.edu/~mccuneb/JVSreprint13.603-606.pdf}{Author-hosted paper}.
 \end{thebibliography}
 \end{document}
