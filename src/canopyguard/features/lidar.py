@@ -64,12 +64,21 @@ def select_echosat_feature_years(
     *,
     target_epoch: str,
     prediction_cutoff: str,
+    last_input_year: int,
+    allowed_as_feature: bool,
 ) -> list[int]:
-    """Admit ECHOSAT years that end on or before the cutoff.
+    """Admit ECHOSAT years only when allowed and all input imagery predates the cutoff.
 
-    A band covers its whole calendar year, so year Y is admitted only when
-    31 December of Y is not after the cutoff. The cutoff must also precede the
-    target survey, so no band dated after the cutoff becomes a feature.
+    `allowed_as_feature` is the config switch; it is off while ECHOSAT is a
+    benchmark only.
+
+    ECHOSAT predicts every year in one pass from the imagery of all years, so
+    even the 2018 band depends on imagery through `last_input_year`. A band is
+    therefore a safe feature only when 31 December of that last input year is
+    not after the cutoff. The cutoff must also precede the target survey, so for
+    any real forecast this returns no years and ECHOSAT is a benchmark only.
     """
     cutoff = _cutoff_before_target(lidar_config, target_epoch, prediction_cutoff)
-    return [year for year in band_years if date(year, 12, 31) <= cutoff]
+    if not allowed_as_feature or date(last_input_year, 12, 31) > cutoff:
+        return []
+    return list(band_years)
