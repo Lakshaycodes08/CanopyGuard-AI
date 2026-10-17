@@ -319,3 +319,43 @@ wire_check:
     placebo_shifts_m: [[400, 0], [-400, 0], [0, 400], [0, -400]]
     placebo_exclude_within_m: 100.0
     sensitivity_min_height_m: 15.0
+
+pair_coverage:
+  # Issue 15: how much ground the 2018 and 2023 surveys share, and whether it is
+  # enough to test ECHOSAT change against repeat LiDAR. A coverage check only;
+  # 2018 is not an admitted epoch and has not passed the admission screen.
+  earlier:
+    name: "2018"
+    dataset: CA_NoCAL_Wildfires_TL_QL2_2018
+  later_epoch: "2023"
+  projected_crs: EPSG:32610
+  buffers_km: [5, 10, 25]
+  # Point reading: all depths of the octree up to max_depth, which is already
+  # near full density, so tiles are judged on real returns and not on file bounds.
+  max_depth: 12
+  threads: 16
+  request_timeout_seconds: 120
+  request_retries: 5
+  canopy_cell_m: 10
+  min_cell_fraction: 0.9
+  min_ground_fraction: 0.5
+  noise_classes: [7, 18]
+  water_class: 9
+  ground_class: 2
+  excluded_flag_bits: 13
+  canopy_height_classes_m: [2, 5, 15, 30]
+  usable_canopy_min_km2: 5.0
+  # One parameter at a time; names are PairRules fields. The canopy threshold is
+  # the one the answer is sensitive to: 2 m is the repo rule, 5 m is a tree.
+  sensitivity:
+    canopy_min_m: [2.0, 3.0, 5.0, 10.0]
+    disturbance_limit_m: [2.0, 3.0, 5.0]
+    min_cell_fraction: [0.8, 0.9, 0.95]
+    min_ground_fraction: [0.3, 0.5, 0.7]
+  fire_perimeter_url: https://services.arcgis.com/jIL9msH9OI208GCb/ArcGIS/rest/services/California_Fire_Perimeters_1878_2019/FeatureServer/1/query
+  fire_first_year: 2018
+  fire_last_year: 2023
+  fire_min_acres: 100
+  tile_stats: interim/lidar_pair_coverage/tile_stats.npz
+  report_json: reports/lidar_pair_coverage_2018_2023.json
+  figure: reports/figures_sample/lidar_pair_coverage_2018_2023.png
