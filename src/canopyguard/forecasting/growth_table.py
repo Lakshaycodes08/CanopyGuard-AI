@@ -89,10 +89,18 @@ def table_at_scale(
     table["n_pixels"] = grouped.size()
     table = table[table["n_pixels"] >= min_valid_share * factor * factor]
     table = table.reset_index()
+    block_rasters = {
+        name: block_mean(raster, factor, min_valid_share)
+        for name, raster in features.items()
+    }
+    shape = next(iter(block_rasters.values())).shape
+    # Partial blocks at the raster edge have no feature block; drop them.
+    table = table[(table["block_row"] < shape[0]) & (table["block_col"] < shape[1])]
+    table = table.reset_index(drop=True)
     rows = table["block_row"].to_numpy()
     cols = table["block_col"].to_numpy()
-    for name, raster in features.items():
-        table[name] = block_mean(raster, factor, min_valid_share)[rows, cols]
+    for name, block in block_rasters.items():
+        table[name] = block[rows, cols]
     size = step * factor
     table["x"] = left + (cols + 0.5) * size
     table["y"] = top - (rows + 0.5) * size
