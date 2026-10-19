@@ -221,7 +221,8 @@ def build_report(src: Any, box: BoxRead, source: dict[str, Any]) -> dict[str, An
         "study_crs": WGS84,
         "pixel_size_m": list(src.res),
         "nodata_value": src.nodata,
-        "band_years_assumed": band_years,
+        "band_years": band_years,
+        "band_order_source": source.get("band_order_source"),
         "raster_footprint_covers_box": box.fully_covers_box,
         "years_missing_from_product": sorted(set(check_years) - set(band_years)),
         "per_year": count_valid_by_year(
