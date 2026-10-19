@@ -65,6 +65,34 @@ models beat no change in every region with intervals that exclude zero
 the survey-based growth curve is small: -0.008, -0.041, -0.076 m for the
 Landsat + terrain + climate + ecosystem model.
 
+## Finding 3: disturbance is only weakly predictable
+
+Task: rank 90 m pixels by the chance of later disturbance, using predictors dated
+before the cutoff, with a whole region held out (`reports/hazard_forecast.json`).
+Two targets: LiDAR loss share of at least 0.3 (any cause), and at least half the
+pixel inside a fire perimeter. AUC, where 0.5 is a coin flip:
+
+| Target and region | Base rate | Ecosystem rate only | Landsat + terrain + ecosystem |
+| --- | --- | --- | --- |
+| Loss, study | 0.03 | 0.687 | 0.837 |
+| Loss, west | 0.14 | 0.686 | 0.724 |
+| Loss, east | 0.24 | 0.719 | 0.763 |
+| Fire, study | 0.37 | 0.792 | 0.906 |
+| Fire, west | 0.44 | 0.664 | 0.694 |
+| Fire, east | 0.77 | 0.452 | 0.448 |
+
+- Loss: the satellite model improves on the ecosystem rate in all three regions
+  (AUC gain +0.150, +0.038, +0.044; block-bootstrap intervals exclude zero). The
+  gain is small in west and east. The top 10 percent of ranked pixels hold 17 to
+  40 percent of loss pixels, against 10 percent for random ranking.
+- Fire: not usable. AUC ranges from 0.42 to 0.92 across regions and feature
+  sets, and falls below 0.5 in the east, where 77 percent of pixels are inside a
+  perimeter. Fire footprints are large blobs, three regions cannot separate
+  fire geography from fire risk, and weather and ignition are not in the
+  predictors. No fire-prediction claim should be made from this test.
+- Adding 2013 LiDAR height to the predictors did not help the loss ranking in the
+  west or east.
+
 ## Checks
 
 - Scramble test (`reports/growth_sham_check.json`): shuffling the Landsat
@@ -90,7 +118,7 @@ Landsat + terrain + climate + ecosystem model.
 - Regions adjoin the training regions. The 3 km buffer reduces but does not
   remove boundary correlation.
 - This is net nine-year change from 2013. It says nothing about one-year skill.
-- Which places will burn or be cut is not predicted here.
+- Loss is ranked only weakly and fire not at all; see Finding 3.
 - Climate normals come in 4 km cells and can act as a place label. They added
   little once Landsat was present.
 
