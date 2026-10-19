@@ -28,6 +28,13 @@ def main() -> int:
     parser.add_argument("--workers", type=int, default=1)
     parser.add_argument("--corridor", action="store_true")
     parser.add_argument("--lines", default=None)
+    parser.add_argument(
+        "--box",
+        nargs=4,
+        type=float,
+        metavar=("WEST", "SOUTH", "EAST", "NORTH"),
+        help="Build a region other than the configured study area.",
+    )
     args = parser.parse_args()
 
     pair = tuple(args.pair.split("-"))
@@ -36,6 +43,8 @@ def main() -> int:
 
     bbox = load_config("configs/study_area.yaml")["study_area"]["bbox"]
     study_box = tuple(float(bbox[key]) for key in ("west", "south", "east", "north"))
+    if args.box:
+        study_box = tuple(args.box)
     footprints = _footprints(config, pair, out)
     count = args.tiles or int(config["change"]["tile_count"])
     corridor = None
