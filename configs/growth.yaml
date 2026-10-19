@@ -71,3 +71,11 @@ bootstrap:
     - [landsat_terrain_eco, lightgbm_satellite_plus_survey]
     - [landsat_terrain_veg, landsat_terrain_eco]
   output: reports/growth_forecast_bootstrap.json
+
+regions:
+  names: [study, west, east]
+  scales: [3, 10]
+  # Test rows closer than this to another region are not scored.
+  buffer_m: 3000
+  block_size_m: 5000
+  output: reports/growth_region_transfer.json
