@@ -18,6 +18,9 @@ def main() -> int:
     features = history_features(
         composites["composites"], composites["years"], config["features"]
     )
+    for source in config["features"]["static_sources"]:
+        layers = np.load(data_path(source))
+        features.update({name: layers[name] for name in layers.files})
     labels = np.load(data_path(config["labels"]["archive"]))
     pixels = labels_on_pixel_grid(
         {name: labels[name] for name in labels.files},

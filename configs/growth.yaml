@@ -10,6 +10,11 @@ features:
   recent_years: 3
   # Share of Landsat pixels in a block that must be clear for a block feature.
   min_valid_pixel_share: 0.5
+  # Static site layers on the same grid, each an npz of named rasters.
+  static_sources:
+    - interim/terrain/terrain_features.npz
+    - interim/climate/terraclimate_normals_1981-2010.npz
+    - interim/vegetation/sonoma_veg_classes.npz
 
 table:
   output: processed/growth_table_2013-2022.parquet
@@ -19,10 +24,17 @@ table:
 validation:
   block_size_m: 2000
   folds: 10
-  report_block_sizes_m: [1000, 2000, 5000]
+  report_block_sizes_m: [2000, 5000, 8000]
 
 model:
   target: mean_change
+  feature_sets:
+    landsat: [ndvi_, nbr_, ndmi_, blue_, green_, red_, nir_, swir1_, swir2_]
+    landsat_terrain: [ndvi_, nbr_, ndmi_, blue_, green_, red_, nir_, swir1_, swir2_, elevation_m, slope_deg, northness, eastness, tpi]
+    landsat_terrain_veg: [ndvi_, nbr_, ndmi_, blue_, green_, red_, nir_, swir1_, swir2_, elevation_m, slope_deg, northness, eastness, tpi, veg_, lf_]
+    landsat_terrain_climate: [ndvi_, nbr_, ndmi_, blue_, green_, red_, nir_, swir1_, swir2_, elevation_m, slope_deg, northness, eastness, tpi, clim_]
+    landsat_site_all: [ndvi_, nbr_, ndmi_, blue_, green_, red_, nir_, swir1_, swir2_, elevation_m, slope_deg, northness, eastness, tpi, clim_, veg_, lf_]
+    site_only: [elevation_m, slope_deg, northness, eastness, tpi, clim_, veg_, lf_]
   lightgbm:
     n_estimators: 400
     learning_rate: 0.03

@@ -32,9 +32,14 @@ NON_FEATURES = {
 }
 
 
-def feature_columns(table: pd.DataFrame) -> list[str]:
-    """Predictor columns: satellite history only, never a LiDAR column."""
-    return [name for name in table.columns if name not in NON_FEATURES]
+def feature_columns(
+    table: pd.DataFrame, prefixes: list[str] | None = None
+) -> list[str]:
+    """Predictor columns, never a LiDAR column; optionally by name prefix."""
+    names = [name for name in table.columns if name not in NON_FEATURES]
+    if prefixes is None:
+        return names
+    return [name for name in names if name.startswith(tuple(prefixes))]
 
 
 def spatial_folds(
@@ -103,3 +108,51 @@ def score_by_stratum(
             name: score(y[mask], pred[mask]) for name, pred in predictions.items()
         }
     return out
+
+
+def dominant_class(table: pd.DataFrame) -> NDArray:
+    """Vegetation map class covering most of each row; 'none' outside the map."""
+    columns = [name for name in table.columns if name.startswith("veg_")]
+    shares = table[columns].to_numpy(dtype=np.float64)
+    missing = np.isnan(shares).all(axis=1)
+    best = np.argmax(np.where(np.isnan(shares), -1.0, shares), axis=1)
+    labels = np.array(columns, dtype=object)[best]
+    labels[missing] = "none"
+    return labels
+
+
+def group_median_predictions(
+    keys: pd.Series, target: NDArray, folds: NDArray[np.int64]
+) -> NDArray[np.float64]:
+    """Training-fold median change per group; global median if group unseen."""
+    pred = np.full(len(keys), np.nan)
+    frame = pd.DataFrame({"key": keys.to_numpy(), "y": target})
+    for fold in np.unique(folds):
+        test = folds == fold
+        train = frame[~test]
+        medians = train.groupby("key")["y"].median()
+        pred[test] = frame.loc[test, "key"].map(medians).fillna(train["y"].median())
+    return pred
+
+
+def survey_comparators(
+    table: pd.DataFrame,
+    target: str,
+    folds: NDArray[np.int64],
+    height_edges: list[float],
+) -> dict[str, NDArray[np.float64]]:
+    """Predictions that use the 2013 airborne survey height. Comparison only.
+
+    These show what is achievable when a survey exists, so the satellite-only
+    model can be read against them. They are never inputs to that model.
+    """
+    y = table[target].to_numpy(dtype=np.float64)
+    height_bin = pd.cut(table["p95_start"], height_edges, right=False).astype(str)
+    veg = pd.Series(dominant_class(table), index=table.index)
+    return {
+        "veg_class_median": group_median_predictions(veg, y, folds),
+        "survey_height_median": group_median_predictions(height_bin, y, folds),
+        "survey_height_x_veg_median": group_median_predictions(
+            veg + "|" + height_bin, y, folds
+        ),
+    }

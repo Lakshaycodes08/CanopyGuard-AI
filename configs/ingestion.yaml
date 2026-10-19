@@ -117,3 +117,31 @@ landsat:
   workers: 8
   request_retries: 3
   output_composites: interim/landsat/summer_composites_to_2013.npz
+
+# Terrain from satellite radar, not airborne LiDAR. SRTM X-band/C-band heights
+# can sit partway into the canopy, so slope and aspect are used, not the
+# elevation surface itself as a height proxy.
+nasadem:
+  collection: nasadem
+  asset: elevation
+  tpi_radius_pixels: 5
+  output: interim/terrain/terrain_features.npz
+
+terraclimate:
+  collection: terraclimate
+  variables: [ppt, tmax, tmin, def, aet]
+  # Normals end well before the forecast cutoff in landsat.cutoff.
+  normal_start: "1981-01-01"
+  normal_end: "2010-12-31"
+  margin_degrees: 0.2
+  output: interim/climate/terraclimate_normals_1981-2010.npz
+
+sonoma_veg:
+  url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query
+  # Class names only. The layer also carries LiDAR height, cover and biomass
+  # columns; they are airborne-survey products and must never be requested.
+  fields: [MAP_CLASS, LIFEFORM, LF_FOREST, SERP_FLAG]
+  page_size: 2000
+  request_timeout_seconds: 120
+  min_pixels_per_class: 2000
+  output: interim/vegetation/sonoma_veg_classes.npz
