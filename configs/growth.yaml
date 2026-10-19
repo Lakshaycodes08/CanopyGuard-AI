@@ -95,3 +95,16 @@ sham_check:
   scale: 3
   feature_set: landsat
   output: reports/growth_sham_check.json
+
+hazard:
+  scale: 3
+  # Targets for pixels disturbed after the 2013 survey. Both are labels, not
+  # predictors. Fire uses the FRAP burned share; loss uses the LiDAR loss share.
+  labels:
+    loss: {column: loss_share, threshold: 0.3}
+    burned: {column: burned, threshold: 0.5}
+  feature_sets: [landsat, landsat_terrain_eco, landsat_site_eco, site_only_eco]
+  k_fractions: [0.1, 0.2]
+  bootstrap_resamples: 1000
+  confidence_level: 0.95
+  output: reports/hazard_forecast.json
