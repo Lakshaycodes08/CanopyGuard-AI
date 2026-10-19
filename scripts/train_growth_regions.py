@@ -9,6 +9,7 @@ from canopyguard.evaluation.blocks import assign_blocks
 from canopyguard.forecasting.growth_contrasts import bootstrap_pairs
 from canopyguard.forecasting.growth_model import all_predictions, score
 from canopyguard.forecasting.region_transfer import (
+    apply_screen,
     class_summary,
     far_from_other_regions,
     region_codes,
@@ -40,60 +41,65 @@ def main() -> int:
             path = with_region(base, regions[name]["suffix"])
             path = path.with_name(f"{path.stem}_x{factor}{path.suffix}")
             tables[name] = pd.read_parquet(path).dropna(subset=["mean_change"])
-        table = stack_regions(tables).reset_index(drop=True)
-        folds = region_codes(table, names)
-        predictions = all_predictions(table, config, folds, START_HEIGHT_EDGES)
-        scored = far_from_other_regions(table, boxes, float(settings["buffer_m"]))
-        held_out = pd.DataFrame(
-            {
-                "region": table["region"],
-                "y": table["mean_change"],
-                "scored": scored,
-                **{f"pred_{k}": v for k, v in predictions.items()},
-            }
-        )
-        held_out["block_id"] = -1
-        for name in names:
-            rows = (table["region"] == name).to_numpy()
-            held_out.loc[rows, "block_id"] = assign_blocks(
-                table.loc[rows, "x"], table.loc[rows, "y"], settings["block_size_m"]
-            )
-        output = ensure_parent(
-            base.with_name(f"growth_heldout_regions_x{factor}{base.suffix}")
-        )
-        held_out.to_parquet(output, index=False)
-        write_provenance(
-            output,
-            source_url="local: region growth tables, leave-one-region-out",
-            script_name="scripts/train_growth_regions.py",
-            bbox_wgs84=regions["study"]["bbox"],
-            crs=crs,
-            row_count=len(held_out),
-            config_sha256=file_sha256("configs/growth.yaml"),
-        )
+        stacked = stack_regions(tables).reset_index(drop=True)
         entry = report.setdefault(f"scale_x{factor}", {})
-        entry["summary"] = class_summary(table, config)
-        for name in names:
-            rows = held_out[(held_out["region"] == name) & held_out["scored"]]
-            y = rows["y"].to_numpy()
-            entry[name] = {
-                "scored_rows": len(rows),
-                "overall": {
-                    k.removeprefix("pred_"): score(y, rows[k].to_numpy())
-                    for k in rows.columns
-                    if k.startswith("pred_")
-                },
-                "contrasts": bootstrap_pairs(rows, config["bootstrap"], seed),
-            }
-            skill = entry[name]["overall"]
-            print(
-                f"x{factor} held-out {name}: "
-                + " ".join(
-                    f"{m} {skill[m]['mae']:.3f}"
-                    for m in ("zero", "landsat", "landsat_site_eco")
-                ),
-                flush=True,
+        for screen_name, rule in config["screens"].items():
+            table = apply_screen(stacked, rule).reset_index(drop=True)
+            folds = region_codes(table, names)
+            predictions = all_predictions(table, config, folds, START_HEIGHT_EDGES)
+            scored = far_from_other_regions(table, boxes, float(settings["buffer_m"]))
+            held_out = pd.DataFrame(
+                {
+                    "region": table["region"],
+                    "y": table["mean_change"],
+                    "scored": scored,
+                    **{f"pred_{k}": v for k, v in predictions.items()},
+                }
             )
+            held_out["block_id"] = -1
+            for name in names:
+                rows = (table["region"] == name).to_numpy()
+                held_out.loc[rows, "block_id"] = assign_blocks(
+                    table.loc[rows, "x"], table.loc[rows, "y"], settings["block_size_m"]
+                )
+            output = ensure_parent(
+                base.with_name(
+                    f"growth_heldout_regions_{screen_name}_x{factor}{base.suffix}"
+                )
+            )
+            held_out.to_parquet(output, index=False)
+            write_provenance(
+                output,
+                source_url="local: region growth tables, leave-one-region-out",
+                script_name="scripts/train_growth_regions.py",
+                bbox_wgs84=regions["study"]["bbox"],
+                crs=crs,
+                row_count=len(held_out),
+                config_sha256=file_sha256("configs/growth.yaml"),
+            )
+            section = entry.setdefault(screen_name, {})
+            section["summary"] = class_summary(table, config)
+            for name in names:
+                rows = held_out[(held_out["region"] == name) & held_out["scored"]]
+                y = rows["y"].to_numpy()
+                section[name] = {
+                    "scored_rows": len(rows),
+                    "overall": {
+                        k.removeprefix("pred_"): score(y, rows[k].to_numpy())
+                        for k in rows.columns
+                        if k.startswith("pred_")
+                    },
+                    "contrasts": bootstrap_pairs(rows, config["bootstrap"], seed),
+                }
+                skill = section[name]["overall"]
+                print(
+                    f"x{factor} {screen_name} held-out {name}: "
+                    + " ".join(
+                        f"{m} {skill[m]['mae']:.3f}"
+                        for m in ("zero", "landsat", "landsat_site_eco")
+                    ),
+                    flush=True,
+                )
     output = ensure_parent(project_root() / settings["output"])
     output.write_text(json.dumps(report, indent=2) + "\n", "utf-8")
     print(f"Wrote {output}")

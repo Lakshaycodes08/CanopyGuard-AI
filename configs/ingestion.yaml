@@ -162,3 +162,13 @@ cec_lines:
   url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
   request_timeout_seconds: 60
   output: interim/cec/cec_lines_study_box.geojson
+
+# CAL FIRE FRAP perimeters. Used only to screen training and scoring rows for
+# disturbance after the 2013 survey; never a predictor, since it is the future.
+# Perimeters can be incomplete, so absence here does not prove a cell stable.
+frap_fires:
+  url: https://services.arcgis.com/jIL9msH9OI208GCb/ArcGIS/rest/services/California_Fire_Perimeters_1878_2019/FeatureServer/1/query
+  request_timeout_seconds: 120
+  page_size: 1000
+  min_year: 2013
+  output: interim/fire/frap_perimeters.geojson

@@ -11,6 +11,10 @@ features:
   # Share of Landsat pixels in a block that must be clear for a block feature.
   min_valid_pixel_share: 0.5
   # Static site layers on the same grid, each an npz of named rasters.
+  # Fire perimeters (screen only) with alarm dates between the end of the first
+  # survey and the start of the last one.
+  fire_perimeters: interim/fire/frap_perimeters.geojson
+  fire_window_epochs: ["2013", "2022"]
   static_sources:
     - interim/terrain/terrain_features.npz
     - interim/climate/terraclimate_normals_1981-2010.npz
@@ -71,6 +75,12 @@ bootstrap:
     - [landsat_terrain_eco, lightgbm_satellite_plus_survey]
     - [landsat_terrain_veg, landsat_terrain_eco]
   output: reports/growth_forecast_bootstrap.json
+
+screens:
+  all: {}
+  # Rows with no fire perimeter and little LiDAR-measured loss: the steady
+  # growth question. Loss share uses the label, so this is a conditional claim.
+  undisturbed: {max_burned_share: 0.0, max_loss_share: 0.1}
 
 regions:
   names: [study, west, east]

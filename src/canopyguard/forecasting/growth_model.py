@@ -29,6 +29,7 @@ NON_FEATURES = {
     "p95_start",
     "canopy_share",
     "loss_share",
+    "burned",
 }
 
 

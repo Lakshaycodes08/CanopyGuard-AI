@@ -39,3 +39,14 @@ def test_region_codes_follow_the_name_order():
     assert region_codes(table, ["a", "b"]).tolist() == [1, 0, 1]
     with pytest.raises(KeyError):
         region_codes(pd.DataFrame({"region": ["c"]}), ["a", "b"])
+
+
+def test_screen_removes_burned_and_high_loss_rows():
+    from canopyguard.forecasting.region_transfer import apply_screen
+
+    table = pd.DataFrame(
+        {"burned": [0.0, 0.5, 0.0, 0.0], "loss_share": [0.0, 0.0, 0.5, 0.05]}
+    )
+    rule = {"max_burned_share": 0.0, "max_loss_share": 0.1}
+    assert apply_screen(table, rule).index.tolist() == [0, 3]
+    assert len(apply_screen(table, {})) == 4

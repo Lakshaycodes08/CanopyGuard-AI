@@ -1,10 +1,13 @@
 from __future__ import annotations
 
 import argparse
+import json
+from datetime import date
 
 import numpy as np
 
 from canopyguard.config import load_config, load_region
+from canopyguard.features.fire import burned_raster, perimeters_in_window
 from canopyguard.features.landsat_history import history_features
 from canopyguard.forecasting.growth_table import labels_on_pixel_grid, table_at_scale
 from canopyguard.io import data_path, ensure_parent, with_region
@@ -28,6 +31,22 @@ def main() -> int:
     for source in config["features"]["static_sources"]:
         layers = np.load(with_region(data_path(source), suffix))
         features.update({name: layers[name] for name in layers.files})
+    epochs = {e["name"]: e for e in load_config("configs/lidar.yaml")["epochs"]}
+    first, last = config["features"]["fire_window_epochs"]
+    perimeters = json.loads(
+        with_region(data_path(config["features"]["fire_perimeters"]), suffix).read_text(
+            "utf-8"
+        )
+    )
+    features["burned"] = burned_raster(
+        perimeters_in_window(
+            perimeters,
+            date.fromisoformat(epochs[first]["end"]),
+            date.fromisoformat(epochs[last]["start"]),
+        ),
+        grid,
+        composites["crs"].item(),
+    )
     labels = np.load(with_region(data_path(config["labels"]["archive"]), suffix))
     pixels = labels_on_pixel_grid(
         {name: labels[name] for name in labels.files},

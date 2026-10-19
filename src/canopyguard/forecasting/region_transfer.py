@@ -76,6 +76,16 @@ def region_codes(table: pd.DataFrame, names: list[str]) -> NDArray[np.int64]:
     return table["region"].map({n: i for i, n in enumerate(names)}).to_numpy(np.int64)
 
 
+def apply_screen(table: pd.DataFrame, rule: dict[str, float]) -> pd.DataFrame:
+    """Keep rows that satisfy the screen; an empty rule keeps everything."""
+    keep = np.ones(len(table), dtype=bool)
+    if "max_burned_share" in rule:
+        keep &= (table["burned"] <= rule["max_burned_share"]).to_numpy()
+    if "max_loss_share" in rule:
+        keep &= (table["loss_share"] <= rule["max_loss_share"]).to_numpy()
+    return table[keep]
+
+
 def class_summary(table: pd.DataFrame, config: dict[str, Any]) -> dict[str, float]:
     """Mean change and canopy share per region, for the report."""
     grouped = table.groupby("region")
