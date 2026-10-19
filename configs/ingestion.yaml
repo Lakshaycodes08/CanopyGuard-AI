@@ -57,9 +57,17 @@ echosat:
     arXiv:2602.21421
   index_url: https://echosat.uni-muenster.de/
   tile_url: https://echosat.uni-muenster.de/ECHOSAT_T10S.tif
-  # The authors do not document band order. Inferred as one band per year in
-  # this order; see reports/echosat_check.md for the evidence.
+  # The files do not name the bands. Jan Pauls, corresponding author of the paper,
+  # confirmed by email (October 2026) that they are one band per year in this
+  # order.
+  band_order_source: J. Pauls (corresponding author), personal communication, October 2026
   band_years: [2018, 2019, 2020, 2021, 2022, 2023, 2024]
+  # The model predicts all years in one pass, so every band depends on imagery
+  # through this year (same email).
+  last_input_year: 2024
+  # Benchmark only. The authors confirmed joint prediction, so every year carries
+  # information from later years. Switch on only if that stops being true.
+  allowed_as_feature: false
   check_years: [2018, 2019, 2020, 2021, 2022, 2023]
   nodata_value: -9999
   height_scale_to_m: 0.01

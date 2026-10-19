@@ -66,22 +66,31 @@ also holds a 2024 band, which is outside this check.
   lon/lat. LiDAR labels use EPSG:6339, so E8 must use the pinned operation and
   pixel-centre alignment in `reports/e8_alignment_protocol.md`; raw projected
   coordinates must not be treated as the same grid.
-- Band order is inferred, not documented. The authors do not label the 7 bands.
-  The repo reads them as 2018 to 2024 in order. Evidence for that order:
+- Band order: the files do not name the bands, but Jan Pauls, the corresponding
+  author of the paper, confirmed by email (October 2026) that bands 1 to 7 are
+  2018 to 2024 in order (J. Pauls, personal communication). The same email is
+  the source for the next two points.
+  Two checks in this repo agree, and both rerun with `scripts/check_echosat.py`:
   - Large drops and large gains are very unbalanced. Summed over consecutive
     steps there are 35,451 pixels that lose more than 5 m and 290 that gain more
     than 5 m (`abrupt_changes` in `reports/echosat_coverage.json`). The model
     forces slow growth and allows abrupt loss only for disturbance, so this
     fits a forward order.
-  - Fire check, rerun by `scripts/check_echosat.py` (`fire_check` in the JSON):
-    the CAL FIRE FRAP perimeter of the Kincade fire (alarm 2019-10-23, 77,762
-    acres) covers 41.8 percent of the box pixels. Of the 16,733 large drops in
-    the 2019 to 2020 step, 15,694 (93.8 percent) fall inside it. In the 2018 to
-    2019 step only 21 of 269 (7.8 percent) do. The step with the most drops
-    inside the perimeter is the expected one, 2019 to 2020. FRAP states its
-    perimeters can be incomplete or over-generalized.
-  - This supports the order but does not prove it. The authors have not yet
-    confirmed it. Do not rely on a single year until they do.
+  - Fire check (`fire_check` in the JSON): the CAL FIRE FRAP perimeter of the
+    Kincade fire (alarm 2019-10-23, 77,762 acres) covers 41.8 percent of the box
+    pixels. Of the 16,733 large drops in the 2019 to 2020 step, 15,694 (93.8
+    percent) fall inside it. In the 2018 to 2019 step only 21 of 269 (7.8
+    percent) do. The step with the most drops inside the perimeter is the
+    expected one, 2019 to 2020. FRAP states its perimeters can be incomplete or
+    over-generalized.
+- Joint prediction: the model predicts all years in one pass, so a year's map
+  uses the imagery of the surrounding years too, including later ones (author
+  email). Years are not independent maps. The authors did not say why a
+  late-2019 fire first shows in the 2020 band, so the fire check only relies on
+  which step has the most drops.
+- Independence: the authors used only GEDI for training and validation, no
+  airborne LiDAR, so a comparison with airborne LiDAR is independent of the
+  training labels.
 - Smooth by design: the model constrains yearly slopes to 0 to 3 m per year
   (paper, section 3.3), so slow change is a modeling choice. Typical error
   against GEDI is about 5 to 6 m (paper), larger than a year of growth.
@@ -99,13 +108,16 @@ also holds a 2024 band, which is outside this check.
 ## Not established here
 
 - No comparison with repeat airborne LiDAR, so no claim about growth accuracy.
-- ECHOSAT is covered by the leakage guard. `select_echosat_feature_years` in
-  `src/canopyguard/features/lidar.py` admits a band year only when 31 December of
-  that year is on or before the prediction cutoff, and the cutoff must precede
-  the target survey. For the 2013 cutoff no ECHOSAT year is admitted. For the
-  2023 target with cutoff 2022-11-11 only 2018 to 2021 are. Feature, forecasting,
-  and risk code cannot import the raw ECHOSAT modules
-  (`tests/test_truth_isolation.py`).
+- ECHOSAT is covered by the leakage guard and is a benchmark only.
+  Because every year is predicted from imagery through 2024, even the 2018 band
+  carries information from after any real prediction cutoff.
+  `select_echosat_feature_years` in `src/canopyguard/features/lidar.py` admits
+  no ECHOSAT year while `echosat.allowed_as_feature` is false in
+  `configs/ingestion.yaml` (the default). If it is switched on, a year is still
+  admitted only when 31 December 2024 is on or before the cutoff, and the
+  cutoff must precede the target survey, so no real forecast can use it as a
+  feature. Feature, forecasting, and risk code also cannot import the raw
+  ECHOSAT modules (`tests/test_truth_isolation.py`).
 
 ## Reproduce
 

@@ -8,7 +8,7 @@
     10.0
   ],
   "nodata_value": -9999.0,
-  "band_years_assumed": [
+  "band_years": [
     2018,
     2019,
     2020,
@@ -17,6 +17,7 @@
     2023,
     2024
   ],
+  "band_order_source": "J. Pauls (corresponding author), personal communication, October 2026",
   "raster_footprint_covers_box": true,
   "years_missing_from_product": [],
   "per_year": [
