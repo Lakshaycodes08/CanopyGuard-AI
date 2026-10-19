@@ -64,7 +64,9 @@ Absent-class literature-A fallbacks: forest loss off: 1,087 cells (Hesperocypari
 
 ## Forest map classes and empirical height ceilings
 
-The post hoc empirical A is fixed within each training fold before fitting k and c. In this curve sensitivity, cells starting at or above A are forced to no growth. Mixed classes use the largest member literature A; pooled fits share k and c while each class keeps its own fold A. The table reports held-out exceedance after wire and 10 m line exclusions. Its share need not equal 0.5%, because held-out blocks can have taller trees.
+Before any fold's A is computed, the selection masks remove cells within 30 m of a CEC transmission line, PR #13 wire suspects, and cells within 10 m of a mapped line under the max/p95 wire rule. Each A then uses training-fold rows only. The 30 m buffer covers transmission lines only.
+
+The post hoc empirical A is fixed within each training fold before fitting k and c. In this curve sensitivity, cells starting at or above A are forced to no growth. Mixed classes use the largest member literature A; pooled fits share k and c while each class keeps its own fold A. The table reports held-out exceedance after the selection and wire exclusions. Its share need not equal 0.5%, because held-out blocks can have taller trees.
 
 | Forest map class | Cells | Curve fit scope | Full-fit empirical A (m) | Fold empirical A range (m) | Held-out 2013 p95 >= fold A | k (/yr) | c | No change MAE | Median MAE | Curve MAE | Bound? |
 | --- | ---: | --- | ---: | --- | --- | ---: | ---: | ---: | ---: | ---: | --- |
