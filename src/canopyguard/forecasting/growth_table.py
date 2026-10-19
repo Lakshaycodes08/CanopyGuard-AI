@@ -99,8 +99,10 @@ def table_at_scale(
     table = table.reset_index(drop=True)
     rows = table["block_row"].to_numpy()
     cols = table["block_col"].to_numpy()
-    for name, block in block_rasters.items():
-        table[name] = block[rows, cols]
+    sampled = pd.DataFrame(
+        {name: block[rows, cols] for name, block in block_rasters.items()}
+    )
+    table = pd.concat([table, sampled], axis=1)
     size = step * factor
     table["x"] = left + (cols + 0.5) * size
     table["y"] = top - (rows + 0.5) * size

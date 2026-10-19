@@ -145,3 +145,20 @@ sonoma_veg:
   request_timeout_seconds: 120
   min_pixels_per_class: 2000
   output: interim/vegetation/sonoma_veg_classes.npz
+
+# Satellite-based ecosystem map used in place of the Sonoma vegetation map,
+# whose attributes are partly derived from airborne LiDAR.
+gap_ecosystems:
+  collection: gap
+  asset: data
+  # Item dated 2011-12-31, before landsat.cutoff.
+  max_item_date: "2012-12-31"
+  min_pixels_per_class: 2000
+  output: interim/vegetation/gap_landfire_ecosystems.npz
+
+# County copy of the California Energy Commission transmission lines. Line
+# position is approximate; there are no tower points or conductor geometry.
+cec_lines:
+  url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
+  request_timeout_seconds: 60
+  output: interim/cec/cec_lines_study_box.geojson

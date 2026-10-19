@@ -3,6 +3,7 @@ from __future__ import annotations
 import numpy as np
 
 from canopyguard.config import load_config
+from canopyguard.data.gap_landfire import ecosystem_rasters
 from canopyguard.data.sonoma_veg import class_rasters, fetch_class_polygons
 from canopyguard.data.terraclimate import climate_normals, sample_on_grid
 from canopyguard.data.terrain_stac import elevation_on_grid
@@ -51,6 +52,10 @@ def main() -> int:
         box,
         crs,
     )
+
+    gap = ingestion["gap_ecosystems"]
+    ecosystems = ecosystem_rasters(grid, box, landsat["stac_url"], crs, gap)
+    save(ecosystems, gap["output"], landsat["stac_url"], script, box, crs)
 
     veg = ingestion["sonoma_veg"]
     polygons = fetch_class_polygons(box, crs, veg)

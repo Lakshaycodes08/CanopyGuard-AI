@@ -1,0 +1,30 @@
+seed: 42
+
+# The county line layer has no tower points, so lines are cut into pieces of
+# about this length. These are working segments, not engineered spans.
+segments:
+  length_m: 300
+
+corridor:
+  half_widths_m: [30, 60, 100]
+  primary_half_width_m: 60
+
+truth:
+  # Canopy pixels only; open ground cannot encroach on a conductor.
+  min_canopy_share: 0.3
+  min_pixels_per_segment: 10
+  high_growth_quantile: 0.8
+
+ranking:
+  heldout_block_sizes_m: [5000, 8000]
+  scale: 1
+  k_fractions: [0.1, 0.2]
+  random_draws: 1000
+  bootstrap_resamples: 2000
+  confidence_level: 0.95
+  satellite_only: [landsat, landsat_terrain_eco, landsat_site_eco]
+  # These use the 2013 airborne survey and are shown only for comparison.
+  survey_based: [survey_height_x_eco_median, lightgbm_satellite_plus_survey]
+  headline: landsat_site_eco
+
+output: reports/span_ranking.json

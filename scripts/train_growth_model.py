@@ -5,81 +5,88 @@ import json
 import pandas as pd
 
 from canopyguard.config import load_config
+from canopyguard.evaluation.blocks import assign_blocks
 from canopyguard.forecasting.growth_model import (
+    all_predictions,
     feature_columns,
-    out_of_fold_predictions,
     score,
     score_by_stratum,
     spatial_folds,
-    survey_comparators,
 )
 from canopyguard.io import data_path, ensure_parent, project_root
-from canopyguard.provenance import current_commit
+from canopyguard.provenance import (
+    current_commit,
+    file_sha256,
+    study_area_box,
+    write_provenance,
+)
 from canopyguard.utils import set_seeds
 
 START_HEIGHT_EDGES = [-1, 1, 5, 15, 30, 200]
 
 
-def columns_with_survey(table: pd.DataFrame, config: dict) -> list[str]:
-    """All satellite and site columns plus 2013 survey height, for comparison."""
-    every_prefix = sorted(
-        {p for v in config["model"]["feature_sets"].values() for p in v}
-    )
-    return feature_columns(table, every_prefix) + ["p95_start", "mean_start"]
-
-
 def main() -> int:
     config = load_config("configs/growth.yaml")
+    box = study_area_box(load_config("configs/study_area.yaml"))
     seed = int(config["seed"])
     set_seeds(seed)
     validation = config["validation"]
     target = config["model"]["target"]
-    params = config["model"]["lightgbm"]
     base = data_path(config["table"]["output"])
     report: dict = {"git_commit": current_commit(), "seed": seed, "target": target}
     for factor in config["table"]["scales"]:
         path = base.with_name(f"{base.stem}_x{factor}{base.suffix}")
         table = pd.read_parquet(path).dropna(subset=[target]).reset_index(drop=True)
         scale = report.setdefault(f"scale_x{factor}", {"rows": len(table)})
-        for set_name, prefixes in config["model"]["feature_sets"].items():
-            columns = feature_columns(table, prefixes)
-            for block_size in validation["report_block_sizes_m"]:
-                folds = spatial_folds(table, block_size, int(validation["folds"]), seed)
-                pred = out_of_fold_predictions(
-                    table, columns, target, folds, params, seed
-                )
-                y = table[target].to_numpy()
-                entry = scale.setdefault(set_name, {"n_features": len(columns)})
-                entry[f"block_{block_size}m"] = {
-                    "overall": {name: score(y, p) for name, p in pred.items()},
-                    "by_start_height_m": score_by_stratum(
-                        table, target, pred, START_HEIGHT_EDGES
-                    ),
+        scale["n_features"] = {
+            name: len(feature_columns(table, prefixes))
+            for name, prefixes in config["model"]["feature_sets"].items()
+        }
+        for size in validation["report_block_sizes_m"]:
+            folds = spatial_folds(table, size, int(validation["folds"]), seed)
+            predictions = all_predictions(table, config, folds, START_HEIGHT_EDGES)
+            y = table[target].to_numpy()
+            scale[f"block_{size}m"] = {
+                "overall": {name: score(y, p) for name, p in predictions.items()},
+                "by_start_height_m": score_by_stratum(
+                    table, target, predictions, START_HEIGHT_EDGES
+                ),
+            }
+            held_out = pd.DataFrame(
+                {
+                    "block_id": assign_blocks(table["x"], table["y"], size),
+                    "fold": folds,
+                    "y": y,
+                    "easting": table["x"].to_numpy(),
+                    "northing": table["y"].to_numpy(),
+                    "p95_change": table["p95_change"].to_numpy(),
+                    "p95_start": table["p95_start"].to_numpy(),
+                    "canopy_share": table["canopy_share"].to_numpy(),
+                    **{f"pred_{k}": v for k, v in predictions.items()},
                 }
-                skill = entry[f"block_{block_size}m"]["overall"]
-                if set_name == next(iter(config["model"]["feature_sets"])):
-                    comparators = survey_comparators(
-                        table, target, folds, START_HEIGHT_EDGES
-                    )
-                    ceiling = out_of_fold_predictions(
-                        table,
-                        columns_with_survey(table, config),
-                        target,
-                        folds,
-                        params,
-                        seed,
-                    )["model"]
-                    comparators["lightgbm_satellite_plus_survey"] = ceiling
-                    scale.setdefault("comparators_use_survey", {})[
-                        f"block_{block_size}m"
-                    ] = {name: score(y, p) for name, p in comparators.items()}
-                print(
-                    f"x{factor} {set_name:24s} block {block_size} m: "
-                    f"model MAE {skill['model']['mae']:.3f} "
-                    f"zero {skill['zero']['mae']:.3f} "
-                    f"R2 {skill['model']['r2']:.3f}",
-                    flush=True,
-                )
+            )
+            output = ensure_parent(
+                base.with_name(f"growth_heldout_x{factor}_b{size}{base.suffix}")
+            )
+            held_out.to_parquet(output, index=False)
+            write_provenance(
+                output,
+                source_url="local: growth table held-out predictions",
+                script_name="scripts/train_growth_model.py",
+                bbox_wgs84=box,
+                crs="EPSG:32610",
+                row_count=len(held_out),
+                config_sha256=file_sha256("configs/growth.yaml"),
+            )
+            overall = scale[f"block_{size}m"]["overall"]
+            print(
+                f"x{factor} block {size} m: "
+                + " ".join(
+                    f"{name} {overall[name]['mae']:.3f}"
+                    for name in ("zero", "landsat", "landsat_site_all")
+                ),
+                flush=True,
+            )
     output = ensure_parent(project_root() / config["report"]["output"])
     output.write_text(json.dumps(report, indent=2) + "\n", "utf-8")
     print(f"Wrote {output}")

@@ -110,9 +110,9 @@ def score_by_stratum(
     return out
 
 
-def dominant_class(table: pd.DataFrame) -> NDArray:
-    """Vegetation map class covering most of each row; 'none' outside the map."""
-    columns = [name for name in table.columns if name.startswith("veg_")]
+def dominant_class(table: pd.DataFrame, prefix: str = "eco_") -> NDArray:
+    """Mapped class covering most of each row; 'none' outside the map."""
+    columns = [name for name in table.columns if name.startswith(prefix)]
     shares = table[columns].to_numpy(dtype=np.float64)
     missing = np.isnan(shares).all(axis=1)
     best = np.argmax(np.where(np.isnan(shares), -1.0, shares), axis=1)
@@ -148,11 +148,49 @@ def survey_comparators(
     """
     y = table[target].to_numpy(dtype=np.float64)
     height_bin = pd.cut(table["p95_start"], height_edges, right=False).astype(str)
-    veg = pd.Series(dominant_class(table), index=table.index)
+    eco = pd.Series(dominant_class(table), index=table.index)
     return {
-        "veg_class_median": group_median_predictions(veg, y, folds),
+        "eco_class_median": group_median_predictions(eco, y, folds),
         "survey_height_median": group_median_predictions(height_bin, y, folds),
-        "survey_height_x_veg_median": group_median_predictions(
-            veg + "|" + height_bin, y, folds
+        "survey_height_x_eco_median": group_median_predictions(
+            eco + "|" + height_bin, y, folds
         ),
     }
+
+
+def columns_with_survey(table: pd.DataFrame, config: dict[str, Any]) -> list[str]:
+    """All satellite and site columns plus 2013 survey height, for comparison."""
+    prefixes = sorted({p for v in config["model"]["feature_sets"].values() for p in v})
+    return feature_columns(table, prefixes) + ["p95_start", "mean_start"]
+
+
+def all_predictions(
+    table: pd.DataFrame,
+    config: dict[str, Any],
+    folds: NDArray[np.int64],
+    height_edges: list[float],
+) -> dict[str, NDArray[np.float64]]:
+    """Held-out predictions for every model, baseline and survey comparator."""
+    target = config["model"]["target"]
+    params = config["model"]["lightgbm"]
+    seed = int(config["seed"])
+    predictions: dict[str, NDArray[np.float64]] = {}
+    for name, prefixes in config["model"]["feature_sets"].items():
+        columns = feature_columns(table, prefixes)
+        held_out = out_of_fold_predictions(table, columns, target, folds, params, seed)
+        predictions[name] = held_out["model"]
+        predictions["zero"] = held_out["zero"]
+        predictions["train_mean"] = held_out["train_mean"]
+    predictions.update(survey_comparators(table, target, folds, height_edges))
+    with_survey = columns_with_survey(table, config)
+    predictions["lightgbm_satellite_plus_survey"] = out_of_fold_predictions(
+        table, with_survey, target, folds, params, seed
+    )["model"]
+    return predictions
+
+
+def paired_error_vectors(
+    y: NDArray, predictions: dict[str, NDArray], first: str, second: str
+) -> tuple[NDArray, NDArray]:
+    """Signed errors of two models on the same rows."""
+    return y - predictions[first], y - predictions[second]
