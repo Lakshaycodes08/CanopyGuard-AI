@@ -1,6 +1,6 @@
 # CanopyGuard-AI project memory
 
-Last updated: 2026-09-24
+Last updated: 2026-10-19
 
 ## Purpose
 
@@ -11,6 +11,18 @@ history.
 
 Do not record passwords, API keys, credentials, raw data, or unverified
 scientific claims here.
+
+## Workspace identity (2026-10-19)
+
+- The connected project checkout for this task is C:\dev\CanopyGuard-AI.
+- C:\Users\Lakshay\OneDrive\Desktop\CanopyGuard-AI is a separate checkout.
+  Do not treat its commits, files, or missing inputs as the state of C:\dev.
+- Before editing or reporting project state, verify the working directory,
+  Git branch and HEAD, and required local inputs in the connected checkout.
+  Use that checkout path in file links.
+- At the 2026-10-19 check, C:\dev contained
+  data/interim/change_2013-2022.json; the OneDrive copy did not.
+  Earlier G3 edits were made in OneDrive by mistake and reapplied here.
 
 ## Current status
 

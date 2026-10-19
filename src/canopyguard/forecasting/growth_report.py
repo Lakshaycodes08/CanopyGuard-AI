@@ -234,12 +234,20 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "",
         "## Forest map classes and empirical height ceilings",
         "",
+        "Before any fold's A is computed, the selection masks remove cells "
+        f"within {forecast['clean_screen']['near_line_m']:g} m of a CEC "
+        "transmission line, PR #13 wire suspects, and cells within "
+        f"{settings['p95_wire_exclusion_m']:g} m of a mapped line under the "
+        "max/p95 wire rule. Each A then uses training-fold rows only. The "
+        f"{forecast['clean_screen']['near_line_m']:g} m buffer covers "
+        "transmission lines only.",
+        "",
         "The post hoc empirical A is fixed within each training fold before "
         "fitting k and c. In this curve sensitivity, cells starting at or "
         "above A are forced to no growth. "
         "Mixed classes use the largest member literature A; pooled fits share "
         "k and c while each class keeps its own fold A. The table reports "
-        "held-out exceedance after wire and 10 m line exclusions. Its share "
+        "held-out exceedance after the selection and wire exclusions. Its share "
         "need not equal 0.5%, because held-out blocks can have taller trees.",
         "",
         *_type_rows(metrics),
