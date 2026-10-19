@@ -50,3 +50,20 @@ def test_screen_removes_burned_and_high_loss_rows():
     rule = {"max_burned_share": 0.0, "max_loss_share": 0.1}
     assert apply_screen(table, rule).index.tolist() == [0, 3]
     assert len(apply_screen(table, {})) == 4
+
+
+def test_shuffle_keeps_row_values_together_and_inside_each_region():
+    from canopyguard.forecasting.region_transfer import shuffle_within_region
+
+    table = pd.DataFrame(
+        {
+            "region": ["a"] * 4 + ["b"] * 4,
+            "f1": np.arange(8.0),
+            "f2": np.arange(8.0) * 10,
+        }
+    )
+    out = shuffle_within_region(table, ["f1", "f2"], seed=3)
+    assert (out["f2"] == out["f1"] * 10).all()
+    assert sorted(out.loc[:3, "f1"]) == [0.0, 1.0, 2.0, 3.0]
+    assert sorted(out.loc[4:, "f1"]) == [4.0, 5.0, 6.0, 7.0]
+    assert not (out["f1"] == table["f1"]).all()

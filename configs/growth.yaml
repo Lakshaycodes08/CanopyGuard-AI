@@ -89,3 +89,9 @@ regions:
   buffer_m: 3000
   block_size_m: 5000
   output: reports/growth_region_transfer.json
+
+sham_check:
+  screen: undisturbed
+  scale: 3
+  feature_set: landsat
+  output: reports/growth_sham_check.json

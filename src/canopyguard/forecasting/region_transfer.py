@@ -97,3 +97,28 @@ def class_summary(table: pd.DataFrame, config: dict[str, Any]) -> dict[str, floa
         }
         for name, g in grouped
     }
+
+
+def shuffle_within_region(
+    table: pd.DataFrame, columns: list[str], seed: int
+) -> pd.DataFrame:
+    """Permute whole rows of `columns` inside each region, breaking their link
+    to location and label while keeping their joint distribution."""
+    shuffled = table.copy()
+    generator = np.random.default_rng(seed)
+    for name in table["region"].unique():
+        rows = np.flatnonzero((table["region"] == name).to_numpy())
+        order = generator.permutation(rows)
+        shuffled.loc[table.index[rows], columns] = table.loc[
+            table.index[order], columns
+        ].to_numpy()
+    return shuffled
+
+
+def noise_columns(table: pd.DataFrame, columns: list[str], seed: int) -> pd.DataFrame:
+    """Replace `columns` with standard-normal noise of the same shape."""
+    noisy = table.copy()
+    noisy[columns] = np.random.default_rng(seed).standard_normal(
+        (len(table), len(columns))
+    )
+    return noisy
