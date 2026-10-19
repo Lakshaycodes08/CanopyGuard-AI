@@ -1,0 +1,37 @@
+seed: 42
+
+labels:
+  archive: processed/labels_2013-2022_unique.npz
+  # A Landsat pixel needs this many valid 10 m label cells (of up to nine).
+  min_label_cells_per_pixel: 6
+
+features:
+  composites: interim/landsat/summer_composites_to_2013.npz
+  recent_years: 3
+  # Share of Landsat pixels in a block that must be clear for a block feature.
+  min_valid_pixel_share: 0.5
+
+table:
+  output: processed/growth_table_2013-2022.parquet
+  # Landsat pixels per block edge (1 = 30 m, 3 = 90 m, 10 = 300 m).
+  scales: [1, 3, 10]
+
+validation:
+  block_size_m: 2000
+  folds: 10
+  report_block_sizes_m: [1000, 2000, 5000]
+
+model:
+  target: mean_change
+  lightgbm:
+    n_estimators: 400
+    learning_rate: 0.03
+    num_leaves: 31
+    min_child_samples: 200
+    subsample: 0.8
+    subsample_freq: 1
+    colsample_bytree: 0.8
+    objective: l2
+
+report:
+  output: reports/growth_forecast_baseline.json

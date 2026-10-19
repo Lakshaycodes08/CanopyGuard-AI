@@ -87,3 +87,33 @@ echosat:
     dpi: 60
     height_vmax_m: 30
     change_limit_m: 10
+
+landsat:
+  stac_url: https://planetarycomputer.microsoft.com/api/stac/v1
+  collection: landsat-c2-l2
+  platforms: [landsat-5, landsat-7, landsat-8]
+  max_scene_cloud_percent: 60
+  # Forecast cutoff is the day before the 2013 airborne survey starts
+  # (configs/lidar.yaml epochs). No scene on or after it may be used.
+  cutoff: "2013-09-27"
+  first_year: 2001
+  season_start: "06-01"
+  season_end: "09-15"
+  band_assets:
+    blue: blue
+    green: green
+    red: red
+    nir: nir08
+    swir1: swir16
+    swir2: swir22
+  qa_asset: qa_pixel
+  # Fill, dilated cloud, cirrus, cloud, shadow, snow (Collection 2 QA_PIXEL).
+  qa_reject_mask: 63
+  reflectance_scale: 0.0000275
+  reflectance_offset: -0.2
+  grid_crs: EPSG:32610
+  grid_origin_offset_m: 15
+  grid_resolution_m: 30
+  workers: 8
+  request_retries: 3
+  output_composites: interim/landsat/summer_composites_to_2013.npz
