@@ -1,19 +1,21 @@
 from __future__ import annotations
 
+import argparse
+
 import numpy as np
 
-from canopyguard.config import load_config
+from canopyguard.config import load_config, load_region
 from canopyguard.data.gap_landfire import ecosystem_rasters
 from canopyguard.data.sonoma_veg import class_rasters, fetch_class_polygons
 from canopyguard.data.terraclimate import climate_normals, sample_on_grid
 from canopyguard.data.terrain_stac import elevation_on_grid
 from canopyguard.features.terrain import terrain_features
-from canopyguard.io import data_path, ensure_parent
-from canopyguard.provenance import file_sha256, study_area_box, write_provenance
+from canopyguard.io import data_path, ensure_parent, with_region
+from canopyguard.provenance import file_sha256, write_provenance
 
 
-def save(rasters, path, source_url, script, box, crs):
-    output = ensure_parent(data_path(path))
+def save(rasters, path, source_url, script, box, crs, suffix):
+    output = ensure_parent(with_region(data_path(path), suffix))
     np.savez_compressed(output, **rasters)
     write_provenance(
         output,
@@ -30,9 +32,13 @@ def save(rasters, path, source_url, script, box, crs):
 def main() -> int:
     ingestion = load_config("configs/ingestion.yaml")
     landsat = ingestion["landsat"]
-    box = study_area_box(load_config("configs/study_area.yaml"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--region", default="study")
+    region = load_region(parser.parse_args().region)
+    suffix = region["suffix"]
+    box = region["bbox"]
     crs = landsat["grid_crs"]
-    composites = np.load(data_path(landsat["output_composites"]))
+    composites = np.load(with_region(data_path(landsat["output_composites"]), suffix))
     left, top, step, width, height = composites["grid"]
     grid = (float(left), float(top), float(step), int(width), int(height))
     script = "scripts/ingest_site_sources.py"
@@ -40,7 +46,7 @@ def main() -> int:
     dem = ingestion["nasadem"]
     elevation = elevation_on_grid(grid, box, landsat["stac_url"], crs, dem)
     layers = terrain_features(elevation, step, int(dem["tpi_radius_pixels"]))
-    save(layers, dem["output"], landsat["stac_url"], script, box, crs)
+    save(layers, dem["output"], landsat["stac_url"], script, box, crs, suffix)
 
     tc = ingestion["terraclimate"]
     normals = climate_normals(box, landsat["stac_url"], tc)
@@ -51,17 +57,24 @@ def main() -> int:
         script,
         box,
         crs,
+        suffix,
     )
 
     gap = ingestion["gap_ecosystems"]
     ecosystems = ecosystem_rasters(grid, box, landsat["stac_url"], crs, gap)
-    save(ecosystems, gap["output"], landsat["stac_url"], script, box, crs)
+    save(ecosystems, gap["output"], landsat["stac_url"], script, box, crs, suffix)
 
     veg = ingestion["sonoma_veg"]
     polygons = fetch_class_polygons(box, crs, veg)
     print(f"{len(polygons)} vegetation polygons", flush=True)
     save(
-        class_rasters(polygons, grid, veg), veg["output"], veg["url"], script, box, crs
+        class_rasters(polygons, grid, veg),
+        veg["output"],
+        veg["url"],
+        script,
+        box,
+        crs,
+        suffix,
     )
     return 0
 

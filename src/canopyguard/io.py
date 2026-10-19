@@ -68,3 +68,9 @@ def extract_dumps(log_path: str | Path, out_dir: str | Path) -> list[str]:
         written.append(name)
         index += 1
     return written
+
+
+def with_region(path: str | Path, suffix: str) -> Path:
+    """Insert a region suffix before the file extension, e.g. a.npz -> a_west.npz."""
+    original = Path(path)
+    return original.with_name(f"{original.stem}{suffix}{original.suffix}")

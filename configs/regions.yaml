@@ -1,0 +1,11 @@
+# Extra regions for testing whether satellite-only models transfer. The
+# original study area (configs/study_area.yaml) is the region named "study".
+# Boxes were chosen where 2013 (Sonoma County) and 2022 airborne LiDAR both
+# cover a large share of the box; see the candidate-tile counts in the notes.
+regions:
+  west:
+    bbox: {west: -123.06, south: 38.475, east: -122.90, north: 38.82}
+    note: 1730 candidate 500 m tiles; coastal side, adjoins the study area edge
+  east:
+    bbox: {west: -122.74, south: 38.475, east: -122.58, north: 38.82}
+    note: 1195 candidate 500 m tiles; inland side, adjoins the study area edge

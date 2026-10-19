@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import warnings
 from datetime import date
 
@@ -8,7 +9,7 @@ import planetary_computer
 import pystac_client
 from pyproj import Transformer
 
-from canopyguard.config import load_config
+from canopyguard.config import load_config, load_region
 from canopyguard.data.landsat_stac import (
     BAND_NAMES,
     assert_before_cutoff,
@@ -16,14 +17,16 @@ from canopyguard.data.landsat_stac import (
     study_grid,
     year_composite,
 )
-from canopyguard.io import data_path, ensure_parent
-from canopyguard.provenance import file_sha256, study_area_box, write_provenance
+from canopyguard.io import data_path, ensure_parent, with_region
+from canopyguard.provenance import file_sha256, write_provenance
 
 
 def main() -> int:
-    study_config = load_config("configs/study_area.yaml")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--region", default="study")
+    region = load_region(parser.parse_args().region)
     config = load_config("configs/ingestion.yaml")["landsat"]
-    west, south, east, north = study_area_box(study_config)
+    west, south, east, north = region["bbox"]
     to_utm = Transformer.from_crs("EPSG:4326", config["grid_crs"], always_xy=True)
     x0, y0 = to_utm.transform(west, south)
     x1, y1 = to_utm.transform(east, north)
@@ -57,7 +60,9 @@ def main() -> int:
         print(f"{year}: {len(items)} scenes", flush=True)
 
     left, top, width, height = grid
-    output = ensure_parent(data_path(config["output_composites"]))
+    output = ensure_parent(
+        with_region(data_path(config["output_composites"]), region["suffix"])
+    )
     np.savez_compressed(
         output,
         years=np.array(years),
@@ -72,7 +77,7 @@ def main() -> int:
         output,
         source_url=config["stac_url"],
         script_name="scripts/ingest_landsat.py",
-        bbox_wgs84=(west, south, east, north),
+        bbox_wgs84=region["bbox"],
         crs=config["grid_crs"],
         row_count=len(years),
         config_sha256=file_sha256("configs/ingestion.yaml"),
