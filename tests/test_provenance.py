@@ -91,8 +91,13 @@ def test_tracked_data_files_excludes_dvc_metadata(tmp_path):
 
 
 def test_every_data_file_declares_provenance_inside_the_study_area():
-    study_box = study_area_box(load_config("configs/study_area.yaml"))
+    # Configured transfer regions count as study area: they exist to test
+    # whether models carry over, and data far from all of them is still caught.
+    allowed = [study_area_box(load_config("configs/study_area.yaml"))]
+    for region in load_config("configs/regions.yaml")["regions"].values():
+        box = region["bbox"]
+        allowed.append(tuple(float(box[k]) for k in ("west", "south", "east", "north")))
     for path in tracked_data_files():
         record = read_provenance(path)
         declared = tuple(record["bbox_wgs84"])
-        assert boxes_intersect(declared, study_box), path
+        assert any(boxes_intersect(declared, box) for box in allowed), path
