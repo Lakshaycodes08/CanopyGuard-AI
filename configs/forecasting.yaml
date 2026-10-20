@@ -10,7 +10,7 @@ task:
     - ["2013", "2023"]
   primary_pair: ["2013", "2022"]
   noise_floor_pair: ["2022", "2023"]
-  working_scale_m: 100
+  working_scale_m: 10  # Existing LiDAR label grid; 100 m was never implemented.
 
 truth:
   source: sonoma_repeat_airborne_lidar
@@ -34,11 +34,134 @@ gedi:
     max_elevation_residual_m: 25.0
 
 stage1_growth_model:
-  form: gada
-  base_function: chapman_richards
-  fit_on: stable_cells_only
+  form: type_median_increment
+  fit_on: fire_hansen_screened_forest_without_lidar_loss_filter
   stratify_by: vegetation_alliance
   pool_to_physiognomic_group_below_n: 500
+  labels_path: data/processed/labels_2013-2022_unique.npz
+  vegetation_join:
+    source_url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query
+    raw_path: data/raw/sonoma_veg_2013.geojson
+    output_path: data/interim/veg_type_2013.parquet
+    boundary_exclusion_m: 5.0
+    page_size: 1000
+    chunk_size: 100000
+    uncertain_review_fraction: 0.30
+  clean_screen:
+    output_path: data/interim/clean_cells_2013_2022.parquet
+    wire_flags_path: data/processed/labels_2013-2022_wire_flags.npz
+    fire_years: [2014, 2022]
+    min_mean_start_m: 2.0
+    loss_share_threshold: 0.05
+    near_line_m: 30.0
+    chunk_size: 100000
+    sources:
+      frap:
+        url: https://services.arcgis.com/V6ZHFr6zdgNZuVG0/ArcGIS/rest/services/California_Fire_Perimeters/FeatureServer/0/query
+        where: YEAR_ >= 2014 AND YEAR_ <= 2022
+        path: data/raw/frap_fire_perimeters_2014-2022_2026-10-14.geojson
+      mtbs:
+        url: https://apps.fs.usda.gov/ArcX/rest/services/EDW/EDW_MTBS_01/MapServer/63/query
+        where: year >= 2014 AND year <= 2022
+        path: data/raw/mtbs_fire_perimeters_2014-2022_2026-10-14.geojson
+      cec:
+        url: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/California_Electric_Transmission_Lines/FeatureServer/0/query
+        where: 1=1
+        path: data/interim/cec/cec_lines_study_box.geojson
+      hansen:
+        url: https://storage.googleapis.com/earthenginepartners-hansen/GFC-2024-v1.12/Hansen_GFC-2024-v1.12_lossyear_40N_130W.tif
+        path: data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif
+  growth_curve:
+    primary_a_mode: posthoc
+    a_rule: max_literature_and_training_p995_pair_max_p95
+    a_rule_post_hoc: true
+    mixed_class_rule: max_of_members
+    pooled_rule: shared_k_c_class_specific_A
+    unit_mismatch_rule: max_of_printed_metres_and_converted_feet
+    max_height_m:
+      Quercus agrifolia Alliance: 25
+      Quercus douglasii Alliance: 20
+      Quercus lobata Alliance: 25
+      Quercus garryana Alliance: 30
+      Quercus kelloggii Alliance: 25
+      Quercus wislizeni (tree) Alliance: 23
+      Quercus chrysolepis Alliance: 30
+      Umbellularia californica Alliance: 24
+      Arbutus menziesii Alliance: 40
+      Acer macrophyllum Alliance: 27  # 2011 Oregon champion; documented exception to typical-upper rule
+      Populus fremontii Alliance: 34
+      Eucalyptus (globulus, camaldulensis) Semi-natural Alliance: 55
+      Quercus (agrifolia, douglasii, garryana, kelloggii, lobata, wislizenii) Alliance: 30
+      Pseudotsuga menziesii Alliance: 76
+      Sequoia sempervirens Alliance: 91
+      Hesperocyparis sargentii Alliance: 23
+      Pinus attenuata Alliance: 12
+      Pinus sabiniana / Quercus durata Provisional Alliance: 24
+    record_tree_height_m:
+      Pseudotsuga menziesii Alliance: 101
+      Sequoia sempervirens Alliance: 111
+    pending_source_review: []
+    open_verification_items: [Eucalyptus camaldulensis Jepson height; check whether above 55 m]
+    source_review_confirmed: true
+    reviewer_spot_check:
+      reviewer: Claude Opus 5
+      reviewer_type: ai
+      session: https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E
+      review_window_utc: 2026-10-15T09:54:00Z/2026-10-15T10:04:00Z
+      commit: 32b94cefc8e6530ed4fe65c751f10b96e77319e0
+      scope: A-rule implementation and held-out-fold leakage checks
+      independence_limit: reviewer proposed the A rule
+      human_review: pending
+    reviewer_spot_check_followup:
+      reviewer: Claude Opus 5
+      reviewer_type: ai
+      session: https://claude.ai/code/session_01E86qLp2sVy4PU2mBmrPa3E
+      review_window_utc: 2026-10-15T10:20:00Z/2026-10-15T10:51:00Z
+      commit: 57c94acabd4aa1162191bf7471361eab116896a3
+      scope: >-
+        Re-review after the first spot-check. Read the post-review hardening
+        diffs (full-sample prior rename, map-class group assertions, cached
+        ceiling copy, gate record validation), re-ran the full suite and the
+        reviewer leakage checks, and confirmed the G3 scores did not move.
+      evidence: tests/test_growth_curve_review.py
+      independence_limit: reviewer proposed the A rule
+      human_review: pending
+    p95_wire_exclusion_m: 10.0
+    saturation_review_fraction: 0.005
+    training_height_quantile: 0.995
+    excluded_map_classes:
+      - Urban Window
+      - Developed
+      - Vineyard
+      - Orchard or Grove
+      - Nursery or Ornamental Horticultural Area
+      - Major Roads
+      - Water
+      - Annual Cropland
+      - Irrigated Pasture
+      - Perennial Agriculture
+    time_gap_source: data/interim/change_2013-2022.json
+    primary_block_m: 2000
+    forest_groups: [conifer forest, hardwood forest]
+    block_sizes_m: [2000, 1000, 5000]
+    folds: 5
+    bootstrap_draws: 2000
+    seed: 42
+    min_fit_cells: 500
+    a_margin_m: 0.01
+    a_upper_m: 120.0
+    a_upper_warning_fraction: 0.99
+    k_bounds: [0.000001, 1.0]
+    c_bounds: [1.01, 10.0]
+    initial_k: 0.03
+    initial_c: 2.0
+    soft_l1_scale_m: 1.0
+    max_nfev: 200
+    oof_path: data/interim/growth_curve_oof_2013-2022.parquet
+    metrics_path: reports/growth_curve_check_2013-2022.json
+    preflight_path: reports/growth_curve_preflight_2013-2022.json
+    report_path: reports/growth_curve_check_2013-2022.md
+    figure_path: reports/figures/growth_curves_2013-2022.png
   site_modifier_candidates: [heat_load, tpi_450, elevation_m, slope_deg]
   site_modifier_admission: cross_validated_improvement_under_r2_folds
   loss: soft_l1
@@ -48,6 +171,34 @@ stage1_growth_model:
 stage2_residual_model:
   target: delta_h_minus_stage1
   families: [ridge, lightgbm]
+  terrain:
+    dem_url: https://prd-tnm.s3.amazonaws.com/StagedProducts/Elevation/13/TIFF/historical/n39w123/USGS_13_n39w123_20120801.tif
+    dem_path: data/raw/usgs_3dep_13_n39w123_20120801.tif
+    output_path: data/interim/terrain_10m.parquet
+    target_crs: EPSG:6339
+    resolution_m: 10
+    padding_m: 500
+    tpi_radius_m: 450
+    resampling: bilinear
+  numeric_features: [mean_start, p95_start, max_start, elevation_m, slope_deg, heat_load, tpi_450]
+  categorical_features: [vegetation_type]
+  ridge:
+    alpha: 1.0
+  lightgbm:
+    objective: regression
+    max_depth: 4
+    num_leaves: 15
+    n_estimators: 400
+    learning_rate: 0.03
+    min_data_in_leaf: 200
+    feature_fraction: 0.6
+    deterministic: true
+    force_col_wise: true
+    n_jobs: 4
+    verbosity: -1
+  oof_path: data/interim/stage2_residual_oof_2013-2022.parquet
+  metrics_path: reports/stage2_residual_check_2013-2022.json
+  report_path: reports/stage2_residual_check_2013-2022.md
   capacity_ceiling:
     max_depth: 4
     num_leaves: 15
@@ -69,7 +220,7 @@ ladder:
   - id: E2
     model: start_height_ring_isotonic
   - id: E3
-    model: stage1_gada
+    model: stage1_type_median_increment
   - id: E4
     model: ridge_on_stage2_residual
   - id: E5

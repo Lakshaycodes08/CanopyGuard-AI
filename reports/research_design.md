@@ -1,9 +1,12 @@
 # CanopyGuard-AI research design
 
-Reframed: 2026-09-24, superseding the design dated 2026-09-22. Nothing in this
-project is locked or pre-registered; this document is a working design and is
-revised as evidence accumulates. Thresholds calibrated after data were seen
-are marked post hoc.
+Reframed: 2026-09-24, superseding the design dated 2026-09-22. This is a
+working design, revised as evidence accumulates. Thresholds calibrated after
+data were seen are marked post hoc.
+
+Reconciliation (2026-10-20): Stage two was pre-specified and committed locally
+before fitting, but not independently timestamped. The separate E8 benchmark
+plan was preregistered on GitHub before any E8 score.
 
 ## Decision
 
