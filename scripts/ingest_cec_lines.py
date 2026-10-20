@@ -1,18 +1,22 @@
 from __future__ import annotations
 
+import argparse
 import json
 
-from canopyguard.config import load_config
+from canopyguard.config import load_config, load_region
 from canopyguard.data.cec_lines import fetch_lines
-from canopyguard.io import data_path, ensure_parent
-from canopyguard.provenance import file_sha256, study_area_box, write_provenance
+from canopyguard.io import data_path, ensure_parent, with_region
+from canopyguard.provenance import file_sha256, write_provenance
 
 
 def main() -> int:
     config = load_config("configs/ingestion.yaml")["cec_lines"]
-    box = study_area_box(load_config("configs/study_area.yaml"))
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--region", default="study")
+    region = load_region(parser.parse_args().region)
+    box = region["bbox"]
     lines = fetch_lines(box, config)
-    output = ensure_parent(data_path(config["output"]))
+    output = ensure_parent(with_region(data_path(config["output"]), region["suffix"]))
     output.write_text(json.dumps(lines) + "\n", "utf-8")
     write_provenance(
         output,

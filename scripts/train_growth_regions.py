@@ -44,6 +44,9 @@ def main() -> int:
         stacked = stack_regions(tables).reset_index(drop=True)
         entry = report.setdefault(f"scale_x{factor}", {})
         for screen_name, rule in config["screens"].items():
+            allowed = settings.get("screens_at_scale", {}).get(factor)
+            if allowed is not None and screen_name not in allowed:
+                continue
             table = apply_screen(stacked, rule).reset_index(drop=True)
             folds = region_codes(table, names)
             predictions = all_predictions(table, config, folds, START_HEIGHT_EDGES)
@@ -52,6 +55,11 @@ def main() -> int:
                 {
                     "region": table["region"],
                     "y": table["mean_change"],
+                    "easting": table["x"].to_numpy(),
+                    "northing": table["y"].to_numpy(),
+                    "canopy_share": table["canopy_share"].to_numpy(),
+                    "p95_start": table["p95_start"].to_numpy(),
+                    "loss_share": table["loss_share"].to_numpy(),
                     "scored": scored,
                     **{f"pred_{k}": v for k, v in predictions.items()},
                 }

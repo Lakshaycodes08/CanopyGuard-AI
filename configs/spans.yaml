@@ -13,18 +13,42 @@ truth:
   # Canopy pixels only; open ground cannot encroach on a conductor.
   min_canopy_share: 0.3
   min_pixels_per_segment: 10
-  high_growth_quantile: 0.8
+  # Segments at or above this quantile of the observed value are positives.
+  high_quantile: 0.8
 
 ranking:
-  heldout_block_sizes_m: [5000, 8000]
   scale: 1
   k_fractions: [0.1, 0.2]
   random_draws: 1000
   bootstrap_resamples: 2000
   confidence_level: 0.95
-  satellite_only: [landsat, landsat_terrain_eco, landsat_site_eco]
-  # These use the 2013 airborne survey and are shown only for comparison.
-  survey_based: [survey_height_x_eco_median, lightgbm_satellite_plus_survey]
-  headline: landsat_site_eco
+  block_size_m: 5000
+  # Growth forecast: unburned, low-loss canopy pixels, region held out.
+  growth:
+    heldout: growth_heldout_regions_undisturbed_x1.parquet
+    truth_column: y
+    scores:
+      landsat: pred_landsat
+      landsat_terrain_eco: pred_landsat_terrain_eco
+      landsat_site_eco: pred_landsat_site_eco
+      eco_class_median: pred_eco_class_median
+      survey_height_x_eco_median: pred_survey_height_x_eco_median
+      satellite_plus_survey_height: pred_lightgbm_satellite_plus_survey
+      tallest_first_survey: p95_start
+    headline: landsat_terrain_eco
+    contrasts: [eco_class_median, survey_height_x_eco_median, tallest_first_survey]
+  # Loss forecast: share of canopy pixels in the corridor with LiDAR loss.
+  loss:
+    heldout: hazard_heldout_x1.parquet
+    truth_column: label_loss
+    scores:
+      landsat_terrain_eco: prob_loss_landsat_terrain_eco
+      landsat_site_eco: prob_loss_landsat_site_eco
+      eco_class_rate: prob_loss_eco_class_rate
+      satellite_plus_survey_height: prob_loss_satellite_plus_survey_height
+      tallest_first_survey: p95_start
+    headline: landsat_terrain_eco
+    contrasts: [eco_class_rate, tallest_first_survey]
 
+forecast_table: processed/span_forecast.parquet
 output: reports/span_ranking.json

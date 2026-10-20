@@ -1,13 +1,13 @@
-"""Rank line segments by predicted canopy growth in their corridor.
+"""Rank line segments by predicted canopy growth and loss in their corridor.
 
 This is a research prioritisation, not a regulatory clearance or safety
 certification. Lines are approximate and have no conductor geometry, so
-segments are working pieces and the score says nothing about clearance.
+segments are working pieces and a score says nothing about clearance.
 """
 
 from __future__ import annotations
 
-import math
+from collections.abc import Callable
 from typing import Any
 
 import numpy as np
@@ -64,27 +64,27 @@ def assign_pixels(
     return assigned
 
 
-def segment_scores(
+def segment_table(
     pixels: pd.DataFrame,
     assigned: NDArray[np.int64],
     segments: pd.DataFrame,
-    prediction_columns: list[str],
-    truth: dict[str, Any],
+    columns: list[str],
+    min_pixels: int,
 ) -> pd.DataFrame:
-    """Per-segment truth, survey height and mean predicted growth."""
+    """Mean of `columns` over the pixels in each segment's corridor.
+
+    The caller chooses which pixels count (for example canopy only) by passing
+    a filtered frame with its matching `assigned` array.
+    """
     frame = pixels.assign(segment=assigned)
-    frame = frame[
-        (frame["segment"] >= 0) & (frame["canopy_share"] >= truth["min_canopy_share"])
-    ]
+    frame = frame[frame["segment"] >= 0]
     grouped = frame.groupby("segment")
-    table = grouped[["y", "p95_change", "p95_start", *prediction_columns]].mean()
+    table = grouped[columns].mean()
     table["n_pixels"] = grouped.size()
-    table = table[table["n_pixels"] >= truth["min_pixels_per_segment"]]
-    table = table.rename(
-        columns={"y": "truth_mean_change", "p95_change": "truth_p95_change"}
-    )
-    table["length_m"] = segments["length_m"].to_numpy()[table.index.to_numpy()]
-    centre = shapely.centroid(segments["geometry"].to_numpy()[table.index.to_numpy()])
+    table = table[table["n_pixels"] >= min_pixels]
+    index = table.index.to_numpy()
+    table["length_m"] = segments["length_m"].to_numpy()[index]
+    centre = shapely.centroid(segments["geometry"].to_numpy()[index])
     table["easting"] = shapely.get_x(centre)
     table["northing"] = shapely.get_y(centre)
     return table
@@ -105,27 +105,14 @@ def random_recall(
     )
 
 
-def ranking_metrics(
-    score: NDArray,
-    truth: NDArray,
-    labels: NDArray,
-    weights: NDArray,
-    k_fractions: list[float],
-) -> dict[str, float]:
-    result = {"spearman": spearman(score, truth)}
-    for k in k_fractions:
-        result[f"recall_at_{int(k * 100)}pct"] = recall_at_k(score, labels, k, weights)
-    return result
-
-
 def block_bootstrap_interval(
-    statistic: Any,
+    statistic: Callable[[NDArray], float],
     block_ids: NDArray,
     resamples: int,
     confidence: float,
     seed: int,
 ) -> tuple[float, float]:
-    """Percentile interval of a statistic of segment indices, resampling blocks."""
+    """Percentile interval of a statistic of row indices, resampling blocks."""
     groups = [np.flatnonzero(block_ids == b) for b in np.unique(block_ids)]
     generator = np.random.default_rng(seed)
     values = []
@@ -140,61 +127,69 @@ def block_bootstrap_interval(
     return float(np.quantile(values, alpha)), float(np.quantile(values, 1.0 - alpha))
 
 
-def half_width_label(half_width_m: float) -> str:
-    return f"{int(math.floor(half_width_m))}m"
-
-
 def evaluate_ranking(
-    table: pd.DataFrame, truth_column: str, config: dict[str, Any], seed: int
+    table: pd.DataFrame,
+    truth_column: str,
+    score_columns: dict[str, str],
+    headline: str,
+    contrasts: list[str],
+    config: dict[str, Any],
+    seed: int,
 ) -> dict[str, Any]:
-    """Recall at k and Spearman for each score, with block-bootstrap contrasts."""
-    ranking = config["ranking"]
-    quantile = float(config["truth"]["high_growth_quantile"])
+    """Recall at k and Spearman per score, with block-bootstrap contrasts.
+
+    Positives are the segments at or above the configured truth quantile.
+    Recall is weighted by segment length, so k is a share of line length.
+    """
     truth = table[truth_column].to_numpy()
+    quantile = float(config["truth"]["high_quantile"])
     labels = (truth >= np.quantile(truth, quantile)).astype(float)
     weights = table["length_m"].to_numpy()
-    k_fractions = list(ranking["k_fractions"])
-    models = [*ranking["satellite_only"], *ranking["survey_based"]]
-    scores = {name: table[f"pred_{name}"].to_numpy() for name in models}
-    scores["current_height_first"] = table["p95_start"].to_numpy()
+    k_fractions = list(config["ranking"]["k_fractions"])
+    scores = {name: table[column].to_numpy() for name, column in score_columns.items()}
 
     result: dict[str, Any] = {
         "segments": len(table),
         "prevalence": float(labels.mean()),
-        "scores": {
-            name: ranking_metrics(s, truth, labels, weights, k_fractions)
-            for name, s in scores.items()
-        },
+        "scores": {},
     }
+    for name, score in scores.items():
+        result["scores"][name] = {"spearman": spearman(score, truth)} | {
+            f"recall_at_{int(k * 100)}pct": recall_at_k(score, labels, k, weights)
+            for k in k_fractions
+        }
     result["scores"]["random"] = {
         f"recall_at_{int(k * 100)}pct": random_recall(
-            labels, weights, k, int(ranking["random_draws"]), seed
+            labels, weights, k, int(config["ranking"]["random_draws"]), seed
         )
         for k in k_fractions
     }
-    headline = ranking["headline"]
+
+    def recall_gap(first: str, second: str, k: float) -> Callable[[NDArray], float]:
+        def gap(i: NDArray) -> float:
+            return recall_at_k(
+                scores[first][i], labels[i], k, weights[i]
+            ) - recall_at_k(scores[second][i], labels[i], k, weights[i])
+
+        return gap
+
     blocks = table["block"].to_numpy()
-    contrasts = {}
-    for other in ("current_height_first", "survey_height_x_eco_median"):
+    everything = np.arange(len(table))
+    result["contrasts"] = {}
+    for other in contrasts:
         for k in k_fractions:
-            key = f"recall_at_{int(k * 100)}pct"
-
-            def difference(idx: NDArray, k: float = k, other: str = other) -> float:
-                first = recall_at_k(scores[headline][idx], labels[idx], k, weights[idx])
-                second = recall_at_k(scores[other][idx], labels[idx], k, weights[idx])
-                return first - second
-
+            statistic = recall_gap(headline, other, k)
             low, high = block_bootstrap_interval(
-                difference,
+                statistic,
                 blocks,
-                int(ranking["bootstrap_resamples"]),
-                float(ranking["confidence_level"]),
+                int(config["ranking"]["bootstrap_resamples"]),
+                float(config["ranking"]["confidence_level"]),
                 seed,
             )
-            contrasts[f"{headline}_minus_{other}_{key}"] = {
-                "difference": difference(np.arange(len(table))),
+            key = f"{headline}_minus_{other}_recall_at_{int(k * 100)}pct"
+            result["contrasts"][key] = {
+                "difference": statistic(everything),
                 "ci_low": low,
                 "ci_high": high,
             }
-    result["contrasts"] = contrasts
     return result

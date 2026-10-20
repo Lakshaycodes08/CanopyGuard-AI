@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 
 import numpy as np
@@ -26,7 +27,7 @@ from canopyguard.forecasting.region_transfer import (
     utm_box,
 )
 from canopyguard.io import data_path, ensure_parent, project_root, with_region
-from canopyguard.provenance import current_commit
+from canopyguard.provenance import current_commit, file_sha256, write_provenance
 from canopyguard.risk.spans import block_bootstrap_interval
 from canopyguard.utils import set_seeds
 
@@ -44,7 +45,13 @@ def auc_difference(first, second, label):
 
 def main() -> int:
     config = load_config("configs/growth.yaml")
-    settings = config["hazard"]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--scale", type=int, default=None)
+    args = parser.parse_args()
+    settings = dict(config["hazard"])
+    default_scale = int(settings["scale"])
+    settings["scale"] = args.scale or default_scale
+    suffix = "" if settings["scale"] == default_scale else f"_x{settings['scale']}"
     seed = int(config["seed"])
     set_seeds(seed)
     crs = load_config("configs/ingestion.yaml")["landsat"]["grid_crs"]
@@ -72,6 +79,16 @@ def main() -> int:
     params = config["model"]["lightgbm"]
     k_fractions = list(settings["k_fractions"])
     report: dict = {"git_commit": current_commit(), "seed": seed}
+    held_out = pd.DataFrame(
+        {
+            "region": table["region"],
+            "easting": table["x"],
+            "northing": table["y"],
+            "canopy_share": table["canopy_share"],
+            "p95_start": table["p95_start"],
+            "scored": scored,
+        }
+    )
     for label_name, label in disturbance_labels(table, settings["labels"]).items():
         scores = {
             "eco_class_rate": group_rate(eco, label, folds),
@@ -90,6 +107,9 @@ def main() -> int:
                 table, columns_with_survey(table, config), label, folds, params, seed
             ),
         }
+        held_out[f"label_{label_name}"] = label
+        for model, score in scores.items():
+            held_out[f"prob_{label_name}_{model}"] = score
         entry = report.setdefault(label_name, {})
         for name in names:
             rows = (table["region"] == name).to_numpy() & scored
@@ -124,7 +144,20 @@ def main() -> int:
                 ),
                 flush=True,
             )
-    output = ensure_parent(project_root() / settings["output"])
+    held_path = ensure_parent(
+        base.with_name(f"hazard_heldout_x{settings['scale']}{base.suffix}")
+    )
+    held_out.to_parquet(held_path, index=False)
+    write_provenance(
+        held_path,
+        source_url="local: region growth tables, leave-one-region-out",
+        script_name="scripts/train_hazard.py",
+        bbox_wgs84=regions["study"]["bbox"],
+        crs=crs,
+        row_count=len(held_out),
+        config_sha256=file_sha256("configs/growth.yaml"),
+    )
+    output = ensure_parent(with_region(project_root() / settings["output"], suffix))
     output.write_text(json.dumps(report, indent=2) + "\n", "utf-8")
     print(f"Wrote {output}")
     return 0
