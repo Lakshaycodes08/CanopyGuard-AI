@@ -1,4 +1,4 @@
-"""Run the preregistered E4/E5 residual gate on local data."""
+"""Run the pre-specified E4/E5 residual gate on local data."""
 
 from canopyguard.config import load_config
 from canopyguard.evaluation.stage2_gate import run_stage2_gate

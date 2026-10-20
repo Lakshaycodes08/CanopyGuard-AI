@@ -145,8 +145,10 @@ scientific claims here.
 - Research design: `reports/research_design.md` sets out the primary
   question, hypotheses, time and spatial splits, baselines, ablations, metrics,
   and falsification criteria. Reframed 2026-09-24 from a detectability
-  benchmark to a span-level encroachment forecast; nothing in the design is
-  locked or pre-registered, and it is revised as evidence accumulates.
+  benchmark to a span-level encroachment forecast. It remains a working design
+  revised as evidence accumulates. Reconciliation (2026-10-20): stage two was
+  pre-specified and committed locally before fitting, but not independently
+  timestamped; E8 was separately preregistered on GitHub before scoring.
 - Compute: CPU only for every required result. Two environments.
   `environment.yml` runs data assembly, modelling, evaluation, figures and
   tests on a laptop. `environment-lidar.yml` carries PDAL and GDAL and is used

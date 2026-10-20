@@ -20,8 +20,9 @@ error (MAE) relative to no change by 0.121 m on forest cells selected
 using later fire and Hansen loss records. In a post hoc analysis of all
 eligible forest cells, the improvement is 0.062 m and its 2 km block
 interval includes zero. The height-dependent curve adds no measurable
-improvement. In a separately preregistered stage-two residual test,
-ridge and LightGBM both increase MAE on the screened population and fail
+improvement. In a stage-two residual test pre-specified and committed
+locally before fitting, without an independent timestamp, ridge and
+LightGBM both increase MAE on the screened population and fail
 the gate. A post hoc diagnostic shows that squared-error training can
 itself worsen MAE relative to the median prior. These are preliminary
 growth-prior results, not a validated
@@ -124,8 +125,8 @@ prediction is made for a block held out from its fit. MAE is computed
 across held-out cells. Paired MAE differences use 2,000 whole-block
 bootstrap draws with seed 42; a 95\% interval wholly below zero is the
 comparison criterion. G3 evaluated both forest screens. The later
-stage-two residual gate was preregistered separately, with loss-off as
-its headline screen.
+stage-two residual gate was pre-specified locally before fitting, without
+an independent timestamp, with loss-off as its headline screen.
 
 A post hoc population sensitivity retains all forest cells passing label
 quality, 2013 canopy, vegetation, line-distance, and wire exclusions,
@@ -135,7 +136,7 @@ This analysis tests how much the retrospective fire and Hansen screens
 change the estimated gain; it was designed after the G3 result.
 
 \subsection{Stage-two residual comparison}
-The preregistered target is observed p95 height change minus the
+The pre-specified target is observed p95 height change minus the
 training-fold stage-one median increment. E4 ridge (regularization
 parameter 1) and E5 LightGBM (maximum depth 4, 15 leaves, 400 trees,
 learning rate 0.03, minimum 200 cells per leaf, feature fraction 0.6)
@@ -148,7 +149,7 @@ is fitted on each spatial training fold. Neither target-epoch LiDAR nor
 post-2013 satellite observations enter the predictors. Both models
 use the same five-fold 2 km blocks and 2,000-draw paired whole-block
 intervals as the stage-one comparison. The loss-off screen is the
-preregistered decision screen; 1 km and 5 km blocks, all classes, and
+pre-specified decision screen; 1 km and 5 km blocks, all classes, and
 the LiDAR-loss-on screen are declared sensitivities.
 
 Ridge and LightGBM minimize squared-error objectives, whereas the
@@ -206,7 +207,7 @@ On the forest LiDAR-loss-off 2 km screen (125,888 cells), the matched
 stage-one MAE is 1.256 m. Ridge MAE is 1.336 m, a difference of
 $+0.080$ m (95\% whole-block interval $[+0.060,+0.101]$). LightGBM
 MAE is 1.309 m, a difference of $+0.052$ m ($[+0.029,+0.083]$).
-Both fail the preregistered rule, which requires the entire interval
+Both fail the pre-specified rule, which requires the entire interval
 below zero. No further settings were tried. On the retrospectively
 selected loss-on subset, ridge and LightGBM improve over stage one by
 $0.020$ and $0.031$ m respectively, but this upper-bound sensitivity
@@ -251,7 +252,7 @@ The stage-two loss-off failure shows that these fixed residual models
 do not improve the median prior on this screened population. Better
 loss-on scores may reflect retrospective exclusion of loss cells;
 they cannot establish operational forecast skill. The present result
-does not justify changing the preregistered feature set or settings
+does not justify changing the pre-specified feature set or settings
 after inspection. Because the models minimize squared error while the
 gate uses MAE, their failure cannot be attributed solely to
 unpredictable disturbance.
@@ -267,7 +268,7 @@ Height-dependent Chapman--Richards curves add no measurable benefit.
 Independent scientific
 review of the post hoc curve rule and validation of persistent-forest
 selection remain open before broader claims are made.
-The preregistered ridge and LightGBM residual models fail their
+The pre-specified ridge and LightGBM residual models fail their
 loss-off improvement gate. These comparisons do not support replacing
 the median prior with either fitted residual model.
 
