@@ -93,6 +93,51 @@ pixel inside a fire perimeter. AUC, where 0.5 is a coin flip:
 - Adding 2013 LiDAR height to the predictors did not help the loss ranking in the
   west or east.
 
+## Finding 4: line segments
+
+The county transmission layer has 41 line features in the study box, 8 in the
+west box and 14 in the east box. It has no tower points, so lines were cut into
+pieces of about 300 m. These are working segments, not engineered spans. Each
+segment's corridor is the set of 30 m pixels within 60 m of it that hold canopy
+(canopy share at least 0.3). Predictions for a region come from models trained
+on the other two regions (`reports/span_ranking.json`, pooled over regions).
+
+Segments with enough pixels at 60 m: growth, 107 (96 study, 11 west, 0 east);
+loss, 285 (211 study, 22 west, 52 east). Most corridor canopy sits inside fire
+perimeters, so the unburned-growth question has few segments outside the study
+box.
+
+Share of the segments with the most observed change that the top 20 percent of
+predicted line length captures (random ranking gives 0.20):
+
+| Ranking by | Growth (107 segments) | Loss (285 segments) |
+| --- | --- | --- |
+| Satellite, Landsat + terrain + ecosystem | 0.32 | 0.47 |
+| Satellite, Landsat + terrain + climate + ecosystem | 0.32 | 0.39 |
+| Ecosystem type only | 0.18 | 0.32 |
+| Survey height and ecosystem growth curve (uses 2013 LiDAR) | 0.23 | not run |
+| Tallest segments first (uses 2013 LiDAR) | 0.27 | 0.47 |
+| Satellite + survey height (comparison, uses 2013 LiDAR) | 0.32 | 0.41 |
+
+- Rank correlation of predicted and observed corridor growth is +0.52 for the
+  satellite model, against -0.13 for ecosystem type, +0.14 for the survey growth
+  curve and +0.09 for tallest first.
+- The satellite model sits above random in both tasks, but its edge over the
+  simple alternatives is not established: the paired block-bootstrap intervals
+  include zero for nearly all comparisons. The exception is growth at 100 m
+  corridors against ecosystem type, +0.23 recall at 20 percent (interval
+  +0.05 to +0.37).
+- Tallest-first ranking, the common practice, matches the satellite model on
+  loss and trails it on growth. It does not need a survey to be refuted: it
+  simply carries no growth signal here.
+- Predicted loss chances are lower than observed loss shares in the east, so the
+  numbers are for ranking, not calibrated probabilities.
+- Maps: `reports/figures/span_forecast_growth.png` and
+  `reports/figures/span_forecast_loss.png`.
+
+The growth and loss rankings use only about 100 and 300 segments, mostly from
+one region. Treat these as early evidence.
+
 ## Checks
 
 - Scramble test (`reports/growth_sham_check.json`): shuffling the Landsat

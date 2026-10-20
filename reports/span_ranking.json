@@ -1,762 +1,1136 @@
 {
-  "git_commit": "3509d72799d81cc6bab3eebdf04185c90e915aaa",
+  "git_commit": "fb582c056cbc53a03e09e02b278aee24e74f04f4",
   "note": "Research prioritisation only; not a clearance determination.",
-  "line_segments": 1221,
-  "block_5000m": {
-    "half_width_30m": {
-      "truth_mean_change": {
-        "segments": 285,
-        "prevalence": 0.2,
+  "half_width_30m": {
+    "growth": {
+      "study": {
+        "segments": 29,
+        "prevalence": 0.20689655172413793,
         "scores": {
           "landsat": {
-            "spearman": 0.39725619080696917,
-            "recall_at_10pct": 0.21052631578947367,
-            "recall_at_20pct": 0.40350877192982454
+            "spearman": 0.40788177339901477,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.16666666666666666
           },
           "landsat_terrain_eco": {
-            "spearman": 0.3614596670934699,
-            "recall_at_10pct": 0.10526315789473684,
-            "recall_at_20pct": 0.38596491228070173
+            "spearman": 0.5556650246305419,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.16666666666666666
           },
           "landsat_site_eco": {
-            "spearman": 0.5145515714826315,
-            "recall_at_10pct": 0.2982456140350877,
-            "recall_at_20pct": 0.45614035087719296
-          },
-          "survey_height_x_eco_median": {
-            "spearman": 0.41834925637742537,
-            "recall_at_10pct": 0.22807017543859648,
+            "spearman": 0.6615763546798029,
+            "recall_at_10pct": 0.0,
             "recall_at_20pct": 0.3333333333333333
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.5795243303768137,
-            "recall_at_10pct": 0.2631578947368421,
-            "recall_at_20pct": 0.49122807017543857
-          },
-          "current_height_first": {
-            "spearman": -0.5245055907769028,
+          "eco_class_median": {
+            "spearman": 0.129064039408867,
             "recall_at_10pct": 0.0,
-            "recall_at_20pct": 0.017543859649122806
-          },
-          "random": {
-            "recall_at_10pct": 0.09838596491228069,
-            "recall_at_20pct": 0.19942105263157897
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.2982456140350877,
-            "ci_low": 0.15907705099778272,
-            "ci_high": 0.4444444444444444
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.43859649122807015,
-            "ci_low": 0.2727272727272727,
-            "ci_high": 0.6363636363636364
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.07017543859649122,
-            "ci_low": -0.02382404181184669,
-            "ci_high": 0.15384615384615385
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.12280701754385964,
-            "ci_low": -0.0714285714285714,
-            "ci_high": 0.19047619047619047
-          }
-        }
-      },
-      "truth_p95_change": {
-        "segments": 285,
-        "prevalence": 0.2,
-        "scores": {
-          "landsat": {
-            "spearman": 0.14008408196695818,
-            "recall_at_10pct": 0.07017543859649122,
-            "recall_at_20pct": 0.24561403508771928
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.1565401981265584,
-            "recall_at_10pct": 0.03508771929824561,
-            "recall_at_20pct": 0.22807017543859648
-          },
-          "landsat_site_eco": {
-            "spearman": 0.19345539560513617,
-            "recall_at_10pct": 0.17543859649122806,
-            "recall_at_20pct": 0.24561403508771928
+            "recall_at_20pct": 0.16666666666666666
           },
           "survey_height_x_eco_median": {
-            "spearman": 0.27978404101458215,
-            "recall_at_10pct": 0.10526315789473684,
-            "recall_at_20pct": 0.17543859649122806
+            "spearman": 0.361576354679803,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.16666666666666666
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.3142840850772652,
-            "recall_at_10pct": 0.15789473684210525,
-            "recall_at_20pct": 0.2807017543859649
+          "satellite_plus_survey_height": {
+            "spearman": 0.6896551724137931,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.16666666666666666
           },
-          "current_height_first": {
-            "spearman": -0.3081635192087379,
-            "recall_at_10pct": 0.05263157894736842,
-            "recall_at_20pct": 0.12280701754385964
+          "tallest_first_survey": {
+            "spearman": 0.23497536945812808,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.16666666666666666
           },
           "random": {
-            "recall_at_10pct": 0.09863157894736842,
-            "recall_at_20pct": 0.19905263157894737
+            "recall_at_10pct": 0.067,
+            "recall_at_20pct": 0.173
           }
         },
         "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.12280701754385964,
-            "ci_low": -0.06156249999999996,
-            "ci_high": 0.2745436105476672
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.12280701754385964,
-            "ci_low": -0.06666666666666668,
-            "ci_high": 0.3783783783783784
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.07017543859649122,
-            "ci_low": -0.05888355342136844,
-            "ci_high": 0.1515408320493065
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.07017543859649122,
-            "ci_low": -0.125,
-            "ci_high": 0.2000925925925921
-          }
-        }
-      }
-    },
-    "half_width_60m": {
-      "truth_mean_change": {
-        "segments": 421,
-        "prevalence": 0.20190023752969122,
-        "scores": {
-          "landsat": {
-            "spearman": 0.4642074758329219,
-            "recall_at_10pct": 0.23529411764705882,
-            "recall_at_20pct": 0.4823529411764706
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.46416115995542095,
-            "recall_at_10pct": 0.21176470588235294,
-            "recall_at_20pct": 0.4
-          },
-          "landsat_site_eco": {
-            "spearman": 0.6380322506460904,
-            "recall_at_10pct": 0.32941176470588235,
-            "recall_at_20pct": 0.5058823529411764
-          },
-          "survey_height_x_eco_median": {
-            "spearman": 0.4903954057222623,
-            "recall_at_10pct": 0.21176470588235294,
-            "recall_at_20pct": 0.4
-          },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.6875627395198266,
-            "recall_at_10pct": 0.29411764705882354,
-            "recall_at_20pct": 0.5529411764705883
-          },
-          "current_height_first": {
-            "spearman": -0.5180869934401922,
-            "recall_at_10pct": 0.011764705882352941,
-            "recall_at_20pct": 0.047058823529411764
-          },
-          "random": {
-            "recall_at_10pct": 0.10001176470588234,
-            "recall_at_20pct": 0.19935294117647062
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.3176470588235294,
-            "ci_low": 0.1937984496124031,
-            "ci_high": 0.44642857142857145
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.4588235294117647,
-            "ci_low": 0.34523546144121364,
-            "ci_high": 0.6718814036885246
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.11764705882352941,
-            "ci_low": -0.013333333333333308,
-            "ci_high": 0.15476190476190474
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.10588235294117643,
-            "ci_low": -0.02175120772946862,
-            "ci_high": 0.1785714285714285
-          }
-        }
-      },
-      "truth_p95_change": {
-        "segments": 421,
-        "prevalence": 0.20190023752969122,
-        "scores": {
-          "landsat": {
-            "spearman": 0.19131786361582268,
-            "recall_at_10pct": 0.11764705882352941,
-            "recall_at_20pct": 0.27058823529411763
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.21882322290963419,
-            "recall_at_10pct": 0.16470588235294117,
-            "recall_at_20pct": 0.2823529411764706
-          },
-          "landsat_site_eco": {
-            "spearman": 0.3283088111132375,
-            "recall_at_10pct": 0.18823529411764706,
-            "recall_at_20pct": 0.3176470588235294
-          },
-          "survey_height_x_eco_median": {
-            "spearman": 0.3128016763774551,
-            "recall_at_10pct": 0.11764705882352941,
-            "recall_at_20pct": 0.2
-          },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.4336578125075384,
-            "recall_at_10pct": 0.2,
-            "recall_at_20pct": 0.3411764705882353
-          },
-          "current_height_first": {
-            "spearman": -0.2897794688791075,
-            "recall_at_10pct": 0.047058823529411764,
-            "recall_at_20pct": 0.1411764705882353
-          },
-          "random": {
-            "recall_at_10pct": 0.09888235294117646,
-            "recall_at_20pct": 0.19868235294117648
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.1411764705882353,
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_10pct": {
+            "difference": 0.16666666666666666,
             "ci_low": 0.0,
-            "ci_high": 0.28791073384446864
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.1764705882352941,
-            "ci_low": 0.033698501872659194,
-            "ci_high": 0.4029910929224843
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.07058823529411765,
-            "ci_low": -0.05494505494505493,
-            "ci_high": 0.1549356483729966
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.11764705882352938,
-            "ci_low": -0.02986205336951601,
-            "ci_high": 0.20456002331002324
-          }
-        }
-      }
-    },
-    "half_width_100m": {
-      "truth_mean_change": {
-        "segments": 477,
-        "prevalence": 0.20125786163522014,
-        "scores": {
-          "landsat": {
-            "spearman": 0.4691531779681162,
-            "recall_at_10pct": 0.23958333333333334,
-            "recall_at_20pct": 0.4895833333333333
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.4980295741885606,
-            "recall_at_10pct": 0.25,
-            "recall_at_20pct": 0.4166666666666667
-          },
-          "landsat_site_eco": {
-            "spearman": 0.6526536563942699,
-            "recall_at_10pct": 0.28125,
-            "recall_at_20pct": 0.4895833333333333
-          },
-          "survey_height_x_eco_median": {
-            "spearman": 0.4803740237707145,
-            "recall_at_10pct": 0.22916666666666666,
-            "recall_at_20pct": 0.4479166666666667
-          },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.6823499116232897,
-            "recall_at_10pct": 0.2708333333333333,
-            "recall_at_20pct": 0.4895833333333333
-          },
-          "current_height_first": {
-            "spearman": -0.4229639909962563,
-            "recall_at_10pct": 0.020833333333333332,
-            "recall_at_20pct": 0.052083333333333336
-          },
-          "random": {
-            "recall_at_10pct": 0.09927083333333334,
-            "recall_at_20pct": 0.2015104166666667
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.2604166666666667,
-            "ci_low": 0.18278785024723335,
-            "ci_high": 0.4237520315765032
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.4375,
-            "ci_low": 0.29195499741364445,
             "ci_high": 0.6666666666666666
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.05208333333333334,
-            "ci_low": -0.010311963058419258,
-            "ci_high": 0.1600123456790123
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.3333333333333333,
+            "ci_high": 0.6666666666666666
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.04166666666666663,
-            "ci_low": -0.028578296703296646,
-            "ci_high": 0.1643878966533726
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.3333333333333333,
+            "ci_high": 0.6666666666666666
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.3333333333333333,
+            "ci_high": 0.6666666666666666
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.16666666666666666,
+            "ci_low": 0.0,
+            "ci_high": 0.6666666666666666
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.6666666666666666
           }
         }
       },
-      "truth_p95_change": {
-        "segments": 477,
-        "prevalence": 0.20125786163522014,
+      "west": {
+        "segments": 2,
+        "note": "too few to rank"
+      },
+      "east": {
+        "segments": 0,
+        "note": "too few to rank"
+      },
+      "pooled": {
+        "segments": 31,
+        "prevalence": 0.22580645161290322,
         "scores": {
           "landsat": {
-            "spearman": 0.21767803987466933,
-            "recall_at_10pct": 0.16666666666666666,
-            "recall_at_20pct": 0.3229166666666667
+            "spearman": 0.4157258064516129,
+            "recall_at_10pct": 0.14285714285714285,
+            "recall_at_20pct": 0.2857142857142857
           },
           "landsat_terrain_eco": {
-            "spearman": 0.27312118500198684,
-            "recall_at_10pct": 0.16666666666666666,
-            "recall_at_20pct": 0.3125
+            "spearman": 0.5479838709677419,
+            "recall_at_10pct": 0.2857142857142857,
+            "recall_at_20pct": 0.2857142857142857
           },
           "landsat_site_eco": {
-            "spearman": 0.3824821947410052,
-            "recall_at_10pct": 0.1875,
-            "recall_at_20pct": 0.3645833333333333
+            "spearman": 0.6798387096774193,
+            "recall_at_10pct": 0.14285714285714285,
+            "recall_at_20pct": 0.2857142857142857
+          },
+          "eco_class_median": {
+            "spearman": 0.0935483870967742,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.2857142857142857
           },
           "survey_height_x_eco_median": {
-            "spearman": 0.3064931506667559,
-            "recall_at_10pct": 0.14583333333333334,
-            "recall_at_20pct": 0.2916666666666667
+            "spearman": 0.34274193548387094,
+            "recall_at_10pct": 0.14285714285714285,
+            "recall_at_20pct": 0.2857142857142857
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.45925262028708214,
-            "recall_at_10pct": 0.23958333333333334,
-            "recall_at_20pct": 0.3541666666666667
+          "satellite_plus_survey_height": {
+            "spearman": 0.7133064516129032,
+            "recall_at_10pct": 0.14285714285714285,
+            "recall_at_20pct": 0.2857142857142857
           },
-          "current_height_first": {
-            "spearman": -0.1904073068400013,
-            "recall_at_10pct": 0.07291666666666667,
-            "recall_at_20pct": 0.15625
+          "tallest_first_survey": {
+            "spearman": 0.20766129032258066,
+            "recall_at_10pct": 0.2857142857142857,
+            "recall_at_20pct": 0.2857142857142857
           },
           "random": {
-            "recall_at_10pct": 0.09929166666666665,
-            "recall_at_20pct": 0.2014375
+            "recall_at_10pct": 0.0964285714285714,
+            "recall_at_20pct": 0.19428571428571423
           }
         },
         "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.11458333333333333,
-            "ci_low": 0.009519359145527371,
-            "ci_high": 0.27870660559305677
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_10pct": {
+            "difference": 0.2857142857142857,
+            "ci_low": 0.0,
+            "ci_high": 0.6
           },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.20833333333333331,
-            "ci_low": 0.022708541458541474,
-            "ci_high": 0.43940909090909086
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.16666666666666666,
+            "ci_high": 0.6666666666666666
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.04166666666666666,
-            "ci_low": -0.06499438061938051,
-            "ci_high": 0.12903225806451613
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
+            "difference": 0.14285714285714285,
+            "ci_low": 0.0,
+            "ci_high": 0.6666666666666666
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.07291666666666663,
-            "ci_low": -0.04838709677419356,
-            "ci_high": 0.1600123456790123
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.25,
+            "ci_high": 0.6666666666666666
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.3333333333333333
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.5053571428571461
+          }
+        }
+      }
+    },
+    "loss": {
+      "study": {
+        "segments": 152,
+        "prevalence": 0.20394736842105263,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.2078271982455182,
+            "recall_at_10pct": 0.0967741935483871,
+            "recall_at_20pct": 0.1935483870967742
+          },
+          "landsat_site_eco": {
+            "spearman": 0.36958258974924557,
+            "recall_at_10pct": 0.25806451612903225,
+            "recall_at_20pct": 0.41935483870967744
+          },
+          "eco_class_rate": {
+            "spearman": 0.2559139757058157,
+            "recall_at_10pct": 0.16129032258064516,
+            "recall_at_20pct": 0.3225806451612903
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.4685432871399164,
+            "recall_at_10pct": 0.3870967741935484,
+            "recall_at_20pct": 0.4838709677419355
+          },
+          "tallest_first_survey": {
+            "spearman": 0.47620685749849767,
+            "recall_at_10pct": 0.22580645161290322,
+            "recall_at_20pct": 0.3870967741935484
+          },
+          "random": {
+            "recall_at_10pct": 0.10096774193548384,
+            "recall_at_20pct": 0.19987096774193544
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": -0.06451612903225806,
+            "ci_low": -0.16666666666666669,
+            "ci_high": 0.07142857142857142
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": -0.12903225806451613,
+            "ci_low": -0.24244471744471746,
+            "ci_high": 0.13333333333333333
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": -0.12903225806451613,
+            "ci_low": -0.20689655172413796,
+            "ci_high": 0.0
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": -0.1935483870967742,
+            "ci_low": -0.3571428571428571,
+            "ci_high": 0.0
+          }
+        }
+      },
+      "west": {
+        "segments": 15,
+        "note": "too few to rank"
+      },
+      "east": {
+        "segments": 29,
+        "prevalence": 0.20689655172413793,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.5551451655075978,
+            "recall_at_10pct": 0.3333333333333333,
+            "recall_at_20pct": 0.5
+          },
+          "landsat_site_eco": {
+            "spearman": 0.3760183254371463,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.3333333333333333
+          },
+          "eco_class_rate": {
+            "spearman": 0.6089325637656674,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.5
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.2807800881545095,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.3333333333333333
+          },
+          "tallest_first_survey": {
+            "spearman": 0.04515180679461796,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.16666666666666666
+          },
+          "random": {
+            "recall_at_10pct": 0.06616666666666665,
+            "recall_at_20pct": 0.1675
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.16666666666666666,
+            "ci_low": 0.0,
+            "ci_high": 0.16666666666666669
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.33333333333333337,
+            "ci_high": 0.0
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.3333333333333333,
+            "ci_low": 0.25,
+            "ci_high": 0.3333333333333333
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.33333333333333337,
+            "ci_low": 0.16666666666666666,
+            "ci_high": 0.33333333333333337
+          }
+        }
+      },
+      "pooled": {
+        "segments": 196,
+        "prevalence": 0.20408163265306123,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.3442786580605174,
+            "recall_at_10pct": 0.25,
+            "recall_at_20pct": 0.4
+          },
+          "landsat_site_eco": {
+            "spearman": 0.41891208723145384,
+            "recall_at_10pct": 0.225,
+            "recall_at_20pct": 0.4
+          },
+          "eco_class_rate": {
+            "spearman": 0.3345934152048925,
+            "recall_at_10pct": 0.25,
+            "recall_at_20pct": 0.375
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.4726536689355802,
+            "recall_at_10pct": 0.35,
+            "recall_at_20pct": 0.475
+          },
+          "tallest_first_survey": {
+            "spearman": 0.5176764787125423,
+            "recall_at_10pct": 0.225,
+            "recall_at_20pct": 0.5
+          },
+          "random": {
+            "recall_at_10pct": 0.097025,
+            "recall_at_20pct": 0.1983
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.14819444444444435,
+            "ci_high": 0.11764705882352941
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.025000000000000022,
+            "ci_low": -0.14708605664488017,
+            "ci_high": 0.1400714285714282
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.024999999999999994,
+            "ci_low": -0.23809523809523808,
+            "ci_high": 0.1481678486997635
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": -0.09999999999999998,
+            "ci_low": -0.3571428571428572,
+            "ci_high": 0.09999999999999998
           }
         }
       }
     }
   },
-  "block_8000m": {
-    "half_width_30m": {
-      "truth_mean_change": {
-        "segments": 285,
-        "prevalence": 0.2,
+  "half_width_60m": {
+    "growth": {
+      "study": {
+        "segments": 96,
+        "prevalence": 0.20833333333333334,
         "scores": {
           "landsat": {
-            "spearman": 0.3787032093184799,
-            "recall_at_10pct": 0.21052631578947367,
-            "recall_at_20pct": 0.38596491228070173
+            "spearman": 0.4748779164405861,
+            "recall_at_10pct": 0.05,
+            "recall_at_20pct": 0.3
           },
           "landsat_terrain_eco": {
-            "spearman": 0.2745893098747065,
-            "recall_at_10pct": 0.10526315789473684,
-            "recall_at_20pct": 0.3508771929824561
+            "spearman": 0.5487384698860555,
+            "recall_at_10pct": 0.1,
+            "recall_at_20pct": 0.25
           },
           "landsat_site_eco": {
-            "spearman": 0.17853317920034006,
-            "recall_at_10pct": 0.17543859649122806,
-            "recall_at_20pct": 0.3157894736842105
+            "spearman": 0.5999457406402605,
+            "recall_at_10pct": 0.15,
+            "recall_at_20pct": 0.25
           },
-          "survey_height_x_eco_median": {
-            "spearman": 0.3544614762553977,
-            "recall_at_10pct": 0.21052631578947367,
-            "recall_at_20pct": 0.3333333333333333
-          },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.23876790370489406,
-            "recall_at_10pct": 0.15789473684210525,
-            "recall_at_20pct": 0.3157894736842105
-          },
-          "current_height_first": {
-            "spearman": -0.5245055907769028,
+          "eco_class_median": {
+            "spearman": -0.19974226804123715,
             "recall_at_10pct": 0.0,
-            "recall_at_20pct": 0.017543859649122806
-          },
-          "random": {
-            "recall_at_10pct": 0.09838596491228069,
-            "recall_at_20pct": 0.19942105263157897
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.17543859649122806,
-            "ci_low": 0.0625,
-            "ci_high": 0.3061306780776826
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.2982456140350877,
-            "ci_low": 0.079984126984127,
-            "ci_high": 0.5085178139052229
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": -0.03508771929824561,
-            "ci_low": -0.20454545454545453,
-            "ci_high": 0.10962709284627072
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": -0.017543859649122806,
-            "ci_low": -0.36846978557504867,
-            "ci_high": 0.10992063492063475
-          }
-        }
-      },
-      "truth_p95_change": {
-        "segments": 285,
-        "prevalence": 0.2,
-        "scores": {
-          "landsat": {
-            "spearman": 0.145216606966051,
-            "recall_at_10pct": 0.07017543859649122,
-            "recall_at_20pct": 0.24561403508771928
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.11343756317811174,
-            "recall_at_10pct": 0.05263157894736842,
-            "recall_at_20pct": 0.19298245614035087
-          },
-          "landsat_site_eco": {
-            "spearman": -0.0908764326851799,
-            "recall_at_10pct": 0.12280701754385964,
-            "recall_at_20pct": 0.19298245614035087
+            "recall_at_20pct": 0.1
           },
           "survey_height_x_eco_median": {
-            "spearman": 0.25056374315084473,
-            "recall_at_10pct": 0.07017543859649122,
-            "recall_at_20pct": 0.19298245614035087
+            "spearman": 0.13389853499728707,
+            "recall_at_10pct": 0.15,
+            "recall_at_20pct": 0.15
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": -0.0068867381691696,
-            "recall_at_10pct": 0.14035087719298245,
-            "recall_at_20pct": 0.19298245614035087
+          "satellite_plus_survey_height": {
+            "spearman": 0.6627238198589258,
+            "recall_at_10pct": 0.15,
+            "recall_at_20pct": 0.25
           },
-          "current_height_first": {
-            "spearman": -0.3081635192087379,
-            "recall_at_10pct": 0.05263157894736842,
-            "recall_at_20pct": 0.12280701754385964
-          },
-          "random": {
-            "recall_at_10pct": 0.09863157894736842,
-            "recall_at_20pct": 0.19905263157894737
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.07017543859649122,
-            "ci_low": -0.020020833333333293,
-            "ci_high": 0.20340712556208915
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.07017543859649122,
-            "ci_low": -0.06977764177886575,
-            "ci_high": 0.25
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.05263157894736842,
-            "ci_low": -0.1372549019607843,
-            "ci_high": 0.17142857142857143
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.0,
-            "ci_low": -0.2567894507410636,
-            "ci_high": 0.1320824084350721
-          }
-        }
-      }
-    },
-    "half_width_60m": {
-      "truth_mean_change": {
-        "segments": 421,
-        "prevalence": 0.20190023752969122,
-        "scores": {
-          "landsat": {
-            "spearman": 0.4822513697759952,
-            "recall_at_10pct": 0.21176470588235294,
-            "recall_at_20pct": 0.4588235294117647
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.4304309788892874,
-            "recall_at_10pct": 0.2,
-            "recall_at_20pct": 0.36470588235294116
-          },
-          "landsat_site_eco": {
-            "spearman": 0.3787527520154644,
-            "recall_at_10pct": 0.21176470588235294,
-            "recall_at_20pct": 0.43529411764705883
-          },
-          "survey_height_x_eco_median": {
-            "spearman": 0.4664782403826206,
-            "recall_at_10pct": 0.2,
-            "recall_at_20pct": 0.38823529411764707
-          },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.3935969907545146,
-            "recall_at_10pct": 0.2235294117647059,
-            "recall_at_20pct": 0.3764705882352941
-          },
-          "current_height_first": {
-            "spearman": -0.5180869934401922,
-            "recall_at_10pct": 0.011764705882352941,
-            "recall_at_20pct": 0.047058823529411764
-          },
-          "random": {
-            "recall_at_10pct": 0.10001176470588234,
-            "recall_at_20pct": 0.19935294117647062
-          }
-        },
-        "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.2,
-            "ci_low": 0.09472691161866932,
-            "ci_high": 0.32608695652173914
-          },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.38823529411764707,
-            "ci_low": 0.22640689089417557,
-            "ci_high": 0.5957861287648519
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.011764705882352927,
-            "ci_low": -0.18421052631578946,
-            "ci_high": 0.1039028679653679
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.047058823529411764,
-            "ci_low": -0.1833653846153845,
-            "ci_high": 0.1559704701834862
-          }
-        }
-      },
-      "truth_p95_change": {
-        "segments": 421,
-        "prevalence": 0.20190023752969122,
-        "scores": {
-          "landsat": {
-            "spearman": 0.22447392078376757,
-            "recall_at_10pct": 0.11764705882352941,
-            "recall_at_20pct": 0.25882352941176473
-          },
-          "landsat_terrain_eco": {
-            "spearman": 0.20100833524975997,
-            "recall_at_10pct": 0.12941176470588237,
-            "recall_at_20pct": 0.27058823529411763
-          },
-          "landsat_site_eco": {
-            "spearman": 0.08595599669999372,
-            "recall_at_10pct": 0.15294117647058825,
-            "recall_at_20pct": 0.29411764705882354
-          },
-          "survey_height_x_eco_median": {
-            "spearman": 0.3024742006088608,
-            "recall_at_10pct": 0.11764705882352941,
+          "tallest_first_survey": {
+            "spearman": 0.06429734129137278,
+            "recall_at_10pct": 0.15,
             "recall_at_20pct": 0.2
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.13420186324915528,
-            "recall_at_10pct": 0.16470588235294117,
-            "recall_at_20pct": 0.23529411764705882
-          },
-          "current_height_first": {
-            "spearman": -0.2897794688791075,
-            "recall_at_10pct": 0.047058823529411764,
-            "recall_at_20pct": 0.1411764705882353
-          },
           "random": {
-            "recall_at_10pct": 0.09888235294117646,
-            "recall_at_20pct": 0.19868235294117648
+            "recall_at_10pct": 0.09140000000000001,
+            "recall_at_20pct": 0.19785
           }
         },
         "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.10588235294117648,
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_10pct": {
+            "difference": 0.1,
             "ci_low": 0.0,
-            "ci_high": 0.19698372615039275
+            "ci_high": 0.29411764705882354
           },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.15294117647058825,
-            "ci_low": 0.015854978354978386,
-            "ci_high": 0.32858082706766906
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_20pct": {
+            "difference": 0.15,
+            "ci_low": 0.0,
+            "ci_high": 0.3810439560439556
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.03529411764705884,
-            "ci_low": -0.0842394094993581,
-            "ci_high": 0.13559322033898302
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
+            "difference": -0.04999999999999999,
+            "ci_low": -0.1818181818181818,
+            "ci_high": 0.1875
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.09411764705882353,
-            "ci_low": -0.1714761904761904,
-            "ci_high": 0.18181818181818182
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
+            "difference": 0.1,
+            "ci_low": -0.2,
+            "ci_high": 0.33333333333333337
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": -0.04999999999999999,
+            "ci_low": -0.1875,
+            "ci_high": 0.16666666666666666
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.04999999999999999,
+            "ci_low": -0.21428571428571427,
+            "ci_high": 0.3529411764705882
+          }
+        }
+      },
+      "west": {
+        "segments": 11,
+        "note": "too few to rank"
+      },
+      "east": {
+        "segments": 0,
+        "note": "too few to rank"
+      },
+      "pooled": {
+        "segments": 107,
+        "prevalence": 0.205607476635514,
+        "scores": {
+          "landsat": {
+            "spearman": 0.4591684790062502,
+            "recall_at_10pct": 0.13636363636363635,
+            "recall_at_20pct": 0.22727272727272727
+          },
+          "landsat_terrain_eco": {
+            "spearman": 0.5212288642018849,
+            "recall_at_10pct": 0.13636363636363635,
+            "recall_at_20pct": 0.3181818181818182
+          },
+          "landsat_site_eco": {
+            "spearman": 0.6004330022139933,
+            "recall_at_10pct": 0.22727272727272727,
+            "recall_at_20pct": 0.3181818181818182
+          },
+          "eco_class_median": {
+            "spearman": -0.13078234291424207,
+            "recall_at_10pct": 0.045454545454545456,
+            "recall_at_20pct": 0.18181818181818182
+          },
+          "survey_height_x_eco_median": {
+            "spearman": 0.14306706636101807,
+            "recall_at_10pct": 0.09090909090909091,
+            "recall_at_20pct": 0.22727272727272727
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.6568604400556438,
+            "recall_at_10pct": 0.18181818181818182,
+            "recall_at_20pct": 0.3181818181818182
+          },
+          "tallest_first_survey": {
+            "spearman": 0.08510158898097535,
+            "recall_at_10pct": 0.13636363636363635,
+            "recall_at_20pct": 0.2727272727272727
+          },
+          "random": {
+            "recall_at_10pct": 0.09168181818181816,
+            "recall_at_20pct": 0.1960454545454545
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_10pct": {
+            "difference": 0.0909090909090909,
+            "ci_low": 0.0,
+            "ci_high": 0.2631578947368421
+          },
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_20pct": {
+            "difference": 0.13636363636363635,
+            "ci_low": -0.0625,
+            "ci_high": 0.3333333333333333
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
+            "difference": 0.04545454545454544,
+            "ci_low": -0.1072420634920633,
+            "ci_high": 0.21062030075187918
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
+            "difference": 0.09090909090909091,
+            "ci_low": -0.1766042780748661,
+            "ci_high": 0.2759099616858235
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.13333333333333336,
+            "ci_high": 0.17857142857142855
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.04545454545454547,
+            "ci_low": -0.18181818181818182,
+            "ci_high": 0.24000000000000002
           }
         }
       }
     },
-    "half_width_100m": {
-      "truth_mean_change": {
-        "segments": 477,
-        "prevalence": 0.20125786163522014,
+    "loss": {
+      "study": {
+        "segments": 211,
+        "prevalence": 0.2037914691943128,
         "scores": {
-          "landsat": {
-            "spearman": 0.48989500276308506,
-            "recall_at_10pct": 0.23958333333333334,
-            "recall_at_20pct": 0.4583333333333333
-          },
           "landsat_terrain_eco": {
-            "spearman": 0.47406227036484433,
-            "recall_at_10pct": 0.20833333333333334,
-            "recall_at_20pct": 0.3958333333333333
+            "spearman": 0.16670768779251938,
+            "recall_at_10pct": 0.13953488372093023,
+            "recall_at_20pct": 0.27906976744186046
           },
           "landsat_site_eco": {
-            "spearman": 0.424009076275967,
-            "recall_at_10pct": 0.19791666666666666,
-            "recall_at_20pct": 0.40625
+            "spearman": 0.24562266497377505,
+            "recall_at_10pct": 0.20930232558139536,
+            "recall_at_20pct": 0.27906976744186046
           },
-          "survey_height_x_eco_median": {
-            "spearman": 0.4780223607560968,
-            "recall_at_10pct": 0.20833333333333334,
-            "recall_at_20pct": 0.4270833333333333
+          "eco_class_rate": {
+            "spearman": 0.2151522049770415,
+            "recall_at_10pct": 0.09302325581395349,
+            "recall_at_20pct": 0.27906976744186046
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.3906433023987205,
-            "recall_at_10pct": 0.16666666666666666,
-            "recall_at_20pct": 0.3333333333333333
+          "satellite_plus_survey_height": {
+            "spearman": 0.4007495790589336,
+            "recall_at_10pct": 0.23255813953488372,
+            "recall_at_20pct": 0.3488372093023256
           },
-          "current_height_first": {
-            "spearman": -0.4229639909962563,
-            "recall_at_10pct": 0.020833333333333332,
-            "recall_at_20pct": 0.052083333333333336
+          "tallest_first_survey": {
+            "spearman": 0.4029690124164356,
+            "recall_at_10pct": 0.11627906976744186,
+            "recall_at_20pct": 0.32558139534883723
           },
           "random": {
-            "recall_at_10pct": 0.09927083333333334,
-            "recall_at_20pct": 0.2015104166666667
+            "recall_at_10pct": 0.09986046511627908,
+            "recall_at_20pct": 0.20053488372093023
           }
         },
         "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.17708333333333331,
-            "ci_low": 0.09331481481481484,
-            "ci_high": 0.3674655908875172
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.046511627906976744,
+            "ci_low": -0.14705882352941177,
+            "ci_high": 0.21280395136778094
           },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.3541666666666667,
-            "ci_low": 0.20143534523030923,
-            "ci_high": 0.5660534591194968
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.15384615384615385,
+            "ci_high": 0.21819602272727265
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": -0.010416666666666685,
-            "ci_low": -0.17954545454545445,
-            "ci_high": 0.10811373873873871
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.023255813953488372,
+            "ci_low": -0.18520671834625319,
+            "ci_high": 0.14285714285714285
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": -0.020833333333333315,
-            "ci_low": -0.20735392656124357,
-            "ci_high": 0.14494673193204716
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": -0.04651162790697677,
+            "ci_low": -0.20588235294117643,
+            "ci_high": 0.1702257394914374
           }
         }
       },
-      "truth_p95_change": {
-        "segments": 477,
-        "prevalence": 0.20125786163522014,
+      "west": {
+        "segments": 22,
+        "prevalence": 0.22727272727272727,
         "scores": {
-          "landsat": {
-            "spearman": 0.24964380636599784,
-            "recall_at_10pct": 0.14583333333333334,
-            "recall_at_20pct": 0.3125
-          },
           "landsat_terrain_eco": {
-            "spearman": 0.2591549448389129,
-            "recall_at_10pct": 0.13541666666666666,
-            "recall_at_20pct": 0.28125
+            "spearman": 0.7281490367138895,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.4
           },
           "landsat_site_eco": {
-            "spearman": 0.16020796887476862,
-            "recall_at_10pct": 0.16666666666666666,
-            "recall_at_20pct": 0.3333333333333333
+            "spearman": 0.5594525695792295,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.2
           },
-          "survey_height_x_eco_median": {
-            "spearman": 0.31089761238039065,
-            "recall_at_10pct": 0.13541666666666666,
-            "recall_at_20pct": 0.2604166666666667
+          "eco_class_rate": {
+            "spearman": 0.738477391844583,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.2
           },
-          "lightgbm_satellite_plus_survey": {
-            "spearman": 0.15656443362061012,
-            "recall_at_10pct": 0.14583333333333334,
-            "recall_at_20pct": 0.28125
+          "satellite_plus_survey_height": {
+            "spearman": 0.38960850743004805,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.0
           },
-          "current_height_first": {
-            "spearman": -0.1904073068400013,
-            "recall_at_10pct": 0.07291666666666667,
-            "recall_at_20pct": 0.15625
+          "tallest_first_survey": {
+            "spearman": 0.7350346068010185,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.4
           },
           "random": {
-            "recall_at_10pct": 0.09929166666666665,
-            "recall_at_20pct": 0.2014375
+            "recall_at_10pct": 0.0866,
+            "recall_at_20pct": 0.1772
           }
         },
         "contrasts": {
-          "landsat_site_eco_minus_current_height_first_recall_at_10pct": {
-            "difference": 0.09374999999999999,
-            "ci_low": 0.02342408158396949,
-            "ci_high": 0.24000000000000002
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.2,
+            "ci_low": -0.16666666666666666,
+            "ci_high": 1.0
           },
-          "landsat_site_eco_minus_current_height_first_recall_at_20pct": {
-            "difference": 0.17708333333333331,
-            "ci_low": 0.03278022124483539,
-            "ci_high": 0.373139303482587
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.2,
+            "ci_low": -0.3333333333333333,
+            "ci_high": 0.9312499999999773
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
-            "difference": 0.03125,
-            "ci_low": -0.0898876404494382,
-            "ci_high": 0.1250303398058251
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.3333333333333333,
+            "ci_high": 0.5
           },
-          "landsat_site_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
-            "difference": 0.07291666666666663,
-            "ci_low": -0.1334090909090908,
-            "ci_high": 0.1805654761904761
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.3333333333333333,
+            "ci_high": 0.5
+          }
+        }
+      },
+      "east": {
+        "segments": 52,
+        "prevalence": 0.21153846153846154,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.6237394450686274,
+            "recall_at_10pct": 0.2727272727272727,
+            "recall_at_20pct": 0.6363636363636364
+          },
+          "landsat_site_eco": {
+            "spearman": 0.48289229478329593,
+            "recall_at_10pct": 0.18181818181818182,
+            "recall_at_20pct": 0.2727272727272727
+          },
+          "eco_class_rate": {
+            "spearman": 0.5751080421307526,
+            "recall_at_10pct": 0.36363636363636365,
+            "recall_at_20pct": 0.7272727272727273
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.3917030678144751,
+            "recall_at_10pct": 0.18181818181818182,
+            "recall_at_20pct": 0.45454545454545453
+          },
+          "tallest_first_survey": {
+            "spearman": 0.24166000580386376,
+            "recall_at_10pct": 0.2727272727272727,
+            "recall_at_20pct": 0.36363636363636365
+          },
+          "random": {
+            "recall_at_10pct": 0.09736363636363635,
+            "recall_at_20pct": 0.1919090909090909
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": -0.09090909090909094,
+            "ci_low": -0.11764705882352944,
+            "ci_high": 0.0
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": -0.09090909090909094,
+            "ci_low": -0.30000000000000004,
+            "ci_high": 0.0
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": 0.0,
+            "ci_high": 0.5
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.2727272727272727,
+            "ci_low": 0.0,
+            "ci_high": 0.3846153846153846
+          }
+        }
+      },
+      "pooled": {
+        "segments": 285,
+        "prevalence": 0.20701754385964913,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.34000935388992815,
+            "recall_at_10pct": 0.1864406779661017,
+            "recall_at_20pct": 0.4745762711864407
+          },
+          "landsat_site_eco": {
+            "spearman": 0.38304865149054157,
+            "recall_at_10pct": 0.22033898305084745,
+            "recall_at_20pct": 0.3898305084745763
+          },
+          "eco_class_rate": {
+            "spearman": 0.30864012743007757,
+            "recall_at_10pct": 0.1864406779661017,
+            "recall_at_20pct": 0.3220338983050847
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.4533721020742797,
+            "recall_at_10pct": 0.3050847457627119,
+            "recall_at_20pct": 0.4067796610169492
+          },
+          "tallest_first_survey": {
+            "spearman": 0.45819853880250494,
+            "recall_at_10pct": 0.3050847457627119,
+            "recall_at_20pct": 0.4745762711864407
+          },
+          "random": {
+            "recall_at_10pct": 0.09689830508474577,
+            "recall_at_20pct": 0.1996271186440678
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.13797113071371284,
+            "ci_high": 0.15999999999999998
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.15254237288135597,
+            "ci_low": -0.05129870129870125,
+            "ci_high": 0.28
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": -0.11864406779661019,
+            "ci_low": -0.26,
+            "ci_high": 0.018545751633986807
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.0,
+            "ci_low": -0.2127746773630973,
+            "ci_high": 0.09090909090909088
+          }
+        }
+      }
+    }
+  },
+  "half_width_100m": {
+    "growth": {
+      "study": {
+        "segments": 132,
+        "prevalence": 0.20454545454545456,
+        "scores": {
+          "landsat": {
+            "spearman": 0.4110814858102926,
+            "recall_at_10pct": 0.18518518518518517,
+            "recall_at_20pct": 0.37037037037037035
+          },
+          "landsat_terrain_eco": {
+            "spearman": 0.4682368655851982,
+            "recall_at_10pct": 0.18518518518518517,
+            "recall_at_20pct": 0.3333333333333333
+          },
+          "landsat_site_eco": {
+            "spearman": 0.5482721376654683,
+            "recall_at_10pct": 0.07407407407407407,
+            "recall_at_20pct": 0.3333333333333333
+          },
+          "eco_class_median": {
+            "spearman": -0.29764209274052583,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.07407407407407407
+          },
+          "survey_height_x_eco_median": {
+            "spearman": 0.155343250562214,
+            "recall_at_10pct": 0.07407407407407407,
+            "recall_at_20pct": 0.14814814814814814
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.6457608281633995,
+            "recall_at_10pct": 0.2222222222222222,
+            "recall_at_20pct": 0.4444444444444444
+          },
+          "tallest_first_survey": {
+            "spearman": 0.13584446890995705,
+            "recall_at_10pct": 0.07407407407407407,
+            "recall_at_20pct": 0.18518518518518517
+          },
+          "random": {
+            "recall_at_10pct": 0.09962962962962962,
+            "recall_at_20pct": 0.19644444444444445
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_10pct": {
+            "difference": 0.18518518518518517,
+            "ci_low": 0.0,
+            "ci_high": 0.2857142857142857
+          },
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_20pct": {
+            "difference": 0.25925925925925924,
+            "ci_low": 0.125,
+            "ci_high": 0.47624223602484445
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
+            "difference": 0.1111111111111111,
+            "ci_low": -0.1875,
+            "ci_high": 0.24
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
+            "difference": 0.18518518518518517,
+            "ci_low": -0.04767857142857132,
+            "ci_high": 0.3928571428571429
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.1111111111111111,
+            "ci_low": -0.2,
+            "ci_high": 0.25
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.14814814814814814,
+            "ci_low": -0.1333333333333333,
+            "ci_high": 0.3913043478260869
+          }
+        }
+      },
+      "west": {
+        "segments": 17,
+        "note": "too few to rank"
+      },
+      "east": {
+        "segments": 1,
+        "note": "too few to rank"
+      },
+      "pooled": {
+        "segments": 150,
+        "prevalence": 0.2,
+        "scores": {
+          "landsat": {
+            "spearman": 0.39627183430374685,
+            "recall_at_10pct": 0.23333333333333334,
+            "recall_at_20pct": 0.4
+          },
+          "landsat_terrain_eco": {
+            "spearman": 0.44704031290279567,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.4
+          },
+          "landsat_site_eco": {
+            "spearman": 0.5479656873638828,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.36666666666666664
+          },
+          "eco_class_median": {
+            "spearman": -0.20169679255842887,
+            "recall_at_10pct": 0.13333333333333333,
+            "recall_at_20pct": 0.16666666666666666
+          },
+          "survey_height_x_eco_median": {
+            "spearman": 0.16130316902973466,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.23333333333333334
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.6424729987999467,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.5
+          },
+          "tallest_first_survey": {
+            "spearman": 0.14699853326814524,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.23333333333333334
+          },
+          "random": {
+            "recall_at_10pct": 0.10083333333333333,
+            "recall_at_20pct": 0.19876666666666667
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_10pct": {
+            "difference": 0.06666666666666668,
+            "ci_low": 0.0,
+            "ci_high": 0.23809523809523808
+          },
+          "landsat_terrain_eco_minus_eco_class_median_recall_at_20pct": {
+            "difference": 0.23333333333333336,
+            "ci_low": 0.04999999999999999,
+            "ci_high": 0.3721656976744182
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_10pct": {
+            "difference": 0.033333333333333354,
+            "ci_low": -0.09527649769585246,
+            "ci_high": 0.17857142857142855
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median_recall_at_20pct": {
+            "difference": 0.16666666666666669,
+            "ci_low": -0.06666666666666665,
+            "ci_high": 0.3076923076923077
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.1305072463768115,
+            "ci_high": 0.1724137931034483
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.16666666666666669,
+            "ci_low": -0.09090909090909088,
+            "ci_high": 0.3056089743589741
+          }
+        }
+      }
+    },
+    "loss": {
+      "study": {
+        "segments": 233,
+        "prevalence": 0.2017167381974249,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.16983131821679157,
+            "recall_at_10pct": 0.1276595744680851,
+            "recall_at_20pct": 0.3617021276595745
+          },
+          "landsat_site_eco": {
+            "spearman": 0.19019921558860853,
+            "recall_at_10pct": 0.19148936170212766,
+            "recall_at_20pct": 0.2553191489361702
+          },
+          "eco_class_rate": {
+            "spearman": 0.16318133972994703,
+            "recall_at_10pct": 0.14893617021276595,
+            "recall_at_20pct": 0.2553191489361702
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.3823877871920232,
+            "recall_at_10pct": 0.23404255319148937,
+            "recall_at_20pct": 0.3404255319148936
+          },
+          "tallest_first_survey": {
+            "spearman": 0.42630426329937304,
+            "recall_at_10pct": 0.23404255319148937,
+            "recall_at_20pct": 0.3829787234042553
+          },
+          "random": {
+            "recall_at_10pct": 0.09797872340425531,
+            "recall_at_20pct": 0.1971914893617021
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": -0.021276595744680854,
+            "ci_low": -0.17073170731707316,
+            "ci_high": 0.15873917748917743
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.1063829787234043,
+            "ci_low": -0.09679386309992129,
+            "ci_high": 0.28003124999999984
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": -0.10638297872340427,
+            "ci_low": -0.22643653516295023,
+            "ci_high": 0.09305616498464221
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": -0.021276595744680826,
+            "ci_low": -0.23076923076923078,
+            "ci_high": 0.16279069767441862
+          }
+        }
+      },
+      "west": {
+        "segments": 27,
+        "prevalence": 0.2222222222222222,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.5891034852696309,
+            "recall_at_10pct": 0.3333333333333333,
+            "recall_at_20pct": 0.5
+          },
+          "landsat_site_eco": {
+            "spearman": 0.6160074239669842,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.5
+          },
+          "eco_class_rate": {
+            "spearman": 0.5819909497519398,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.0
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.5386972552964289,
+            "recall_at_10pct": 0.16666666666666666,
+            "recall_at_20pct": 0.5
+          },
+          "tallest_first_survey": {
+            "spearman": 0.6104410918227041,
+            "recall_at_10pct": 0.0,
+            "recall_at_20pct": 0.3333333333333333
+          },
+          "random": {
+            "recall_at_10pct": 0.07283333333333333,
+            "recall_at_20pct": 0.18033333333333335
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.3333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 0.6666666666666666
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.5,
+            "ci_low": 0.0,
+            "ci_high": 0.625
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.3333333333333333,
+            "ci_low": 0.0,
+            "ci_high": 0.4
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.16666666666666669,
+            "ci_low": 0.0,
+            "ci_high": 0.375
+          }
+        }
+      },
+      "east": {
+        "segments": 62,
+        "prevalence": 0.20967741935483872,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.5445245494079698,
+            "recall_at_10pct": 0.3076923076923077,
+            "recall_at_20pct": 0.46153846153846156
+          },
+          "landsat_site_eco": {
+            "spearman": 0.47023110877971525,
+            "recall_at_10pct": 0.07692307692307693,
+            "recall_at_20pct": 0.3076923076923077
+          },
+          "eco_class_rate": {
+            "spearman": 0.503446425858426,
+            "recall_at_10pct": 0.3076923076923077,
+            "recall_at_20pct": 0.5384615384615384
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.376961087149739,
+            "recall_at_10pct": 0.23076923076923078,
+            "recall_at_20pct": 0.3076923076923077
+          },
+          "tallest_first_survey": {
+            "spearman": 0.2900417938231279,
+            "recall_at_10pct": 0.23076923076923078,
+            "recall_at_20pct": 0.38461538461538464
+          },
+          "random": {
+            "recall_at_10pct": 0.10007692307692306,
+            "recall_at_20pct": 0.1980769230769231
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.0,
+            "ci_low": -0.10000000000000003,
+            "ci_high": 0.0
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": -0.07692307692307687,
+            "ci_low": -0.09999999999999998,
+            "ci_high": 0.3333333333333333
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": 0.07692307692307693,
+            "ci_low": 0.0,
+            "ci_high": 0.10000000000000003
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": 0.07692307692307693,
+            "ci_low": 0.0,
+            "ci_high": 0.23076923076923078
+          }
+        }
+      },
+      "pooled": {
+        "segments": 322,
+        "prevalence": 0.20186335403726707,
+        "scores": {
+          "landsat_terrain_eco": {
+            "spearman": 0.34314043533733224,
+            "recall_at_10pct": 0.2,
+            "recall_at_20pct": 0.4153846153846154
+          },
+          "landsat_site_eco": {
+            "spearman": 0.3879833219110634,
+            "recall_at_10pct": 0.24615384615384617,
+            "recall_at_20pct": 0.4307692307692308
+          },
+          "eco_class_rate": {
+            "spearman": 0.26936178838044533,
+            "recall_at_10pct": 0.18461538461538463,
+            "recall_at_20pct": 0.3230769230769231
+          },
+          "satellite_plus_survey_height": {
+            "spearman": 0.4898084453257658,
+            "recall_at_10pct": 0.24615384615384617,
+            "recall_at_20pct": 0.4307692307692308
+          },
+          "tallest_first_survey": {
+            "spearman": 0.48214011952625685,
+            "recall_at_10pct": 0.2923076923076923,
+            "recall_at_20pct": 0.5076923076923077
+          },
+          "random": {
+            "recall_at_10pct": 0.09832307692307694,
+            "recall_at_20pct": 0.19756923076923077
+          }
+        },
+        "contrasts": {
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_10pct": {
+            "difference": 0.015384615384615385,
+            "ci_low": -0.14893617021276595,
+            "ci_high": 0.10892249381188111
+          },
+          "landsat_terrain_eco_minus_eco_class_rate_recall_at_20pct": {
+            "difference": 0.09230769230769231,
+            "ci_low": -0.08823529411764708,
+            "ci_high": 0.19150981996726665
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_10pct": {
+            "difference": -0.09230769230769231,
+            "ci_low": -0.24248608534322807,
+            "ci_high": 0.03450564540738469
+          },
+          "landsat_terrain_eco_minus_tallest_first_survey_recall_at_20pct": {
+            "difference": -0.09230769230769226,
+            "ci_low": -0.2631578947368421,
+            "ci_high": 0.033712626166444486
           }
         }
       }

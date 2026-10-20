@@ -39,6 +39,8 @@ def corridor_table(
     table = segment_table(
         pixels, assigned, segments, columns, int(cfg["truth"]["min_pixels_per_segment"])
     )
+    if table.empty:
+        return table
     table["block"] = assign_blocks(
         table["easting"], table["northing"], cfg["ranking"]["block_size_m"]
     )
@@ -79,20 +81,25 @@ def main() -> int:
                 table = corridor_table(pixels, segments, float(half_width), spec, cfg)
                 table["region"] = name
                 pooled[kind].append(table)
-                result = evaluate_ranking(
-                    table,
-                    spec["truth_column"],
-                    spec["scores"],
-                    spec["headline"],
-                    spec["contrasts"],
-                    cfg,
-                    seed,
-                )
+                if len(table) < int(ranking["min_segments"]):
+                    result = {"segments": len(table), "note": "too few to rank"}
+                else:
+                    result = evaluate_ranking(
+                        table,
+                        spec["truth_column"],
+                        spec["scores"],
+                        spec["headline"],
+                        spec["contrasts"],
+                        cfg,
+                        seed,
+                    )
                 report.setdefault(key, {}).setdefault(kind, {})[name] = result
         for kind in ("growth", "loss"):
             spec = ranking[kind]
             tables = []
             for offset, table in enumerate(pooled[kind]):
+                if table.empty:
+                    continue
                 shifted = table.copy()
                 shifted["block"] = shifted["block"] + offset * 10_000_000
                 tables.append(shifted)

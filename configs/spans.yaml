@@ -23,6 +23,8 @@ ranking:
   bootstrap_resamples: 2000
   confidence_level: 0.95
   block_size_m: 5000
+  # Fewer segments than this are reported as a count only, with no ranking.
+  min_segments: 20
   # Growth forecast: unburned, low-loss canopy pixels, region held out.
   growth:
     heldout: growth_heldout_regions_undisturbed_x1.parquet

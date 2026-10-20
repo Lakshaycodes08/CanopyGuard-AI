@@ -1,0 +1,272 @@
+{
+  "git_commit": "fb582c056cbc53a03e09e02b278aee24e74f04f4",
+  "seed": 42,
+  "loss": {
+    "study": {
+      "scored_rows": 87627,
+      "eco_class_rate": {
+        "auc": 0.6868305087735789,
+        "base_rate": 0.06431807547901902,
+        "recall_at_10pct": 0.22604684173172462,
+        "recall_at_20pct": 0.3571682044002839
+      },
+      "landsat": {
+        "auc": 0.8057505796629741,
+        "base_rate": 0.06431807547901902,
+        "recall_at_10pct": 0.29240596167494676,
+        "recall_at_20pct": 0.5424059616749468
+      },
+      "landsat_terrain_eco": {
+        "auc": 0.805738482747665,
+        "base_rate": 0.06431807547901902,
+        "recall_at_10pct": 0.3080198722498226,
+        "recall_at_20pct": 0.5402767920511
+      },
+      "landsat_site_eco": {
+        "auc": 0.8017765114329612,
+        "base_rate": 0.06431807547901902,
+        "recall_at_10pct": 0.30074520936834637,
+        "recall_at_20pct": 0.525195173882186
+      },
+      "site_only_eco": {
+        "auc": 0.6695021623355136,
+        "base_rate": 0.06431807547901902,
+        "recall_at_10pct": 0.20315826827537262,
+        "recall_at_20pct": 0.38307310149041873
+      },
+      "satellite_plus_survey_height": {
+        "auc": 0.8683534299524418,
+        "base_rate": 0.06431807547901902,
+        "recall_at_10pct": 0.427430801987225,
+        "recall_at_20pct": 0.6573811213626686
+      },
+      "auc_gain_over_eco_class_rate": {
+        "difference": 0.11890797397408615,
+        "ci_low": 0.07837781110771186,
+        "ci_high": 0.17395842543627013
+      }
+    },
+    "west": {
+      "scored_rows": 77569,
+      "eco_class_rate": {
+        "auc": 0.6596255856929197,
+        "base_rate": 0.15611906818445512,
+        "recall_at_10pct": 0.2033030553261767,
+        "recall_at_20pct": 0.45474814203137903
+      },
+      "landsat": {
+        "auc": 0.6856560726377486,
+        "base_rate": 0.15611906818445512,
+        "recall_at_10pct": 0.16630883567299753,
+        "recall_at_20pct": 0.3208918249380677
+      },
+      "landsat_terrain_eco": {
+        "auc": 0.7599704501714117,
+        "base_rate": 0.15611906818445512,
+        "recall_at_10pct": 0.22526837324525187,
+        "recall_at_20pct": 0.43129644921552435
+      },
+      "landsat_site_eco": {
+        "auc": 0.7300382918820512,
+        "base_rate": 0.15611906818445512,
+        "recall_at_10pct": 0.16564822460776218,
+        "recall_at_20pct": 0.34145334434351776
+      },
+      "site_only_eco": {
+        "auc": 0.7423448580700832,
+        "base_rate": 0.15611906818445512,
+        "recall_at_10pct": 0.25458298926507017,
+        "recall_at_20pct": 0.45392237819983483
+      },
+      "satellite_plus_survey_height": {
+        "auc": 0.756143613398161,
+        "base_rate": 0.15611906818445512,
+        "recall_at_10pct": 0.20718414533443436,
+        "recall_at_20pct": 0.3909991742361685
+      },
+      "auc_gain_over_eco_class_rate": {
+        "difference": 0.100344864478492,
+        "ci_low": 0.07086360918725024,
+        "ci_high": 0.13570289844518585
+      }
+    },
+    "east": {
+      "scored_rows": 73495,
+      "eco_class_rate": {
+        "auc": 0.6962087316853922,
+        "base_rate": 0.2513368256343969,
+        "recall_at_10pct": 0.10193806842789087,
+        "recall_at_20pct": 0.28773278475530534
+      },
+      "landsat": {
+        "auc": 0.7433628964853447,
+        "base_rate": 0.2513368256343969,
+        "recall_at_10pct": 0.16408618449545256,
+        "recall_at_20pct": 0.326764833261152
+      },
+      "landsat_terrain_eco": {
+        "auc": 0.7646617670580483,
+        "base_rate": 0.2513368256343969,
+        "recall_at_10pct": 0.17686227804244262,
+        "recall_at_20pct": 0.3681788653096579
+      },
+      "landsat_site_eco": {
+        "auc": 0.7602218701298713,
+        "base_rate": 0.2513368256343969,
+        "recall_at_10pct": 0.1888804677349502,
+        "recall_at_20pct": 0.35740580337808575
+      },
+      "site_only_eco": {
+        "auc": 0.7206716227381491,
+        "base_rate": 0.2513368256343969,
+        "recall_at_10pct": 0.18860978778692075,
+        "recall_at_20pct": 0.353832828064097
+      },
+      "satellite_plus_survey_height": {
+        "auc": 0.783127251750394,
+        "base_rate": 0.2513368256343969,
+        "recall_at_10pct": 0.18492854049372023,
+        "recall_at_20pct": 0.36985708098744047
+      },
+      "auc_gain_over_eco_class_rate": {
+        "difference": 0.06845303537265612,
+        "ci_low": 0.05081025904060981,
+        "ci_high": 0.09239411526144338
+      }
+    }
+  },
+  "burned": {
+    "study": {
+      "scored_rows": 87627,
+      "eco_class_rate": {
+        "auc": 0.7988724195385185,
+        "base_rate": 0.37770321932737627,
+        "recall_at_10pct": 0.18841586850771974,
+        "recall_at_20pct": 0.3891591382904795
+      },
+      "landsat": {
+        "auc": 0.7557675860231584,
+        "base_rate": 0.37770321932737627,
+        "recall_at_10pct": 0.16179714173490045,
+        "recall_at_20pct": 0.32444028159651933
+      },
+      "landsat_terrain_eco": {
+        "auc": 0.9079196642652301,
+        "base_rate": 0.37770321932737627,
+        "recall_at_10pct": 0.22705985436746534,
+        "recall_at_20pct": 0.4365652476055232
+      },
+      "landsat_site_eco": {
+        "auc": 0.8759646568108842,
+        "base_rate": 0.37770321932737627,
+        "recall_at_10pct": 0.20693718463909117,
+        "recall_at_20pct": 0.4440583738707436
+      },
+      "site_only_eco": {
+        "auc": 0.8598555013989216,
+        "base_rate": 0.37770321932737627,
+        "recall_at_10pct": 0.21352388433997038,
+        "recall_at_20pct": 0.4188295011632474
+      },
+      "satellite_plus_survey_height": {
+        "auc": 0.8168895183705581,
+        "base_rate": 0.37770321932737627,
+        "recall_at_10pct": 0.20908239417469862,
+        "recall_at_20pct": 0.3558932833791582
+      },
+      "auc_gain_over_eco_class_rate": {
+        "difference": 0.10904724472671157,
+        "ci_low": 0.0705101156078497,
+        "ci_high": 0.15910535122022487
+      }
+    },
+    "west": {
+      "scored_rows": 77569,
+      "eco_class_rate": {
+        "auc": 0.6575514464309726,
+        "base_rate": 0.43215717619151983,
+        "recall_at_10pct": 0.13468766780025057,
+        "recall_at_20pct": 0.2690173617325935
+      },
+      "landsat": {
+        "auc": 0.608629496392485,
+        "base_rate": 0.43215717619151983,
+        "recall_at_10pct": 0.1161326889803711,
+        "recall_at_20pct": 0.23915637491796432
+      },
+      "landsat_terrain_eco": {
+        "auc": 0.7176801324166037,
+        "base_rate": 0.43215717619151983,
+        "recall_at_10pct": 0.15031919336555097,
+        "recall_at_20pct": 0.2926436370144979
+      },
+      "landsat_site_eco": {
+        "auc": 0.9372833347831382,
+        "base_rate": 0.43215717619151983,
+        "recall_at_10pct": 0.21690233279637253,
+        "recall_at_20pct": 0.43592267764453196
+      },
+      "site_only_eco": {
+        "auc": 0.9348870251461208,
+        "base_rate": 0.43215717619151983,
+        "recall_at_10pct": 0.22248075890459995,
+        "recall_at_20pct": 0.4376827158284112
+      },
+      "satellite_plus_survey_height": {
+        "auc": 0.939792888626066,
+        "base_rate": 0.43215717619151983,
+        "recall_at_10pct": 0.21997494182924646,
+        "recall_at_20pct": 0.43962174094624423
+      },
+      "auc_gain_over_eco_class_rate": {
+        "difference": 0.060128685985631036,
+        "ci_low": -0.0395288178043906,
+        "ci_high": 0.16766854539904735
+      }
+    },
+    "east": {
+      "scored_rows": 73495,
+      "eco_class_rate": {
+        "auc": 0.4609422466087138,
+        "base_rate": 0.7680794611878359,
+        "recall_at_10pct": 0.07806908768821966,
+        "recall_at_20pct": 0.1692648361381754
+      },
+      "landsat": {
+        "auc": 0.5247358856525516,
+        "base_rate": 0.7680794611878359,
+        "recall_at_10pct": 0.09241806908768822,
+        "recall_at_20pct": 0.19484499557130203
+      },
+      "landsat_terrain_eco": {
+        "auc": 0.42761919589187275,
+        "base_rate": 0.7680794611878359,
+        "recall_at_10pct": 0.06177147918511958,
+        "recall_at_20pct": 0.15829937998228522
+      },
+      "landsat_site_eco": {
+        "auc": 0.3361879446398464,
+        "base_rate": 0.7680794611878359,
+        "recall_at_10pct": 0.08267493356953055,
+        "recall_at_20pct": 0.1641984056687334
+      },
+      "site_only_eco": {
+        "auc": 0.3555593220779362,
+        "base_rate": 0.7680794611878359,
+        "recall_at_10pct": 0.08891054030115146,
+        "recall_at_20pct": 0.17110717449069973
+      },
+      "satellite_plus_survey_height": {
+        "auc": 0.35489772370900663,
+        "base_rate": 0.7680794611878359,
+        "recall_at_10pct": 0.08184233835252436,
+        "recall_at_20pct": 0.17280779450841452
+      },
+      "auc_gain_over_eco_class_rate": {
+        "difference": -0.03332305071684105,
+        "ci_low": -0.09616401407968268,
+        "ci_high": 0.04486531238430698
+      }
+    }
+  }
+}
