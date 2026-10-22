@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import numpy as np
@@ -56,4 +57,28 @@ def drop_share_on_grid(
         dst_nodata=np.nan,
         resampling=Resampling.average,
     )
+    return out
+
+
+def compact_percent(share: NDArray[np.float32], factor: int) -> NDArray[np.uint8]:
+    """Block means as whole percent (255 = no data), small enough to move by hand."""
+    rows = share.shape[0] // factor * factor
+    cols = share.shape[1] // factor * factor
+    tiles = share[:rows, :cols].reshape(rows // factor, factor, cols // factor, factor)
+    with np.errstate(invalid="ignore"), warnings.catch_warnings():
+        warnings.simplefilter("ignore", RuntimeWarning)
+        mean = np.nanmean(tiles, axis=(1, 3))
+    return np.where(np.isnan(mean), 255, np.round(100 * mean)).astype(np.uint8)
+
+
+def expand_percent(
+    percent: NDArray[np.uint8], factor: int, shape: tuple[int, int]
+) -> NDArray[np.float32]:
+    """Repeat each percent over its block on a grid of `shape`; NaN outside."""
+    share = np.where(percent == 255, np.nan, percent / 100.0).astype(np.float32)
+    repeated = np.kron(share, np.ones((factor, factor), dtype=np.float32))
+    out = np.full(shape, np.nan, dtype=np.float32)
+    rows = min(shape[0], repeated.shape[0])
+    cols = min(shape[1], repeated.shape[1])
+    out[:rows, :cols] = repeated[:rows, :cols]
     return out

@@ -6,7 +6,7 @@ import numpy as np
 from pyproj import Transformer
 
 from canopyguard.config import load_config, load_region
-from canopyguard.data.echosat_drop import drop_share_on_grid
+from canopyguard.data.echosat_drop import compact_percent, drop_share_on_grid
 from canopyguard.data.landsat_stac import study_grid
 from canopyguard.io import data_path, ensure_parent, with_region
 from canopyguard.provenance import file_sha256, write_provenance
@@ -29,15 +29,19 @@ def main() -> int:
     share = drop_share_on_grid(source, region["bbox"], grid)
     output = ensure_parent(with_region(data_path(source["output"]), suffix))
     np.savez_compressed(output, echosat_drop_share=share)
-    write_provenance(
-        output,
-        source_url=source["tile_url"],
-        script_name="scripts/ingest_echosat_drop.py",
-        bbox_wgs84=region["bbox"],
-        crs="EPSG:32610",
-        row_count=1,
-        config_sha256=file_sha256("configs/ingestion.yaml"),
-    )
+    compact = ensure_parent(with_region(data_path(source["compact_output"]), suffix))
+    factor = int(source["compact_factor"])
+    np.savez_compressed(compact, percent=compact_percent(share, factor), factor=factor)
+    for path in (output, compact):
+        write_provenance(
+            path,
+            source_url=source["tile_url"],
+            script_name="scripts/ingest_echosat_drop.py",
+            bbox_wgs84=region["bbox"],
+            crs="EPSG:32610",
+            row_count=1,
+            config_sha256=file_sha256("configs/ingestion.yaml"),
+        )
     valid = np.isfinite(share)
     print(
         f"{region['name']}: valid {valid.mean():.2f}, "

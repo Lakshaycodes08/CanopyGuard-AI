@@ -1,665 +1,11 @@
 {
-  "git_commit": "cd779d5fa41fa1e51beef7ebc947c2ea9d6694e7",
+  "git_commit": "cb3f575ca508b0c4d6c87339376b5c3285ab9f65",
   "seed": 42,
   "regions": [
     "study",
     "west",
     "east"
   ],
-  "scale_x1": {
-    "undisturbed": {
-      "summary": {
-        "east": {
-          "rows": 17199,
-          "mean_change": 0.932632632002373,
-          "p95_start_mean": 11.222623767171386
-        },
-        "study": {
-          "rows": 73190,
-          "mean_change": 0.5009892053638281,
-          "p95_start_mean": 5.264209820074999
-        },
-        "west": {
-          "rows": 48903,
-          "mean_change": 0.8987897845645171,
-          "p95_start_mean": 13.08310357138028
-        }
-      },
-      "study": {
-        "scored_rows": 46272,
-        "overall": {
-          "landsat": {
-            "mae": 0.4703059766905676,
-            "rmse": 0.662406741291199,
-            "bias": 0.004221075857108875,
-            "r2": 0.18518253460332557,
-            "n": 46272
-          },
-          "zero": {
-            "mae": 0.5961295363065663,
-            "rmse": 0.8951211100783608,
-            "bias": -0.5125792852861706,
-            "r2": -0.4879023889626466,
-            "n": 46272
-          },
-          "train_mean": {
-            "mae": 0.6966534410851964,
-            "rmse": 0.8333918293690438,
-            "bias": 0.3950160291122954,
-            "r2": -0.28976123241615226,
-            "n": 46272
-          },
-          "landsat_terrain": {
-            "mae": 0.4713628545303862,
-            "rmse": 0.6590816460194754,
-            "bias": 0.02815553128522125,
-            "r2": 0.19334231154061565,
-            "n": 46272
-          },
-          "landsat_terrain_veg": {
-            "mae": 0.4505090170462594,
-            "rmse": 0.6350968757025643,
-            "bias": 0.013985592920444117,
-            "r2": 0.2509845176669421,
-            "n": 46272
-          },
-          "landsat_terrain_climate": {
-            "mae": 0.49678799334803153,
-            "rmse": 0.683650875714105,
-            "bias": 0.049762413957752424,
-            "r2": 0.13208021002633397,
-            "n": 46272
-          },
-          "landsat_site_all": {
-            "mae": 0.4654661625944745,
-            "rmse": 0.6491052163701939,
-            "bias": 0.023467596990679882,
-            "r2": 0.21757802281320382,
-            "n": 46272
-          },
-          "landsat_terrain_eco": {
-            "mae": 0.4715479459515834,
-            "rmse": 0.6559432845378171,
-            "bias": 0.0342767287913123,
-            "r2": 0.20100617561386447,
-            "n": 46272
-          },
-          "landsat_site_eco": {
-            "mae": 0.49491833385339906,
-            "rmse": 0.6802582972370599,
-            "bias": 0.04875381955739346,
-            "r2": 0.14067284167998428,
-            "n": 46272
-          },
-          "site_only_eco": {
-            "mae": 0.5514563048929317,
-            "rmse": 0.7562840078747124,
-            "bias": 0.018275149443149362,
-            "r2": -0.062137338421272226,
-            "n": 46272
-          },
-          "site_only": {
-            "mae": 0.5210877497153243,
-            "rmse": 0.7199510407618092,
-            "bias": 0.01333357528690148,
-            "r2": 0.037464469148181356,
-            "n": 46272
-          },
-          "eco_class_median": {
-            "mae": 0.5213838873345751,
-            "rmse": 0.7483590217601469,
-            "bias": -0.10662257492533576,
-            "r2": -0.03999401365244304,
-            "n": 46272
-          },
-          "survey_height_median": {
-            "mae": 0.4598714301730564,
-            "rmse": 0.6904922505063624,
-            "bias": -0.08737869492383761,
-            "r2": 0.1146225434326088,
-            "n": 46272
-          },
-          "survey_height_x_eco_median": {
-            "mae": 0.46626812093916953,
-            "rmse": 0.6905344799429894,
-            "bias": -0.07995635446164627,
-            "r2": 0.11451424349298744,
-            "n": 46272
-          },
-          "lightgbm_satellite_plus_survey": {
-            "mae": 0.4202934675559859,
-            "rmse": 0.6053007213852108,
-            "bias": 0.006640679022382477,
-            "r2": 0.3196173581612306,
-            "n": 46272
-          }
-        },
-        "contrasts": {
-          "landsat_minus_zero": {
-            "difference": -0.12582355961599873,
-            "ci_low": -0.1921919175315417,
-            "ci_high": -0.012725026197722557,
-            "p_value_ge_zero": 0.0035,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_zero": {
-            "difference": -0.1245815903549829,
-            "ci_low": -0.1888309953759423,
-            "ci_high": -0.019578445989351087,
-            "p_value_ge_zero": 0.002,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_zero": {
-            "difference": -0.10121120245316723,
-            "ci_low": -0.1680764551900057,
-            "ci_high": 0.015094400019015896,
-            "p_value_ge_zero": 0.0145,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": false
-          },
-          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
-            "difference": 0.0052798250124138635,
-            "ci_low": -0.009493240701152575,
-            "ci_high": 0.038790132057765186,
-            "p_value_ge_zero": 0.6245,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": false
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median": {
-            "difference": 0.028650212914229534,
-            "ci_low": 0.00522413523406256,
-            "ci_high": 0.07225277485315044,
-            "p_value_ge_zero": 0.9875,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_landsat": {
-            "difference": 0.0012419692610158295,
-            "ci_low": -0.007750264313081508,
-            "ci_high": 0.006420057725783569,
-            "p_value_ge_zero": 0.6865,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": false
-          },
-          "landsat_site_eco_minus_landsat_terrain_eco": {
-            "difference": 0.02337038790181567,
-            "ci_low": 0.010616665351283748,
-            "ci_high": 0.05177414759933379,
-            "p_value_ge_zero": 1.0,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_site_only_eco": {
-            "difference": -0.07990835894134835,
-            "ci_low": -0.1551185541844709,
-            "ci_high": -0.04578188357762456,
-            "p_value_ge_zero": 0.0,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
-            "difference": 0.07462486629741316,
-            "ci_low": 0.047661997601016665,
-            "ci_high": 0.11203278017656064,
-            "p_value_ge_zero": 1.0,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
-            "difference": 0.05125447839559749,
-            "ci_low": 0.02349484479490682,
-            "ci_high": 0.07832689321601961,
-            "p_value_ge_zero": 0.9995,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_veg_minus_landsat_terrain_eco": {
-            "difference": -0.021038928905323995,
-            "ci_low": -0.037508323565169276,
-            "ci_high": -0.010672743659250613,
-            "p_value_ge_zero": 0.0,
-            "blocks": 16.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          }
-        }
-      },
-      "west": {
-        "scored_rows": 35048,
-        "overall": {
-          "landsat": {
-            "mae": 0.5616895239117705,
-            "rmse": 0.7992723034116115,
-            "bias": 0.07754625553665155,
-            "r2": 0.41839307431059214,
-            "n": 35048
-          },
-          "zero": {
-            "mae": 0.9820779734773274,
-            "rmse": 1.3972173205516283,
-            "bias": -0.9240225493309602,
-            "r2": -0.7773295556198057,
-            "n": 35048
-          },
-          "train_mean": {
-            "mae": 0.7421233230176489,
-            "rmse": 1.1020944835356468,
-            "bias": -0.3409012781764239,
-            "r2": -0.10580283398343693,
-            "n": 35048
-          },
-          "landsat_terrain": {
-            "mae": 0.5432945880742446,
-            "rmse": 0.7855857104630019,
-            "bias": -0.026959654400772227,
-            "r2": 0.4381411940969179,
-            "n": 35048
-          },
-          "landsat_terrain_veg": {
-            "mae": 0.5309129742352585,
-            "rmse": 0.7673235935414299,
-            "bias": -0.031003145806145025,
-            "r2": 0.46396006538292556,
-            "n": 35048
-          },
-          "landsat_terrain_climate": {
-            "mae": 0.5496875055953433,
-            "rmse": 0.8127646294000236,
-            "bias": -0.17206139313068933,
-            "r2": 0.3985914026649856,
-            "n": 35048
-          },
-          "landsat_site_all": {
-            "mae": 0.5564586700736831,
-            "rmse": 0.8170437471564928,
-            "bias": -0.22582115155788884,
-            "r2": 0.39224202989678514,
-            "n": 35048
-          },
-          "landsat_terrain_eco": {
-            "mae": 0.5430769693063283,
-            "rmse": 0.7857835043715948,
-            "bias": -0.03521208948716566,
-            "r2": 0.4378582300913497,
-            "n": 35048
-          },
-          "landsat_site_eco": {
-            "mae": 0.5507699362696162,
-            "rmse": 0.8128800635489815,
-            "bias": -0.1773632423666145,
-            "r2": 0.39842055856803915,
-            "n": 35048
-          },
-          "site_only_eco": {
-            "mae": 0.6798470112923478,
-            "rmse": 1.0042138318642568,
-            "bias": -0.31004548433574436,
-            "r2": 0.08189481632087248,
-            "n": 35048
-          },
-          "site_only": {
-            "mae": 0.6544431199696521,
-            "rmse": 0.9656854796374894,
-            "bias": -0.37574398728691233,
-            "r2": 0.15099266172470127,
-            "n": 35048
-          },
-          "eco_class_median": {
-            "mae": 0.667244070804912,
-            "rmse": 0.9668107725232584,
-            "bias": -0.22133016514314172,
-            "r2": 0.14901284825320305,
-            "n": 35048
-          },
-          "survey_height_median": {
-            "mae": 0.6230141052867175,
-            "rmse": 0.9095469078354751,
-            "bias": -0.15608547064244474,
-            "r2": 0.24683480043802386,
-            "n": 35048
-          },
-          "survey_height_x_eco_median": {
-            "mae": 0.6173912368869791,
-            "rmse": 0.9015314947377324,
-            "bias": -0.14774559686893945,
-            "r2": 0.26005089699566575,
-            "n": 35048
-          },
-          "lightgbm_satellite_plus_survey": {
-            "mae": 0.5410159163490965,
-            "rmse": 0.799014504436101,
-            "bias": -0.20343981139360326,
-            "r2": 0.4187681992544854,
-            "n": 35048
-          }
-        },
-        "contrasts": {
-          "landsat_minus_zero": {
-            "difference": -0.4203884495655569,
-            "ci_low": -0.5897116590652469,
-            "ci_high": -0.2856138052901634,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_zero": {
-            "difference": -0.4390010041709991,
-            "ci_low": -0.6055390853099659,
-            "ci_high": -0.2987334285556277,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_zero": {
-            "difference": -0.43130803720771116,
-            "ci_low": -0.5829839095457982,
-            "ci_high": -0.29835691054711794,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
-            "difference": -0.07431426758065085,
-            "ci_low": -0.11201916991061253,
-            "ci_high": -0.04863465188012574,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median": {
-            "difference": -0.06662130061736293,
-            "ci_low": -0.09353737954486006,
-            "ci_high": -0.04574255498675433,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_landsat": {
-            "difference": -0.0186125546054422,
-            "ci_low": -0.03265438848541689,
-            "ci_high": -0.007407673066224703,
-            "p_value_ge_zero": 0.0015,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_landsat_terrain_eco": {
-            "difference": 0.007692966963287917,
-            "ci_low": -0.008885943747432548,
-            "ci_high": 0.02659087482671909,
-            "p_value_ge_zero": 0.8,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": false
-          },
-          "landsat_terrain_eco_minus_site_only_eco": {
-            "difference": -0.1367700419860195,
-            "ci_low": -0.2148804913440183,
-            "ci_high": -0.08097371207404432,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
-            "difference": 0.00975401992051983,
-            "ci_low": 0.0024976232785386757,
-            "ci_high": 0.01912159907781187,
-            "p_value_ge_zero": 0.994,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
-            "difference": 0.0020610529572319125,
-            "ci_low": -0.014013816440400388,
-            "ci_high": 0.018686831339592303,
-            "p_value_ge_zero": 0.61,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": false
-          },
-          "landsat_terrain_veg_minus_landsat_terrain_eco": {
-            "difference": -0.0121639950710698,
-            "ci_low": -0.019279788168536014,
-            "ci_high": -0.005703308188482071,
-            "p_value_ge_zero": 0.0,
-            "blocks": 21.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          }
-        }
-      },
-      "east": {
-        "scored_rows": 14022,
-        "overall": {
-          "landsat": {
-            "mae": 0.5300983898577505,
-            "rmse": 0.7466342924902457,
-            "bias": -0.18398953684500666,
-            "r2": 0.44069638507532005,
-            "n": 14022
-          },
-          "zero": {
-            "mae": 1.0412789669143814,
-            "rmse": 1.403235026335503,
-            "bias": -0.9860830902989403,
-            "r2": -0.9755707783816008,
-            "n": 14022
-          },
-          "train_mean": {
-            "mae": 0.7857267547667777,
-            "rmse": 1.0501560727049915,
-            "bias": -0.3257592652218502,
-            "r2": -0.10646952434852497,
-            "n": 14022
-          },
-          "landsat_terrain": {
-            "mae": 0.5624322633666763,
-            "rmse": 0.797597183654466,
-            "bias": -0.2431106267489771,
-            "r2": 0.361738006990053,
-            "n": 14022
-          },
-          "landsat_terrain_veg": {
-            "mae": 0.5390994656921975,
-            "rmse": 0.7526813835350716,
-            "bias": -0.1865808922511748,
-            "r2": 0.43159994737339735,
-            "n": 14022
-          },
-          "landsat_terrain_climate": {
-            "mae": 0.5647177544331289,
-            "rmse": 0.7997710501437028,
-            "bias": -0.2892253646994567,
-            "r2": 0.358254074974099,
-            "n": 14022
-          },
-          "landsat_site_all": {
-            "mae": 0.5529553455597327,
-            "rmse": 0.7712160608353015,
-            "bias": -0.23692365854794495,
-            "r2": 0.4032617298090079,
-            "n": 14022
-          },
-          "landsat_terrain_eco": {
-            "mae": 0.5624201274448914,
-            "rmse": 0.7958947210597411,
-            "bias": -0.238693158362298,
-            "r2": 0.3644598257342997,
-            "n": 14022
-          },
-          "landsat_site_eco": {
-            "mae": 0.5712619265498329,
-            "rmse": 0.8064052224996328,
-            "bias": -0.3012600799516965,
-            "r2": 0.34756323776138554,
-            "n": 14022
-          },
-          "site_only_eco": {
-            "mae": 0.7163809463336963,
-            "rmse": 0.9921043863154615,
-            "bias": -0.3663886252505297,
-            "r2": 0.012478636022170364,
-            "n": 14022
-          },
-          "site_only": {
-            "mae": 0.6805455090146951,
-            "rmse": 0.9193216942783865,
-            "bias": -0.25348737159376916,
-            "r2": 0.15205676835281134,
-            "n": 14022
-          },
-          "eco_class_median": {
-            "mae": 0.689095441793641,
-            "rmse": 0.9637795203268448,
-            "bias": -0.33726682224943805,
-            "r2": 0.06806172740965222,
-            "n": 14022
-          },
-          "survey_height_median": {
-            "mae": 0.6186392378187364,
-            "rmse": 0.8819601150840967,
-            "bias": -0.26593238187926166,
-            "r2": 0.21957773455517426,
-            "n": 14022
-          },
-          "survey_height_x_eco_median": {
-            "mae": 0.6311858333080312,
-            "rmse": 0.8978557180043935,
-            "bias": -0.2511447968558924,
-            "r2": 0.19119306572072292,
-            "n": 14022
-          },
-          "lightgbm_satellite_plus_survey": {
-            "mae": 0.5237907536974888,
-            "rmse": 0.7326781389640199,
-            "bias": -0.20521745797041627,
-            "r2": 0.4614100718917292,
-            "n": 14022
-          }
-        },
-        "contrasts": {
-          "landsat_minus_zero": {
-            "difference": -0.5111805770566307,
-            "ci_low": -0.7396319495224382,
-            "ci_high": -0.3295458097608038,
-            "p_value_ge_zero": 0.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_zero": {
-            "difference": -0.4788588394694898,
-            "ci_low": -0.6727347942257595,
-            "ci_high": -0.3114805166309714,
-            "p_value_ge_zero": 0.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_zero": {
-            "difference": -0.4700170403645483,
-            "ci_low": -0.6812598480143974,
-            "ci_high": -0.311359904569586,
-            "p_value_ge_zero": 0.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
-            "difference": -0.06876570586314001,
-            "ci_low": -0.0932483320317055,
-            "ci_high": -0.025533072751389586,
-            "p_value_ge_zero": 0.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_survey_height_x_eco_median": {
-            "difference": -0.059923906758198475,
-            "ci_low": -0.09605024542993236,
-            "ci_high": -0.01989071302601192,
-            "p_value_ge_zero": 0.0015,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_landsat": {
-            "difference": 0.03232173758714085,
-            "ci_low": 0.011106669742180234,
-            "ci_high": 0.06567307013795645,
-            "p_value_ge_zero": 1.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_landsat_terrain_eco": {
-            "difference": 0.008841799104941539,
-            "ci_low": -0.009347682928962125,
-            "ci_high": 0.033737118650252564,
-            "p_value_ge_zero": 0.801,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": false
-          },
-          "landsat_terrain_eco_minus_site_only_eco": {
-            "difference": -0.15396081888880497,
-            "ci_low": -0.1771612844129074,
-            "ci_high": -0.102940461505177,
-            "p_value_ge_zero": 0.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
-            "difference": 0.047471172852344146,
-            "ci_low": 0.026881127143385152,
-            "ci_high": 0.07305696129362835,
-            "p_value_ge_zero": 1.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
-            "difference": 0.03862937374740261,
-            "ci_low": 0.011774194489818793,
-            "ci_high": 0.07841312850503787,
-            "p_value_ge_zero": 0.997,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          },
-          "landsat_terrain_veg_minus_landsat_terrain_eco": {
-            "difference": -0.02332066175269376,
-            "ci_low": -0.03992495352159061,
-            "ci_high": -0.009560049081035275,
-            "p_value_ge_zero": 0.0,
-            "blocks": 11.0,
-            "resamples": 2000.0,
-            "excludes_zero": true
-          }
-        }
-      }
-    }
-  },
   "scale_x3": {
     "all": {
       "summary": {
@@ -894,7 +240,7 @@
         "scored_rows": 8678,
         "overall": {
           "landsat": {
-            "mae": 2.200044719143604,
+            "mae": 2.2000447191436043,
             "rmse": 3.2796501346376457,
             "bias": -1.0993031812446983,
             "r2": -0.5814075948462156,
@@ -917,8 +263,8 @@
           "landsat_terrain": {
             "mae": 2.449893931363375,
             "rmse": 3.5202480230957387,
-            "bias": -1.6724910829124093,
-            "r2": -0.8219452132982812,
+            "bias": -1.6724910829124098,
+            "r2": -0.8219452132982814,
             "n": 8678
           },
           "landsat_terrain_veg": {
@@ -938,8 +284,8 @@
           "landsat_site_all": {
             "mae": 2.0386307881658814,
             "rmse": 3.3209057934622606,
-            "bias": -0.7542512573544531,
-            "r2": -0.6214437929061716,
+            "bias": -0.7542512573544529,
+            "r2": -0.6214437929061714,
             "n": 8678
           },
           "landsat_terrain_eco": {
@@ -952,14 +298,14 @@
           "landsat_site_eco": {
             "mae": 2.5757002407393124,
             "rmse": 4.042929283465276,
-            "bias": -1.6965274882581232,
+            "bias": -1.6965274882581234,
             "r2": -1.4031510919935366,
             "n": 8678
           },
           "site_only_eco": {
             "mae": 2.251886348228801,
             "rmse": 3.280401418749999,
-            "bias": -1.3904211377510434,
+            "bias": -1.3904211377510436,
             "r2": -0.5821321980401628,
             "n": 8678
           },
@@ -1002,7 +348,7 @@
         "contrasts": {
           "landsat_minus_zero": {
             "difference": 0.6825422086568391,
-            "ci_low": 0.2518206464022683,
+            "ci_low": 0.25182064640226837,
             "ci_high": 1.1218735571735041,
             "p_value_ge_zero": 0.999,
             "blocks": 24.0,
@@ -1011,7 +357,7 @@
           },
           "landsat_terrain_eco_minus_zero": {
             "difference": 0.9178550581984055,
-            "ci_low": 0.2871969454468132,
+            "ci_low": 0.28719694544681296,
             "ci_high": 1.5023885182404806,
             "p_value_ge_zero": 0.9985,
             "blocks": 24.0,
@@ -1020,7 +366,7 @@
           },
           "landsat_site_eco_minus_zero": {
             "difference": 1.0581977302525472,
-            "ci_low": 0.37144009051000315,
+            "ci_low": 0.3714400905100034,
             "ci_high": 1.8478223990633913,
             "p_value_ge_zero": 0.999,
             "blocks": 24.0,
@@ -1029,7 +375,7 @@
           },
           "landsat_terrain_eco_minus_survey_height_x_eco_median": {
             "difference": 0.5667115568712464,
-            "ci_low": 0.31577717320703635,
+            "ci_low": 0.3157771732070361,
             "ci_high": 0.8519867126257756,
             "p_value_ge_zero": 1.0,
             "blocks": 24.0,
@@ -1038,7 +384,7 @@
           },
           "landsat_site_eco_minus_survey_height_x_eco_median": {
             "difference": 0.707054228925388,
-            "ci_low": 0.2829043738646328,
+            "ci_low": 0.28290437386463235,
             "ci_high": 1.206866025898509,
             "p_value_ge_zero": 0.9995,
             "blocks": 24.0,
@@ -1056,8 +402,8 @@
           },
           "landsat_site_eco_minus_landsat_terrain_eco": {
             "difference": 0.14034267205414164,
-            "ci_low": -0.12770511437516202,
-            "ci_high": 0.35612425147726373,
+            "ci_low": -0.12770511437516227,
+            "ci_high": 0.3561242514772636,
             "p_value_ge_zero": 0.8605,
             "blocks": 24.0,
             "resamples": 2000.0,
@@ -1065,7 +411,7 @@
           },
           "landsat_terrain_eco_minus_site_only_eco": {
             "difference": 0.18347122045636954,
-            "ci_low": 0.041482578035856685,
+            "ci_low": 0.04148257803585673,
             "ci_high": 0.33514962696157313,
             "p_value_ge_zero": 0.993,
             "blocks": 24.0,
@@ -1074,7 +420,7 @@
           },
           "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
             "difference": 0.2907102716758785,
-            "ci_low": 0.1589473112153364,
+            "ci_low": 0.1589473112153366,
             "ci_high": 0.4361170842389693,
             "p_value_ge_zero": 1.0,
             "blocks": 24.0,
@@ -1092,8 +438,8 @@
           },
           "landsat_terrain_veg_minus_landsat_terrain_eco": {
             "difference": -0.09864504834835897,
-            "ci_low": -0.18293229700301714,
-            "ci_high": -0.02346821210732707,
+            "ci_low": -0.1829322970030171,
+            "ci_high": -0.02346821210732676,
             "p_value_ge_zero": 0.005,
             "blocks": 24.0,
             "resamples": 2000.0,
@@ -1958,6 +1304,658 @@
             "ci_low": -0.028310604283040032,
             "ci_high": 0.0018518591611856197,
             "p_value_ge_zero": 0.1135,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          }
+        }
+      }
+    },
+    "undisturbed_satellite": {
+      "summary": {
+        "east": {
+          "rows": 1566,
+          "mean_change": 0.7313900218788051,
+          "p95_start_mean": 11.167375568975974
+        },
+        "study": {
+          "rows": 6872,
+          "mean_change": 0.39257094876249,
+          "p95_start_mean": 6.090419816206188
+        },
+        "west": {
+          "rows": 4849,
+          "mean_change": 0.6287800032467062,
+          "p95_start_mean": 14.278630477033527
+        }
+      },
+      "study": {
+        "scored_rows": 4399,
+        "overall": {
+          "landsat": {
+            "mae": 0.39073518718258643,
+            "rmse": 0.5489973285739869,
+            "bias": -0.008422769183266577,
+            "r2": 0.05759407434820518,
+            "n": 4399
+          },
+          "zero": {
+            "mae": 0.505410285152217,
+            "rmse": 0.6873761849034662,
+            "bias": -0.3907279746334074,
+            "r2": -0.47736058624321065,
+            "n": 4399
+          },
+          "train_mean": {
+            "mae": 0.48468508513191194,
+            "rmse": 0.6237304328445991,
+            "bias": 0.2631007097010411,
+            "r2": -0.21644202327096784,
+            "n": 4399
+          },
+          "landsat_terrain": {
+            "mae": 0.3896641033064625,
+            "rmse": 0.5503706124126255,
+            "bias": -0.036954230606804736,
+            "r2": 0.05287343390062371,
+            "n": 4399
+          },
+          "landsat_terrain_veg": {
+            "mae": 0.37830783451244004,
+            "rmse": 0.5328797943841563,
+            "bias": -0.02094465632347755,
+            "r2": 0.11211636372192757,
+            "n": 4399
+          },
+          "landsat_terrain_climate": {
+            "mae": 0.4099724383023553,
+            "rmse": 0.577863086473005,
+            "bias": -0.09268030305813435,
+            "r2": -0.044112876323427086,
+            "n": 4399
+          },
+          "landsat_site_all": {
+            "mae": 0.3952508847736618,
+            "rmse": 0.5556019574944369,
+            "bias": -0.06746523721648831,
+            "r2": 0.03478273811495558,
+            "n": 4399
+          },
+          "landsat_terrain_eco": {
+            "mae": 0.3893868926656705,
+            "rmse": 0.5477429705111958,
+            "bias": -0.03430730594779332,
+            "r2": 0.06189560352724521,
+            "n": 4399
+          },
+          "landsat_site_eco": {
+            "mae": 0.40815528701920145,
+            "rmse": 0.5715563234248755,
+            "bias": -0.08426330973038439,
+            "r2": -0.021446474324782194,
+            "n": 4399
+          },
+          "site_only_eco": {
+            "mae": 0.451077710365875,
+            "rmse": 0.6294222342237462,
+            "bias": -0.1911934686853067,
+            "r2": -0.23874440603746927,
+            "n": 4399
+          },
+          "site_only": {
+            "mae": 0.4278536451063406,
+            "rmse": 0.5996654304312139,
+            "bias": -0.15413155693437677,
+            "r2": -0.12438637025952137,
+            "n": 4399
+          },
+          "eco_class_median": {
+            "mae": 0.4261046913689632,
+            "rmse": 0.5872377357703344,
+            "bias": -0.04247297423478159,
+            "r2": -0.07826487181719144,
+            "n": 4399
+          },
+          "survey_height_median": {
+            "mae": 0.40151551157276205,
+            "rmse": 0.5817912558620549,
+            "bias": -0.0061605453081006595,
+            "r2": -0.058356362925728655,
+            "n": 4399
+          },
+          "survey_height_x_eco_median": {
+            "mae": 0.4122101064884723,
+            "rmse": 0.579796938022389,
+            "bias": -0.03252037029443922,
+            "r2": -0.051112935563903505,
+            "n": 4399
+          },
+          "lightgbm_satellite_plus_survey": {
+            "mae": 0.390772430609611,
+            "rmse": 0.5509689119405148,
+            "bias": -0.07488920654384254,
+            "r2": 0.050813100840605085,
+            "n": 4399
+          }
+        },
+        "contrasts": {
+          "landsat_minus_zero": {
+            "difference": -0.11467509796963066,
+            "ci_low": -0.18554785509947505,
+            "ci_high": -0.050376272225877934,
+            "p_value_ge_zero": 0.0,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_zero": {
+            "difference": -0.11602339248654658,
+            "ci_low": -0.2026479522174407,
+            "ci_high": -0.06426859357083389,
+            "p_value_ge_zero": 0.0,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_zero": {
+            "difference": -0.09725499813301569,
+            "ci_low": -0.15422385732552893,
+            "ci_high": -0.04766807848114186,
+            "p_value_ge_zero": 0.0005,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.022823213822801836,
+            "ci_low": -0.035869634199806884,
+            "ci_high": -0.01159201069342332,
+            "p_value_ge_zero": 0.0015,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.004054819469270943,
+            "ci_low": -0.027121748921781118,
+            "ci_high": 0.030557980661436494,
+            "p_value_ge_zero": 0.382,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_landsat": {
+            "difference": -0.0013482945169159266,
+            "ci_low": -0.0210783186251077,
+            "ci_high": 0.01403116257449013,
+            "p_value_ge_zero": 0.455,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_landsat_terrain_eco": {
+            "difference": 0.018768394353530893,
+            "ci_low": 0.0009680282214823133,
+            "ci_high": 0.04914558825988417,
+            "p_value_ge_zero": 0.962,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_site_only_eco": {
+            "difference": -0.061690817700204514,
+            "ci_low": -0.0930135524512271,
+            "ci_high": -0.023522445529214776,
+            "p_value_ge_zero": 0.001,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.01738285640959042,
+            "ci_low": 0.00604141475552157,
+            "ci_high": 0.02566852194643312,
+            "p_value_ge_zero": 1.0,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": -0.0013855379439404736,
+            "ci_low": -0.027289348141688513,
+            "ci_high": 0.015273544029887362,
+            "p_value_ge_zero": 0.463,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_veg_minus_landsat_terrain_eco": {
+            "difference": -0.011079058153230459,
+            "ci_low": -0.017352391685011397,
+            "ci_high": -0.005213461000290187,
+            "p_value_ge_zero": 0.0,
+            "blocks": 16.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          }
+        }
+      },
+      "west": {
+        "scored_rows": 3621,
+        "overall": {
+          "landsat": {
+            "mae": 0.6283528685032115,
+            "rmse": 0.9413543372693817,
+            "bias": 0.1814053442191015,
+            "r2": 0.14037216901115002,
+            "n": 3621
+          },
+          "zero": {
+            "mae": 0.8711279392331472,
+            "rmse": 1.2128888474352566,
+            "bias": -0.6635123308668938,
+            "r2": -0.42707309103011726,
+            "n": 3621
+          },
+          "train_mean": {
+            "mae": 0.711829791114179,
+            "rmse": 1.0364071722244386,
+            "bias": -0.20806028842104876,
+            "r2": -0.04199355135643823,
+            "n": 3621
+          },
+          "landsat_terrain": {
+            "mae": 0.6072098920194278,
+            "rmse": 0.8911106074029304,
+            "bias": 0.02515813031072457,
+            "r2": 0.22968662534077466,
+            "n": 3621
+          },
+          "landsat_terrain_veg": {
+            "mae": 0.6023955880797675,
+            "rmse": 0.8937252129285623,
+            "bias": 0.021705947453510985,
+            "r2": 0.22515964446620962,
+            "n": 3621
+          },
+          "landsat_terrain_climate": {
+            "mae": 0.627586512360043,
+            "rmse": 0.9136735583584927,
+            "bias": -0.08766159724457828,
+            "r2": 0.19018405244827552,
+            "n": 3621
+          },
+          "landsat_site_all": {
+            "mae": 0.6256641463024022,
+            "rmse": 0.9125071963532729,
+            "bias": -0.08094938966489339,
+            "r2": 0.19225029517194903,
+            "n": 3621
+          },
+          "landsat_terrain_eco": {
+            "mae": 0.6040412338747821,
+            "rmse": 0.8897338613694398,
+            "bias": 0.02064338490199556,
+            "r2": 0.23206502063732581,
+            "n": 3621
+          },
+          "landsat_site_eco": {
+            "mae": 0.6234901970903413,
+            "rmse": 0.9132477670690045,
+            "bias": -0.06964093223945202,
+            "r2": 0.19093865944857524,
+            "n": 3621
+          },
+          "site_only_eco": {
+            "mae": 0.7110285667970199,
+            "rmse": 1.0266301401155529,
+            "bias": -0.2560560104949982,
+            "r2": -0.022426817587126946,
+            "n": 3621
+          },
+          "site_only": {
+            "mae": 0.6781211423037027,
+            "rmse": 0.979672056123258,
+            "bias": -0.17706094644901232,
+            "r2": 0.06896576051672643,
+            "n": 3621
+          },
+          "eco_class_median": {
+            "mae": 0.6658540331739958,
+            "rmse": 0.9685860345147574,
+            "bias": -0.06283044037205511,
+            "r2": 0.08991780564836727,
+            "n": 3621
+          },
+          "survey_height_median": {
+            "mae": 0.6571414105290103,
+            "rmse": 0.9587518337939153,
+            "bias": -0.03927367413892556,
+            "r2": 0.10830439321417973,
+            "n": 3621
+          },
+          "survey_height_x_eco_median": {
+            "mae": 0.6467980829338749,
+            "rmse": 0.9503039621755283,
+            "bias": 0.004761530081981591,
+            "r2": 0.12394919764962486,
+            "n": 3621
+          },
+          "lightgbm_satellite_plus_survey": {
+            "mae": 0.6041033505527079,
+            "rmse": 0.9035165327246062,
+            "bias": -0.05381701412582978,
+            "r2": 0.20808892030789938,
+            "n": 3621
+          }
+        },
+        "contrasts": {
+          "landsat_minus_zero": {
+            "difference": -0.24277507072993598,
+            "ci_low": -0.3612978141534578,
+            "ci_high": -0.17546604335493018,
+            "p_value_ge_zero": 0.0,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_zero": {
+            "difference": -0.2670867053583652,
+            "ci_low": -0.36712386446892703,
+            "ci_high": -0.20328054469532827,
+            "p_value_ge_zero": 0.0,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_zero": {
+            "difference": -0.2476377421428062,
+            "ci_low": -0.33735423200134473,
+            "ci_high": -0.19048520819773412,
+            "p_value_ge_zero": 0.0,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.042756849059092605,
+            "ci_low": -0.06673466054690341,
+            "ci_high": -0.02591721227232289,
+            "p_value_ge_zero": 0.0,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.023307885843533604,
+            "ci_low": -0.0504896344154082,
+            "ci_high": 0.006786477299211287,
+            "p_value_ge_zero": 0.0465,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_landsat": {
+            "difference": -0.024311634628429224,
+            "ci_low": -0.06416606826236979,
+            "ci_high": 0.0012156787440657938,
+            "p_value_ge_zero": 0.0605,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_landsat_terrain_eco": {
+            "difference": 0.019448963215559,
+            "ci_low": -0.0057468741641627874,
+            "ci_high": 0.03874777186377156,
+            "p_value_ge_zero": 0.9595,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_site_only_eco": {
+            "difference": -0.10698733292223772,
+            "ci_low": -0.17130332725632536,
+            "ci_high": -0.07300625759572245,
+            "p_value_ge_zero": 0.0,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.01938684653763323,
+            "ci_low": 0.011456430869133902,
+            "ci_high": 0.03479241614817811,
+            "p_value_ge_zero": 1.0,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": -6.211667792577202e-05,
+            "ci_low": -0.01971687810778331,
+            "ci_high": 0.01985340736701524,
+            "p_value_ge_zero": 0.4995,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_veg_minus_landsat_terrain_eco": {
+            "difference": -0.001645645795014583,
+            "ci_low": -0.008082853042860305,
+            "ci_high": 0.0035646974563815896,
+            "p_value_ge_zero": 0.26,
+            "blocks": 21.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          }
+        }
+      },
+      "east": {
+        "scored_rows": 1240,
+        "overall": {
+          "landsat": {
+            "mae": 0.5551371267481553,
+            "rmse": 0.8969519469244454,
+            "bias": -0.2415939554363275,
+            "r2": 0.24661046531400888,
+            "n": 1240
+          },
+          "zero": {
+            "mae": 0.9160921567596233,
+            "rmse": 1.293244468750674,
+            "bias": -0.7775669167221948,
+            "r2": -0.56618293836037,
+            "n": 1240
+          },
+          "train_mean": {
+            "mae": 0.7145005687532844,
+            "rmse": 1.0725662450571065,
+            "bias": -0.2872758327157866,
+            "r2": -0.07728218880168702,
+            "n": 1240
+          },
+          "landsat_terrain": {
+            "mae": 0.5483936521583642,
+            "rmse": 0.8864147918969113,
+            "bias": -0.21807294103318745,
+            "r2": 0.2642077338498431,
+            "n": 1240
+          },
+          "landsat_terrain_veg": {
+            "mae": 0.5400952230503523,
+            "rmse": 0.8806670203119874,
+            "bias": -0.2014710172226292,
+            "r2": 0.27371897925524413,
+            "n": 1240
+          },
+          "landsat_terrain_climate": {
+            "mae": 0.5642198080118355,
+            "rmse": 0.8909527179775271,
+            "bias": -0.25345511864573583,
+            "r2": 0.25665479647636047,
+            "n": 1240
+          },
+          "landsat_site_all": {
+            "mae": 0.5425646352530555,
+            "rmse": 0.8736381037934183,
+            "bias": -0.21941224163129028,
+            "r2": 0.28526612763673265,
+            "n": 1240
+          },
+          "landsat_terrain_eco": {
+            "mae": 0.5450655402825564,
+            "rmse": 0.8835948347530957,
+            "bias": -0.2037635308906906,
+            "r2": 0.26888184855454134,
+            "n": 1240
+          },
+          "landsat_site_eco": {
+            "mae": 0.5654323444910782,
+            "rmse": 0.8938979944996502,
+            "bias": -0.2582958342794684,
+            "r2": 0.25173203036986047,
+            "n": 1240
+          },
+          "site_only_eco": {
+            "mae": 0.7208612934615894,
+            "rmse": 1.092110413897398,
+            "bias": -0.3384119531265605,
+            "r2": -0.11690009044679894,
+            "n": 1240
+          },
+          "site_only": {
+            "mae": 0.6913545170577792,
+            "rmse": 1.0430770896801502,
+            "bias": -0.30531200661521424,
+            "r2": -0.018858897808015307,
+            "n": 1240
+          },
+          "eco_class_median": {
+            "mae": 0.6456412473951283,
+            "rmse": 1.013535564372807,
+            "bias": -0.2400252706354904,
+            "r2": 0.03803512575934531,
+            "n": 1240
+          },
+          "survey_height_median": {
+            "mae": 0.6487703776333806,
+            "rmse": 1.0145693745242759,
+            "bias": -0.26823333323634496,
+            "r2": 0.036071709222935566,
+            "n": 1240
+          },
+          "survey_height_x_eco_median": {
+            "mae": 0.6388359120676506,
+            "rmse": 1.0075258085545808,
+            "bias": -0.22930949975074627,
+            "r2": 0.04940923926130214,
+            "n": 1240
+          },
+          "lightgbm_satellite_plus_survey": {
+            "mae": 0.5424249445288639,
+            "rmse": 0.8710996659538636,
+            "bias": -0.23102182181052552,
+            "r2": 0.28941354675280384,
+            "n": 1240
+          }
+        },
+        "contrasts": {
+          "landsat_minus_zero": {
+            "difference": -0.360955030011468,
+            "ci_low": -0.5679537846555466,
+            "ci_high": -0.18974202741747606,
+            "p_value_ge_zero": 0.0,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_zero": {
+            "difference": -0.3710266164770668,
+            "ci_low": -0.5955929211997718,
+            "ci_high": -0.1844819502452311,
+            "p_value_ge_zero": 0.0,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_zero": {
+            "difference": -0.3506598122685449,
+            "ci_low": -0.5521985996301476,
+            "ci_high": -0.18563152826346488,
+            "p_value_ge_zero": 0.0,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.09377037178509418,
+            "ci_low": -0.1526821123862364,
+            "ci_high": -0.042026826699224744,
+            "p_value_ge_zero": 0.0015,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.07340356757657229,
+            "ci_low": -0.11473550949076829,
+            "ci_high": -0.04155902013167082,
+            "p_value_ge_zero": 0.0,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_landsat": {
+            "difference": -0.010071586465598803,
+            "ci_low": -0.03299321561527293,
+            "ci_high": 0.01112257767412997,
+            "p_value_ge_zero": 0.195,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_landsat_terrain_eco": {
+            "difference": 0.020366804208521883,
+            "ci_low": -0.00617129172271625,
+            "ci_high": 0.04688647342943588,
+            "p_value_ge_zero": 0.8985,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_site_only_eco": {
+            "difference": -0.17579575317903295,
+            "ci_low": -0.3039355668011365,
+            "ci_high": -0.06592951991028945,
+            "p_value_ge_zero": 0.001,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.023007399962214348,
+            "ci_low": -0.0010185176647387645,
+            "ci_high": 0.04942765869314324,
+            "p_value_ge_zero": 0.887,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.002640595753692465,
+            "ci_low": -0.03261775110613717,
+            "ci_high": 0.013702433172046188,
+            "p_value_ge_zero": 0.615,
+            "blocks": 10.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_veg_minus_landsat_terrain_eco": {
+            "difference": -0.004970317232204091,
+            "ci_low": -0.013857376837778218,
+            "ci_high": 0.001298807546283841,
+            "p_value_ge_zero": 0.044,
             "blocks": 10.0,
             "resamples": 2000.0,
             "excludes_zero": false
@@ -3265,6 +3263,658 @@
             "ci_high": 0.01901936672763179,
             "p_value_ge_zero": 0.2555,
             "blocks": 7.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          }
+        }
+      }
+    },
+    "undisturbed_satellite": {
+      "summary": {
+        "east": {
+          "rows": 113,
+          "mean_change": 0.7829735252362799,
+          "p95_start_mean": 11.921856019651312
+        },
+        "study": {
+          "rows": 517,
+          "mean_change": 0.33104956601476326,
+          "p95_start_mean": 6.0836533803728505
+        },
+        "west": {
+          "rows": 373,
+          "mean_change": 0.600954771164723,
+          "p95_start_mean": 14.020570279543236
+        }
+      },
+      "study": {
+        "scored_rows": 331,
+        "overall": {
+          "landsat": {
+            "mae": 0.28111456296192605,
+            "rmse": 0.37147637876732326,
+            "bias": 0.1114116110792523,
+            "r2": -0.1602093847992303,
+            "n": 331
+          },
+          "zero": {
+            "mae": 0.37491787270795907,
+            "rmse": 0.4788942221328213,
+            "bias": -0.33226525066558127,
+            "r2": -0.9282048109638363,
+            "n": 331
+          },
+          "train_mean": {
+            "mae": 0.38878737506011957,
+            "rmse": 0.46439979322639197,
+            "bias": 0.31101075344170526,
+            "r2": -0.8132513225483169,
+            "n": 331
+          },
+          "landsat_terrain": {
+            "mae": 0.2795872285978159,
+            "rmse": 0.3714069548561315,
+            "bias": 0.10422867968154882,
+            "r2": -0.15977577043561042,
+            "n": 331
+          },
+          "landsat_terrain_veg": {
+            "mae": 0.27592184488705196,
+            "rmse": 0.3682135087198006,
+            "bias": 0.09749677026588635,
+            "r2": -0.13991745150066426,
+            "n": 331
+          },
+          "landsat_terrain_climate": {
+            "mae": 0.2765563430974313,
+            "rmse": 0.36825771056719564,
+            "bias": 0.09253186451597356,
+            "r2": -0.14019114858313686,
+            "n": 331
+          },
+          "landsat_site_all": {
+            "mae": 0.27478931664414186,
+            "rmse": 0.3665895713326468,
+            "bias": 0.08688807330496878,
+            "r2": -0.12988483489601887,
+            "n": 331
+          },
+          "landsat_terrain_eco": {
+            "mae": 0.2857220151303554,
+            "rmse": 0.3742288648661291,
+            "bias": 0.11777972487299919,
+            "r2": -0.17746642452099115,
+            "n": 331
+          },
+          "landsat_site_eco": {
+            "mae": 0.283617322626658,
+            "rmse": 0.3715612544543324,
+            "bias": 0.10906259343037286,
+            "r2": -0.16073961941957338,
+            "n": 331
+          },
+          "site_only_eco": {
+            "mae": 0.2981792474336976,
+            "rmse": 0.38350568489349784,
+            "bias": 0.13690713005221333,
+            "r2": -0.23656679299723193,
+            "n": 331
+          },
+          "site_only": {
+            "mae": 0.27876995986675285,
+            "rmse": 0.3682705707032387,
+            "bias": 0.0979626063817131,
+            "r2": -0.14027078449512365,
+            "n": 331
+          },
+          "eco_class_median": {
+            "mae": 0.2958622399646625,
+            "rmse": 0.37936192295776594,
+            "bias": 0.0020090723506645007,
+            "r2": -0.20998905970898507,
+            "n": 331
+          },
+          "survey_height_median": {
+            "mae": 0.2805149905555169,
+            "rmse": 0.36432552342285107,
+            "bias": 0.10869447876038991,
+            "r2": -0.11597165145384758,
+            "n": 331
+          },
+          "survey_height_x_eco_median": {
+            "mae": 0.3040645609871763,
+            "rmse": 0.38997423369273965,
+            "bias": -0.004577443777439788,
+            "r2": -0.27863266240059237,
+            "n": 331
+          },
+          "lightgbm_satellite_plus_survey": {
+            "mae": 0.2816216138381703,
+            "rmse": 0.3702762927961734,
+            "bias": 0.10462714475954894,
+            "r2": -0.15272518374798216,
+            "n": 331
+          }
+        },
+        "contrasts": {
+          "landsat_minus_zero": {
+            "difference": -0.09380330974603301,
+            "ci_low": -0.16768005167868186,
+            "ci_high": -0.009307286532148159,
+            "p_value_ge_zero": 0.0075,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_zero": {
+            "difference": -0.08919585757760362,
+            "ci_low": -0.16916735857057508,
+            "ci_high": -0.001600178698277614,
+            "p_value_ge_zero": 0.018,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_zero": {
+            "difference": -0.09130055008130106,
+            "ci_low": -0.1698832850379583,
+            "ci_high": -0.005721979770438318,
+            "p_value_ge_zero": 0.013,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.01834254585682088,
+            "ci_low": -0.06199364506791866,
+            "ci_high": 0.011436234800030963,
+            "p_value_ge_zero": 0.1745,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.020447238360518316,
+            "ci_low": -0.06591747840927141,
+            "ci_high": 0.009822755397065131,
+            "p_value_ge_zero": 0.151,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_landsat": {
+            "difference": 0.004607452168429393,
+            "ci_low": -0.0015372849138559725,
+            "ci_high": 0.011315833906889007,
+            "p_value_ge_zero": 0.9475,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_landsat_terrain_eco": {
+            "difference": -0.002104692503697436,
+            "ci_low": -0.004729630594994883,
+            "ci_high": 0.0011614544888199534,
+            "p_value_ge_zero": 0.0935,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_site_only_eco": {
+            "difference": -0.012457232303342225,
+            "ci_low": -0.02656536223708768,
+            "ci_high": -0.0002023697373342529,
+            "p_value_ge_zero": 0.019,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.001995708788487649,
+            "ci_low": 0.0005782299202391682,
+            "ci_high": 0.0036604676013490644,
+            "p_value_ge_zero": 0.999,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.004100401292185085,
+            "ci_low": 0.0008157832545410025,
+            "ci_high": 0.007761888185281732,
+            "p_value_ge_zero": 0.9915,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_veg_minus_landsat_terrain_eco": {
+            "difference": -0.00980017024330343,
+            "ci_low": -0.018025148497906655,
+            "ci_high": -0.0002726081607284502,
+            "p_value_ge_zero": 0.0155,
+            "blocks": 14.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          }
+        }
+      },
+      "west": {
+        "scored_rows": 287,
+        "overall": {
+          "landsat": {
+            "mae": 0.5176677552492394,
+            "rmse": 0.7391285357488614,
+            "bias": -0.10595690514187459,
+            "r2": 0.021954356455840207,
+            "n": 287
+          },
+          "zero": {
+            "mae": 0.7218753669632798,
+            "rmse": 0.9766123668404536,
+            "bias": -0.6286474267800847,
+            "r2": -0.7075114429400609,
+            "n": 287
+          },
+          "train_mean": {
+            "mae": 0.5458919888836482,
+            "rmse": 0.7781150576238515,
+            "bias": -0.2165384839525733,
+            "r2": -0.08394394350380341,
+            "n": 287
+          },
+          "landsat_terrain": {
+            "mae": 0.5179592037380065,
+            "rmse": 0.7362727190421174,
+            "bias": -0.08040420612587686,
+            "r2": 0.029497626618856243,
+            "n": 287
+          },
+          "landsat_terrain_veg": {
+            "mae": 0.5052822468218159,
+            "rmse": 0.7232481395585777,
+            "bias": -0.07359280165343488,
+            "r2": 0.06353007546010392,
+            "n": 287
+          },
+          "landsat_terrain_climate": {
+            "mae": 0.5200203864436682,
+            "rmse": 0.7477734834789934,
+            "bias": -0.18898428705529025,
+            "r2": -0.0010581491270873489,
+            "n": 287
+          },
+          "landsat_site_all": {
+            "mae": 0.5072187493302751,
+            "rmse": 0.7332408952090198,
+            "bias": -0.1591877823499027,
+            "r2": 0.03747383993856268,
+            "n": 287
+          },
+          "landsat_terrain_eco": {
+            "mae": 0.502862313435188,
+            "rmse": 0.7182736103622633,
+            "bias": -0.07645187603895495,
+            "r2": 0.07636792754513932,
+            "n": 287
+          },
+          "landsat_site_eco": {
+            "mae": 0.5026480720216338,
+            "rmse": 0.7250410692665992,
+            "bias": -0.1449823471901803,
+            "r2": 0.05888130886180387,
+            "n": 287
+          },
+          "site_only_eco": {
+            "mae": 0.5142041972807857,
+            "rmse": 0.7291743480788525,
+            "bias": -0.1221712156586492,
+            "r2": 0.048120556666025216,
+            "n": 287
+          },
+          "site_only": {
+            "mae": 0.5133395330668996,
+            "rmse": 0.7343119595019775,
+            "bias": -0.13904394746492046,
+            "r2": 0.03465981153608877,
+            "n": 287
+          },
+          "eco_class_median": {
+            "mae": 0.5102555756804823,
+            "rmse": 0.7242983506559143,
+            "bias": -0.17870891084805954,
+            "r2": 0.06080845032194182,
+            "n": 287
+          },
+          "survey_height_median": {
+            "mae": 0.47591411021393687,
+            "rmse": 0.6552352820081889,
+            "bias": -0.03823176756037981,
+            "r2": 0.23137636820616936,
+            "n": 287
+          },
+          "survey_height_x_eco_median": {
+            "mae": 0.4959845589209083,
+            "rmse": 0.6996074893658829,
+            "bias": -0.17401587561206963,
+            "r2": 0.12374989324233643,
+            "n": 287
+          },
+          "lightgbm_satellite_plus_survey": {
+            "mae": 0.499312720038452,
+            "rmse": 0.7225546552588338,
+            "bias": -0.1375532060510321,
+            "r2": 0.06532507721315273,
+            "n": 287
+          }
+        },
+        "contrasts": {
+          "landsat_minus_zero": {
+            "difference": -0.20420761171404067,
+            "ci_low": -0.2670297554783012,
+            "ci_high": -0.11881501967205227,
+            "p_value_ge_zero": 0.0,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_zero": {
+            "difference": -0.21901305352809197,
+            "ci_low": -0.2888003252853425,
+            "ci_high": -0.1269324180103847,
+            "p_value_ge_zero": 0.0,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_zero": {
+            "difference": -0.21922729494164606,
+            "ci_low": -0.2810668764191806,
+            "ci_high": -0.14398173523354496,
+            "p_value_ge_zero": 0.0,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
+            "difference": 0.0068777545142795216,
+            "ci_low": -0.025464110158124803,
+            "ci_high": 0.05380176121064115,
+            "p_value_ge_zero": 0.6225,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_survey_height_x_eco_median": {
+            "difference": 0.006663513100725438,
+            "ci_low": -0.02336974400864175,
+            "ci_high": 0.06539736865215565,
+            "p_value_ge_zero": 0.5925,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_landsat": {
+            "difference": -0.014805441814051301,
+            "ci_low": -0.030116538069139154,
+            "ci_high": -0.003898064109784527,
+            "p_value_ge_zero": 0.0025,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_landsat_terrain_eco": {
+            "difference": -0.00021424141355408377,
+            "ci_low": -0.020348401809703782,
+            "ci_high": 0.011509858226777794,
+            "p_value_ge_zero": 0.518,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_site_only_eco": {
+            "difference": -0.011341883845597867,
+            "ci_low": -0.02059599940276061,
+            "ci_high": -0.003571902081710948,
+            "p_value_ge_zero": 0.004,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.0033353519831817446,
+            "ci_low": -0.002909175071386451,
+            "ci_high": 0.007983792664228422,
+            "p_value_ge_zero": 0.922,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.0035495933967358284,
+            "ci_low": -0.007839961935219956,
+            "ci_high": 0.01897368597731142,
+            "p_value_ge_zero": 0.701,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_veg_minus_landsat_terrain_eco": {
+            "difference": 0.002419933386628159,
+            "ci_low": -0.005470121794843187,
+            "ci_high": 0.013711648747134266,
+            "p_value_ge_zero": 0.6935,
+            "blocks": 20.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          }
+        }
+      },
+      "east": {
+        "scored_rows": 90,
+        "overall": {
+          "landsat": {
+            "mae": 0.5189457351414705,
+            "rmse": 0.7050895574841389,
+            "bias": -0.29849250326724736,
+            "r2": 0.09331954889150862,
+            "n": 90
+          },
+          "zero": {
+            "mae": 0.8688126932540196,
+            "rmse": 1.1092601963880357,
+            "bias": -0.8259163986140117,
+            "r2": -1.2440500838212496,
+            "n": 90
+          },
+          "train_mean": {
+            "mae": 0.6461228075927434,
+            "rmse": 0.8330983025221984,
+            "bias": -0.38174925785662484,
+            "r2": -0.26577987291456173,
+            "n": 90
+          },
+          "landsat_terrain": {
+            "mae": 0.5081704441700501,
+            "rmse": 0.6933030919462583,
+            "bias": -0.29199942368012366,
+            "r2": 0.1233788175307341,
+            "n": 90
+          },
+          "landsat_terrain_veg": {
+            "mae": 0.5147169548867958,
+            "rmse": 0.6767554761632888,
+            "bias": -0.2594327389322845,
+            "r2": 0.16472545994525833,
+            "n": 90
+          },
+          "landsat_terrain_climate": {
+            "mae": 0.584968996178795,
+            "rmse": 0.7913314313283367,
+            "bias": -0.4093696299346842,
+            "r2": -0.1420431642511144,
+            "n": 90
+          },
+          "landsat_site_all": {
+            "mae": 0.5482341194288867,
+            "rmse": 0.7292247903534158,
+            "bias": -0.32944418396329767,
+            "r2": 0.030185808101948708,
+            "n": 90
+          },
+          "landsat_terrain_eco": {
+            "mae": 0.5459994773747836,
+            "rmse": 0.7381843254949934,
+            "bias": -0.2708717282896446,
+            "r2": 0.006208392198865709,
+            "n": 90
+          },
+          "landsat_site_eco": {
+            "mae": 0.5667351261922506,
+            "rmse": 0.7664533392722997,
+            "bias": -0.3148246230061181,
+            "r2": -0.07136419443957842,
+            "n": 90
+          },
+          "site_only_eco": {
+            "mae": 0.608656901272011,
+            "rmse": 0.7859744404872963,
+            "bias": -0.2763422999065259,
+            "r2": -0.12663316880175413,
+            "n": 90
+          },
+          "site_only": {
+            "mae": 0.5686535187835318,
+            "rmse": 0.730735242391684,
+            "bias": -0.2903476500905915,
+            "r2": 0.02616407178397262,
+            "n": 90
+          },
+          "eco_class_median": {
+            "mae": 0.6145972066493053,
+            "rmse": 0.8074855224210566,
+            "bias": -0.36880787772487583,
+            "r2": -0.1891459896995309,
+            "n": 90
+          },
+          "survey_height_median": {
+            "mae": 0.5814324983650049,
+            "rmse": 0.7493776751797113,
+            "bias": -0.3438351699483166,
+            "r2": -0.02415853399869783,
+            "n": 90
+          },
+          "survey_height_x_eco_median": {
+            "mae": 0.598712560978565,
+            "rmse": 0.7827359517369821,
+            "bias": -0.336366303277575,
+            "r2": -0.11736805297553965,
+            "n": 90
+          },
+          "lightgbm_satellite_plus_survey": {
+            "mae": 0.5406229370817778,
+            "rmse": 0.7204607684024419,
+            "bias": -0.2736754183869134,
+            "r2": 0.05335671092676675,
+            "n": 90
+          }
+        },
+        "contrasts": {
+          "landsat_minus_zero": {
+            "difference": -0.34986695811254875,
+            "ci_low": -0.5612252727333802,
+            "ci_high": -0.09731002222307766,
+            "p_value_ge_zero": 0.0105,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_zero": {
+            "difference": -0.3228132158792356,
+            "ci_low": -0.5198663222171392,
+            "ci_high": -0.06501790519155054,
+            "p_value_ge_zero": 0.013,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_zero": {
+            "difference": -0.3020775670617686,
+            "ci_low": -0.4720209480916982,
+            "ci_high": -0.04846710134466542,
+            "p_value_ge_zero": 0.013,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_terrain_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.05271308360378135,
+            "ci_low": -0.09455936757945003,
+            "ci_high": -0.010993960697965321,
+            "p_value_ge_zero": 0.008,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_survey_height_x_eco_median": {
+            "difference": -0.03197743478631432,
+            "ci_low": -0.09626085175512912,
+            "ci_high": 0.0012938434265642451,
+            "p_value_ge_zero": 0.0485,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_landsat": {
+            "difference": 0.02705374223331314,
+            "ci_low": -0.01621899571828526,
+            "ci_high": 0.042133246886795095,
+            "p_value_ge_zero": 0.959,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_site_eco_minus_landsat_terrain_eco": {
+            "difference": 0.020735648817467034,
+            "ci_low": -0.002125818985657113,
+            "ci_high": 0.05378400906286313,
+            "p_value_ge_zero": 0.8945,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_site_only_eco": {
+            "difference": -0.0626574238972274,
+            "ci_low": -0.09157345095055136,
+            "ci_high": -0.02638760938802026,
+            "p_value_ge_zero": 0.0,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": true
+          },
+          "landsat_site_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.026112189110472972,
+            "ci_low": -0.014209197354645375,
+            "ci_high": 0.06489505203934338,
+            "p_value_ge_zero": 0.852,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_eco_minus_lightgbm_satellite_plus_survey": {
+            "difference": 0.005376540293005938,
+            "ci_low": -0.015686118676898553,
+            "ci_high": 0.018032747206912614,
+            "p_value_ge_zero": 0.7035,
+            "blocks": 6.0,
+            "resamples": 2000.0,
+            "excludes_zero": false
+          },
+          "landsat_terrain_veg_minus_landsat_terrain_eco": {
+            "difference": -0.031282522487987796,
+            "ci_low": -0.06788977397900209,
+            "ci_high": 0.020977715752727437,
+            "p_value_ge_zero": 0.148,
+            "blocks": 6.0,
             "resamples": 2000.0,
             "excludes_zero": false
           }

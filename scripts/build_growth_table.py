@@ -7,12 +7,27 @@ from datetime import date
 import numpy as np
 
 from canopyguard.config import load_config, load_region
+from canopyguard.data.echosat_drop import expand_percent
 from canopyguard.features.disturbance import nbr_drop, satellite_disturbed
 from canopyguard.features.fire import burned_raster, perimeters_in_window
 from canopyguard.features.landsat_history import history_features
 from canopyguard.forecasting.growth_table import labels_on_pixel_grid, table_at_scale
 from canopyguard.io import data_path, ensure_parent, with_region
 from canopyguard.provenance import file_sha256, write_provenance
+
+
+def load_echosat_drop(ingestion: dict, screen: dict, suffix: str, shape: tuple):
+    """Full-resolution drop share, else the compact copy, else an empty raster."""
+    full = with_region(data_path(screen["echosat_drop"]), suffix)
+    if full.exists():
+        return np.load(full)["echosat_drop_share"]
+    compact = with_region(
+        data_path(ingestion["echosat_drop"]["compact_output"]), suffix
+    )
+    if compact.exists():
+        saved = np.load(compact)
+        return expand_percent(saved["percent"], int(saved["factor"]), shape)
+    return np.full(shape, np.nan, dtype=np.float32)
 
 
 def main() -> int:
@@ -48,6 +63,7 @@ def main() -> int:
         grid,
         composites["crs"].item(),
     )
+    ingestion = load_config("configs/ingestion.yaml")
     screen = config["satellite_screen"]
     post = np.load(with_region(data_path(screen["post_composites"]), suffix))
     drops = nbr_drop(composites["composites"], post["composites"], screen)
@@ -55,12 +71,9 @@ def main() -> int:
     features["sat_disturbed"] = satellite_disturbed(
         drops["sat_nbr_drop_final"], float(screen["threshold"])
     )
-    # ECHOSAT is a cross-check only; without its file the column stays empty.
-    echosat_file = with_region(data_path(screen["echosat_drop"]), suffix)
-    features["echosat_drop_share"] = (
-        np.load(echosat_file)["echosat_drop_share"]
-        if echosat_file.exists()
-        else np.full((int(height), int(width)), np.nan, dtype=np.float32)
+    # ECHOSAT is a cross-check only; without its files the column stays empty.
+    features["echosat_drop_share"] = load_echosat_drop(
+        ingestion, screen, suffix, (int(height), int(width))
     )
     labels = np.load(with_region(data_path(config["labels"]["archive"]), suffix))
     pixels = labels_on_pixel_grid(

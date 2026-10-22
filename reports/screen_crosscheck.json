@@ -1,0 +1,174 @@
+{
+  "git_commit": "cb3f575ca508b0c4d6c87339376b5c3285ab9f65",
+  "study": {
+    "rows": 18539,
+    "kept_share": {
+      "lidar_screen": 0.4343276336371973,
+      "satellite_screen": 0.3706780300987108,
+      "both": 0.3409029613247748
+    },
+    "echosat_vs_lidar_screen": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "echosat_vs_satellite_screen": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "echosat_vs_fire_free_only": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "satellite_flag_vs_lidar_loss": {
+      "precision": 0.3027375201288245,
+      "recall": 0.1254587921254588,
+      "flagged_share": 0.13398780948271213,
+      "truth_share": 0.3233184098387184
+    },
+    "nbr_drop_auc_for_lidar_loss": 0.8416033610334128
+  },
+  "west": {
+    "rows": 11377,
+    "kept_share": {
+      "lidar_screen": 0.4730596818141865,
+      "satellite_screen": 0.4262107761272743,
+      "both": 0.35633295244792124
+    },
+    "echosat_vs_lidar_screen": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "echosat_vs_satellite_screen": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "echosat_vs_fire_free_only": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "satellite_flag_vs_lidar_loss": {
+      "precision": 0.29097704217832354,
+      "recall": 0.11578500106224772,
+      "flagged_share": 0.1646303946558847,
+      "truth_share": 0.4137294541619056
+    },
+    "nbr_drop_auc_for_lidar_loss": 0.8494298421216415
+  },
+  "east": {
+    "rows": 11919,
+    "kept_share": {
+      "lidar_screen": 0.1547948653410521,
+      "satellite_screen": 0.13138686131386862,
+      "both": 0.12165450121654502
+    },
+    "echosat_vs_lidar_screen": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "echosat_vs_satellite_screen": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "echosat_vs_fire_free_only": {
+      "kept": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      },
+      "removed": {
+        "rows": 0,
+        "echosat_mean_drop_share": NaN,
+        "echosat_abrupt_loss_rows": NaN,
+        "lidar_mean_loss_share": NaN
+      }
+    },
+    "satellite_flag_vs_lidar_loss": {
+      "precision": 0.3305084745762712,
+      "recall": 0.031140210795273075,
+      "flagged_share": 0.04950079704673211,
+      "truth_share": 0.5253796459434517
+    },
+    "nbr_drop_auc_for_lidar_loss": 0.9162508249319518
+  }
+}

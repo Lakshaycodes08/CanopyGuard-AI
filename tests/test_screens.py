@@ -72,3 +72,18 @@ def test_agreement_reports_precision_and_recall():
     result = agreement(flag, truth)
     assert result["precision"] == pytest.approx(0.5)
     assert result["recall"] == pytest.approx(0.5)
+
+
+def test_compact_echosat_copy_keeps_block_means_and_missing_blocks():
+    from canopyguard.data.echosat_drop import compact_percent, expand_percent
+
+    share = np.zeros((6, 6), dtype=np.float32)
+    share[:3, :3] = 0.5
+    share[3:, 3:] = np.nan
+    percent = compact_percent(share, 3)
+    assert percent.tolist() == [[50, 0], [0, 255]]
+    back = expand_percent(percent, 3, (6, 6))
+    assert back[0, 0] == pytest.approx(0.5)
+    assert back[0, 4] == 0.0
+    assert np.isnan(back[5, 5])
+    assert expand_percent(percent, 3, (7, 7)).shape == (7, 7)

@@ -190,3 +190,6 @@ echosat_drop:
   from_year: 2018
   to_year: 2022
   output: interim/echosat/echosat_drop_share.npz
+  # Whole-percent block means, for moving the result between machines.
+  compact_factor: 3
+  compact_output: interim/echosat/echosat_drop_percent_x3.npz

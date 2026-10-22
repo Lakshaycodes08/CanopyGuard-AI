@@ -138,6 +138,57 @@ predicted line length captures (random ranking gives 0.20):
 The growth and loss rankings use only about 100 and 300 segments, mostly from
 one region. Treat these as early evidence.
 
+## Finding 5: the growth result holds with no LiDAR in the screen
+
+The screen in Finding 2 used the LiDAR loss share, which comes from the answer
+key. A satellite-only screen keeps rows with no fire perimeter dated between the
+surveys and a persistent Landsat NBR loss below the published dNBR level of
+0.10 (mean of the last two summers, 2021 and 2022, against the 2011 to 2013
+baseline; the last window ends the day before the 2022 survey). The 0.10 level
+is a literature value and was not tuned on the labels.
+
+Typical error in metres at 90 m, region held out (`undisturbed_satellite`,
+`reports/growth_region_transfer.json`):
+
+| Method | Study | West | East |
+| --- | --- | --- | --- |
+| No change | 0.505 | 0.871 | 0.916 |
+| Constant average growth | 0.485 | 0.712 | 0.715 |
+| Growth by ecosystem type | 0.426 | 0.666 | 0.646 |
+| Survey height and ecosystem growth curve (uses 2013 LiDAR) | 0.412 | 0.647 | 0.639 |
+| Satellite only, Landsat | 0.391 | 0.628 | 0.555 |
+| Satellite only, Landsat + terrain + ecosystem | 0.389 | 0.604 | 0.545 |
+
+- Scored pixels: 4,399 / 3,621 / 1,240 in 16 / 21 / 10 blocks.
+- The satellite-only model beats no change by 0.116, 0.267 and 0.371 m, and the
+  survey-based curve by 0.023, 0.043 and 0.094 m. All six block-bootstrap
+  intervals exclude zero.
+- Errors are a little higher than with the LiDAR screen (0.351 / 0.453 / 0.470
+  for the same model), because the satellite flag leaves more partial loss in
+  the kept rows. The ordering of methods is the same.
+- At 300 m the gain over no change holds in all three regions; the edge over the
+  survey curve is not resolved in two of them.
+
+Screen agreement (`reports/screen_crosscheck.json`, 90 m): the continuous NBR
+loss ranks LiDAR-measured loss rows with AUC 0.842, 0.849 and 0.916 (study,
+west, east). Kept shares are 0.37, 0.43 and 0.13 for the satellite screen, and
+0.43, 0.47 and 0.15 for the LiDAR screen. The 0.10 flag is more lenient than the
+LiDAR screen on small partial losses: among fire-free rows it flags 5 to 16
+percent while LiDAR loss share above 0.1 covers 32 to 53 percent, so its recall
+of those rows is low (0.03 to 0.13).
+
+One Landsat 8 file (`LC08_L2SP_045033_20220721_02_T1`, red band) is corrupt on
+the server and was skipped in all three regions. The skip is recorded in the
+composite files.
+
+ECHOSAT cross-check: not yet run. The ECHOSAT server drops connections from the
+environment used for these runs, even for a 64 KB request. The code is in place
+(`scripts/ingest_echosat_drop.py`, `scripts/check_screens.py`). ECHOSAT sees
+2018 on, so it can confirm later events (Kincade 2019, 2020 fires) but not the
+2017 Tubbs fire or earlier cuts. Until it is run, the screens are checked
+against each other, against the LiDAR loss label and against fire perimeters,
+not against an independent height product.
+
 ## Checks
 
 - Scramble test (`reports/growth_sham_check.json`): shuffling the Landsat
@@ -154,9 +205,10 @@ one region. Treat these as early evidence.
 
 ## Limits
 
-- The claim is conditional on no large loss. The screen uses the LiDAR loss
-  share, which comes from the label, so it describes growth given no
-  disturbance, not what a utility would observe unscreened.
+- The claim is conditional on no large disturbance. Finding 2 screens with the
+  LiDAR loss share, which comes from the label; Finding 5 repeats it with a
+  satellite and fire-record screen and the result holds. Neither describes what
+  a utility would observe unscreened.
 - CAL FIRE perimeters can be incomplete or generalized. Absence from the record
   does not show a cell was undisturbed. Logging is not in the record.
 - East has few scored pixels and wide intervals.
