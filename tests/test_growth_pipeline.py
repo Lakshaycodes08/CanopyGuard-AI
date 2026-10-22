@@ -107,3 +107,16 @@ def test_spatial_folds_keep_blocks_together():
     folds = spatial_folds(table, 2000.0, 4, seed=1)
     for block in np.unique((x // 2000).astype(int)):
         assert np.unique(folds[(x // 2000).astype(int) == block]).size == 1
+
+
+def test_post_cutoff_scene_dates_are_checked_the_other_way_round():
+    from canopyguard.data.landsat_stac import assert_after_cutoff, post_cutoff_window
+
+    with pytest.raises(ValueError, match="on or before the cutoff"):
+        assert_after_cutoff([date(2014, 6, 1), date(2013, 9, 27)], date(2013, 9, 27))
+    assert_after_cutoff([date(2014, 6, 1)], date(2013, 9, 27))
+    config = {**CONFIG, "window_end": "2022-09-12"}
+    assert post_cutoff_window(2014, config)[0] == date(2014, 6, 1)
+    assert post_cutoff_window(2022, config)[1] == date(2022, 9, 12)
+    with pytest.raises(ValueError):
+        post_cutoff_window(2013, config)

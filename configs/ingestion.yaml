@@ -172,3 +172,14 @@ frap_fires:
   page_size: 1000
   min_year: 2013
   output: interim/fire/frap_perimeters.geojson
+
+# Landsat after the forecast cutoff, used only to flag disturbance. It is a
+# screen for training and scoring rows, never a predictor, because it is the
+# future relative to the cutoff. Settings not listed here come from `landsat`.
+landsat_screen:
+  platforms: [landsat-7, landsat-8, landsat-9]
+  first_year: 2014
+  last_year: 2022
+  # The last window ends the day before the final survey starts.
+  window_end_epoch: "2022"
+  output_composites: interim/landsat/summer_composites_2014-2022.npz

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import argparse
-import warnings
 from datetime import date
 
 import numpy as np
@@ -13,9 +12,9 @@ from canopyguard.config import load_config, load_region
 from canopyguard.data.landsat_stac import (
     BAND_NAMES,
     assert_before_cutoff,
+    collect_composites,
     season_window,
     study_grid,
-    year_composite,
 )
 from canopyguard.io import data_path, ensure_parent, with_region
 from canopyguard.provenance import file_sha256, write_provenance
@@ -37,27 +36,15 @@ def main() -> int:
     )
     cutoff = date.fromisoformat(config["cutoff"])
     years = list(range(int(config["first_year"]), cutoff.year + 1))
-    composites, clear_counts = [], []
-    for year in years:
-        start, end = season_window(year, config)
-        items = list(
-            catalog.search(
-                collections=[config["collection"]],
-                bbox=[west, south, east, north],
-                datetime=f"{start}/{end}",
-                query={
-                    "platform": {"in": config["platforms"]},
-                    "eo:cloud_cover": {"lt": config["max_scene_cloud_percent"]},
-                },
-            ).items()
-        )
-        assert_before_cutoff([item.datetime.date() for item in items], cutoff)
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", RuntimeWarning)
-            band_stack, clear = year_composite(items, grid, config)
-        composites.append(band_stack)
-        clear_counts.append(clear)
-        print(f"{year}: {len(items)} scenes", flush=True)
+    composites, clear_counts = collect_composites(
+        catalog,
+        region["bbox"],
+        grid,
+        config,
+        years,
+        season_window,
+        lambda dates: assert_before_cutoff(dates, cutoff),
+    )
 
     left, top, width, height = grid
     output = ensure_parent(
@@ -67,8 +54,8 @@ def main() -> int:
         output,
         years=np.array(years),
         bands=np.array(BAND_NAMES),
-        composites=np.stack(composites),
-        clear_counts=np.stack(clear_counts),
+        composites=composites,
+        clear_counts=clear_counts,
         grid=np.array([left, top, config["grid_resolution_m"], width, height]),
         crs=config["grid_crs"],
         cutoff=config["cutoff"],

@@ -7,6 +7,7 @@ dated before the forecast cutoff; the builder raises otherwise.
 
 from __future__ import annotations
 
+from collections.abc import Callable
 from concurrent.futures import ThreadPoolExecutor
 from datetime import date, timedelta
 from typing import Any
@@ -107,3 +108,62 @@ def year_composite(
     stack = np.stack(scenes)
     clear = np.isfinite(stack[:, 0]).sum(axis=0).astype(np.int16)
     return np.nanmedian(stack, axis=0).astype(np.float32), clear
+
+
+def post_cutoff_window(year: int, config: dict[str, Any]) -> tuple[date, date]:
+    """Summer window for a year after the cutoff, ending at `window_end`."""
+    cutoff = date.fromisoformat(config["cutoff"])
+    last = date.fromisoformat(config["window_end"])
+    start = date.fromisoformat(f"{year}-{config['season_start']}")
+    end = date.fromisoformat(f"{year}-{config['season_end']}")
+    if start <= cutoff:
+        msg = f"Season {year} starts on or before the cutoff {cutoff}"
+        raise ValueError(msg)
+    return start, min(end, last)
+
+
+def assert_after_cutoff(scene_dates: list[date], cutoff: date) -> None:
+    """Raise if any scene was acquired on or before the cutoff."""
+    early = [d for d in scene_dates if d <= cutoff]
+    if early:
+        msg = (
+            f"{len(early)} scene(s) dated on or before the cutoff {cutoff}: {early[:3]}"
+        )
+        raise ValueError(msg)
+
+
+def collect_composites(
+    catalog: Any,
+    bbox: tuple[float, float, float, float],
+    grid: tuple,
+    config: dict[str, Any],
+    years: list[int],
+    window: Callable[[int, dict[str, Any]], tuple[date, date]],
+    check_dates: Callable[[list[date]], None],
+) -> tuple[NDArray[np.float32], NDArray[np.int16]]:
+    """Yearly composites and clear counts, checking every scene date."""
+    import warnings
+
+    west, south, east, north = bbox
+    composites, counts = [], []
+    for year in years:
+        start, end = window(year, config)
+        items = list(
+            catalog.search(
+                collections=[config["collection"]],
+                bbox=[west, south, east, north],
+                datetime=f"{start}/{end}",
+                query={
+                    "platform": {"in": config["platforms"]},
+                    "eo:cloud_cover": {"lt": config["max_scene_cloud_percent"]},
+                },
+            ).items()
+        )
+        check_dates([item.datetime.date() for item in items])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore", RuntimeWarning)
+            stack, clear = year_composite(items, grid, config)
+        composites.append(stack)
+        counts.append(clear)
+        print(f"{year}: {len(items)} scenes", flush=True)
+    return np.stack(composites), np.stack(counts)
