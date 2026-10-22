@@ -3,9 +3,11 @@ from __future__ import annotations
 import argparse
 
 import numpy as np
+from pyproj import Transformer
 
 from canopyguard.config import load_config, load_region
 from canopyguard.data.echosat_drop import drop_share_on_grid
+from canopyguard.data.landsat_stac import study_grid
 from canopyguard.io import data_path, ensure_parent, with_region
 from canopyguard.provenance import file_sha256, write_provenance
 
@@ -17,11 +19,13 @@ def main() -> int:
     ingestion = load_config("configs/ingestion.yaml")
     source = {**ingestion["echosat"], **ingestion["echosat_drop"]}
     suffix = region["suffix"]
-    composites = np.load(
-        with_region(data_path(ingestion["landsat"]["output_composites"]), suffix)
-    )
-    left, top, step, width, height = composites["grid"]
-    grid = (float(left), float(top), float(step), int(width), int(height))
+    landsat = ingestion["landsat"]
+    west, south, east, north = region["bbox"]
+    to_utm = Transformer.from_crs("EPSG:4326", landsat["grid_crs"], always_xy=True)
+    x0, y0 = to_utm.transform(west, south)
+    x1, y1 = to_utm.transform(east, north)
+    left, top, width, height = study_grid((x0, y0, x1, y1), landsat)
+    grid = (left, top, float(landsat["grid_resolution_m"]), width, height)
     share = drop_share_on_grid(source, region["bbox"], grid)
     output = ensure_parent(with_region(data_path(source["output"]), suffix))
     np.savez_compressed(output, echosat_drop_share=share)
