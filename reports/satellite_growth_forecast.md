@@ -181,13 +181,32 @@ One Landsat 8 file (`LC08_L2SP_045033_20220721_02_T1`, red band) is corrupt on
 the server and was skipped in all three regions. The skip is recorded in the
 composite files.
 
-ECHOSAT cross-check: not yet run. The ECHOSAT server drops connections from the
-environment used for these runs, even for a 64 KB request. The code is in place
-(`scripts/ingest_echosat_drop.py`, `scripts/check_screens.py`). ECHOSAT sees
-2018 on, so it can confirm later events (Kincade 2019, 2020 fires) but not the
-2017 Tubbs fire or earlier cuts. Until it is run, the screens are checked
-against each other, against the LiDAR loss label and against fire perimeters,
-not against an independent height product.
+ECHOSAT cross-check (`reports/screen_crosscheck.json`, 90 m rows): ECHOSAT
+height maps for 2018 and 2022 were read from the Earth Engine copy of the
+product, one 90 m cell per row, as the share of 10 m pixels whose height fell by
+5 m or more. A row counts as abrupt loss when that share is at least 0.10. It is
+an independent, modeled product used only to check the screens.
+
+| Region | Screen | Kept rows | Removed rows |
+| --- | --- | --- | --- |
+| Study | Satellite (fire + Landsat) | 0.2 percent | 1.7 percent |
+| Study | LiDAR loss share | 0.2 percent | 1.8 percent |
+| West | Satellite (fire + Landsat) | 0.1 percent | 6.2 percent |
+| West | LiDAR loss share | 0.0 percent | 6.8 percent |
+| East | Satellite (fire + Landsat) | 0.1 percent | 4.2 percent |
+| East | LiDAR loss share | 0.1 percent | 4.3 percent |
+
+Share of rows with ECHOSAT abrupt loss. The rows both screens keep are almost
+free of it, and the rows they remove carry 8 to 60 times more. Fire perimeters
+alone leave 0.4 percent (study), 0.2 percent (west) and 0.3 percent (east) of
+kept rows with ECHOSAT abrupt loss, so the Landsat step removes some disturbance
+that the fire records miss.
+
+Limits of this check: ECHOSAT starts in 2018, so it cannot confirm removals of
+earlier events such as the 2017 Tubbs fire or earlier cuts; the rates are small
+because most removed rows were disturbed before 2018. ECHOSAT is a modeled
+product whose maps all draw on imagery through 2024, so it is a cross-check, not
+ground truth, and it is never a predictor or a screen here.
 
 ## Checks
 
