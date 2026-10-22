@@ -120,3 +120,27 @@ def test_post_cutoff_scene_dates_are_checked_the_other_way_round():
     assert post_cutoff_window(2022, config)[1] == date(2022, 9, 12)
     with pytest.raises(ValueError):
         post_cutoff_window(2013, config)
+
+
+def test_a_corrupt_scene_is_skipped_and_reported(monkeypatch):
+    from types import SimpleNamespace
+
+    from canopyguard.data import landsat_stac
+
+    def fake_read(item, grid, config):
+        if item.id == "bad":
+            raise RuntimeError("corrupt file")
+        return np.full((6, 2, 2), 0.2, dtype=np.float32)
+
+    monkeypatch.setattr(landsat_stac, "read_scene_retrying", fake_read)
+    items = [SimpleNamespace(id="good"), SimpleNamespace(id="bad")]
+    composite, clear, skipped = landsat_stac.year_composite(
+        items, (0.0, 60.0, 30.0, 2, 2), {"workers": 1}
+    )
+    assert skipped == ["bad"]
+    assert clear.max() == 1
+    assert composite[0, 0, 0] == pytest.approx(0.2)
+    with pytest.raises(RuntimeError, match="No scene could be read"):
+        landsat_stac.year_composite(
+            [SimpleNamespace(id="bad")], (0.0, 60.0, 30.0, 2, 2), {"workers": 1}
+        )

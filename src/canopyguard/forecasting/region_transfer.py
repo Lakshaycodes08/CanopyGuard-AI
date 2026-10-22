@@ -81,6 +81,8 @@ def apply_screen(table: pd.DataFrame, rule: dict[str, float]) -> pd.DataFrame:
     keep = np.ones(len(table), dtype=bool)
     if "max_burned_share" in rule:
         keep &= (table["burned"] <= rule["max_burned_share"]).to_numpy()
+    if "max_sat_disturbed_share" in rule:
+        keep &= (table["sat_disturbed"] <= rule["max_sat_disturbed_share"]).to_numpy()
     if "max_loss_share" in rule:
         keep &= (table["loss_share"] <= rule["max_loss_share"]).to_numpy()
     return table[keep]

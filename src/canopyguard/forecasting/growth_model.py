@@ -30,6 +30,10 @@ NON_FEATURES = {
     "canopy_share",
     "loss_share",
     "burned",
+    "sat_nbr_drop_final",
+    "sat_nbr_drop_peak",
+    "sat_disturbed",
+    "echosat_drop_share",
 }
 
 

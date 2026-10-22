@@ -97,17 +97,33 @@ def read_scene_retrying(item: Any, grid: tuple, config: dict[str, Any]):
 
 def year_composite(
     items: list[Any], grid: tuple, config: dict[str, Any]
-) -> tuple[NDArray[np.float32], NDArray[np.int16]]:
-    """Median reflectance and clear-observation count for one summer."""
+) -> tuple[NDArray[np.float32], NDArray[np.int16], list[str]]:
+    """Median reflectance, clear-observation count and skipped scene ids.
+
+    A scene whose files cannot be read after the retries is skipped and
+    reported, because a single corrupt file in the archive should not discard
+    a year. A year with scenes but none readable raises.
+    """
     left, top, width, height = grid
     if not items:
         empty = np.full((len(BAND_NAMES), height, width), np.nan, np.float32)
-        return empty, np.zeros((height, width), np.int16)
+        return empty, np.zeros((height, width), np.int16), []
+
+    def read(item: Any) -> NDArray[np.float32] | None:
+        try:
+            return read_scene_retrying(item, grid, config)
+        except RuntimeError:
+            return None
+
     with ThreadPoolExecutor(max_workers=int(config["workers"])) as pool:
-        scenes = list(pool.map(lambda it: read_scene_retrying(it, grid, config), items))
+        results = list(pool.map(read, items))
+    scenes = [r for r in results if r is not None]
+    skipped = [i.id for i, r in zip(items, results, strict=True) if r is None]
+    if not scenes:
+        raise RuntimeError(f"No scene could be read; skipped {skipped}")
     stack = np.stack(scenes)
     clear = np.isfinite(stack[:, 0]).sum(axis=0).astype(np.int16)
-    return np.nanmedian(stack, axis=0).astype(np.float32), clear
+    return np.nanmedian(stack, axis=0).astype(np.float32), clear, skipped
 
 
 def post_cutoff_window(year: int, config: dict[str, Any]) -> tuple[date, date]:
@@ -140,12 +156,12 @@ def collect_composites(
     years: list[int],
     window: Callable[[int, dict[str, Any]], tuple[date, date]],
     check_dates: Callable[[list[date]], None],
-) -> tuple[NDArray[np.float32], NDArray[np.int16]]:
-    """Yearly composites and clear counts, checking every scene date."""
+) -> tuple[NDArray[np.float32], NDArray[np.int16], list[str]]:
+    """Yearly composites, clear counts and skipped scenes, checking dates."""
     import warnings
 
     west, south, east, north = bbox
-    composites, counts = [], []
+    composites, counts, skipped = [], [], []
     for year in years:
         start, end = window(year, config)
         items = list(
@@ -162,8 +178,9 @@ def collect_composites(
         check_dates([item.datetime.date() for item in items])
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", RuntimeWarning)
-            stack, clear = year_composite(items, grid, config)
+            stack, clear, bad = year_composite(items, grid, config)
         composites.append(stack)
         counts.append(clear)
-        print(f"{year}: {len(items)} scenes", flush=True)
-    return np.stack(composites), np.stack(counts)
+        skipped.extend(bad)
+        print(f"{year}: {len(items)} scenes, {len(bad)} skipped", flush=True)
+    return np.stack(composites), np.stack(counts), skipped

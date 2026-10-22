@@ -39,7 +39,7 @@ def main() -> int:
     )
     cutoff = date.fromisoformat(config["cutoff"])
     years = list(range(int(config["first_year"]), int(config["last_year"]) + 1))
-    composites, clear_counts = collect_composites(
+    composites, clear_counts, skipped = collect_composites(
         catalog,
         region["bbox"],
         grid,
@@ -58,6 +58,7 @@ def main() -> int:
         bands=np.array(BAND_NAMES),
         composites=composites,
         clear_counts=clear_counts,
+        skipped_scenes=np.array(skipped, dtype=str),
         grid=np.array([left, top, config["grid_resolution_m"], width, height]),
         crs=config["grid_crs"],
         cutoff=config["cutoff"],

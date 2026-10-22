@@ -183,3 +183,10 @@ landsat_screen:
   # The last window ends the day before the final survey starts.
   window_end_epoch: "2022"
   output_composites: interim/landsat/summer_composites_2014-2022.npz
+
+# ECHOSAT height drop between two of its years, used only to cross-check the
+# disturbance screens. It is a benchmark, never a predictor or a screen.
+echosat_drop:
+  from_year: 2018
+  to_year: 2022
+  output: interim/echosat/echosat_drop_share.npz

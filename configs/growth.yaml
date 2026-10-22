@@ -81,6 +81,8 @@ screens:
   # Rows with no fire perimeter and little LiDAR-measured loss: the steady
   # growth question. Loss share uses the label, so this is a conditional claim.
   undisturbed: {max_burned_share: 0.0, max_loss_share: 0.1}
+  # Same idea with no LiDAR: fire perimeters plus Landsat change after the cutoff.
+  undisturbed_satellite: {max_burned_share: 0.0, max_sat_disturbed_share: 0.1}
 
 regions:
   names: [study, west, east]
@@ -111,3 +113,15 @@ hazard:
   bootstrap_resamples: 1000
   confidence_level: 0.95
   output: reports/hazard_forecast.json
+
+satellite_screen:
+  post_composites: interim/landsat/summer_composites_2014-2022.npz
+  echosat_drop: interim/echosat/echosat_drop_share.npz
+  baseline_years: 3
+  final_years: 2
+  # Published dNBR level for the lowest burn-severity class (USGS / MTBS).
+  # Chosen from the literature, not tuned on the LiDAR labels.
+  threshold: 0.10
+  # Rows with an ECHOSAT drop share at or above this count as abrupt loss.
+  echosat_row_threshold: 0.10
+  output: reports/screen_crosscheck.json
