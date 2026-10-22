@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import argparse
 import json
 
 import pandas as pd
@@ -27,7 +28,12 @@ def main() -> int:
     config = load_config("configs/growth.yaml")
     ingestion = load_config("configs/ingestion.yaml")
     crs = ingestion["landsat"]["grid_crs"]
-    settings = config["regions"]
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--scales", type=int, nargs="+", default=None)
+    args = parser.parse_args()
+    settings = dict(config["regions"])
+    if args.scales:
+        settings["scales"] = args.scales
     seed = int(config["seed"])
     set_seeds(seed)
     names = settings["names"]
