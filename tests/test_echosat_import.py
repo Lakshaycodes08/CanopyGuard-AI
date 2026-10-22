@@ -49,3 +49,31 @@ def test_a_wrong_sized_export_is_rejected(tmp_path, monkeypatch):
     monkeypatch.setattr(sys, "argv", ["x", "--region", "study", "--file", str(path)])
     with pytest.raises(ValueError, match="Expected uint8"):
         module.main()
+
+
+def write_export(path, values):
+    with rasterio.open(
+        path,
+        "w",
+        driver="GTiff",
+        width=154,
+        height=426,
+        count=1,
+        dtype="uint8",
+        crs="EPSG:32610",
+        transform=from_origin(508695.0, 4296855.0, 90.0, 90.0),
+    ) as dst:
+        dst.write(values)
+
+
+@pytest.mark.parametrize(
+    ("fill", "message"),
+    [(255, "Every cell is no data"), (0, "were not averaged")],
+)
+def test_empty_or_unaveraged_exports_are_rejected(tmp_path, monkeypatch, fill, message):
+    module = load_script()
+    path = tmp_path / "export.tif"
+    write_export(path, np.full((1, 426, 154), fill, dtype=np.uint8))
+    monkeypatch.setattr(sys, "argv", ["x", "--region", "study", "--file", str(path)])
+    with pytest.raises(ValueError, match=message):
+        module.main()

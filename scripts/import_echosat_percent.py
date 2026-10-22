@@ -52,6 +52,11 @@ def main() -> int:
         raise ValueError(f"Origin {transform.c}, {transform.f} != {left}, {top}")
     if abs(transform.a - size) > 1e-6 or abs(transform.e + size) > 1e-6:
         raise ValueError(f"Pixel size {transform.a} is not {size}")
+    valid = percent != 255
+    if not valid.any():
+        raise ValueError("Every cell is no data; the export holds no ECHOSAT values")
+    if np.isin(percent[valid], (0, 100)).all():
+        raise ValueError("Only 0 and 100 present; the 90 m cells were not averaged")
     output = ensure_parent(
         with_region(data_path(source["compact_output"]), region["suffix"])
     )
@@ -65,7 +70,6 @@ def main() -> int:
         row_count=1,
         config_sha256=file_sha256("configs/ingestion.yaml"),
     )
-    valid = percent != 255
     print(
         f"{region['name']}: {percent.shape} blocks, {valid.mean():.2f} valid, "
         f"mean drop {percent[valid].mean() / 100:.4f} -> {output}"
