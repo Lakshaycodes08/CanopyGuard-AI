@@ -135,12 +135,12 @@ def test_a_corrupt_scene_is_skipped_and_reported(monkeypatch):
     monkeypatch.setattr(landsat_stac, "read_scene_retrying", fake_read)
     items = [SimpleNamespace(id="good"), SimpleNamespace(id="bad")]
     composite, clear, skipped = landsat_stac.year_composite(
-        items, (0.0, 60.0, 30.0, 2, 2), {"workers": 1}
+        items, (0.0, 60.0, 2, 2), {"workers": 1}
     )
     assert skipped == ["bad"]
     assert clear.max() == 1
     assert composite[0, 0, 0] == pytest.approx(0.2)
     with pytest.raises(RuntimeError, match="No scene could be read"):
         landsat_stac.year_composite(
-            [SimpleNamespace(id="bad")], (0.0, 60.0, 30.0, 2, 2), {"workers": 1}
+            [SimpleNamespace(id="bad")], (0.0, 60.0, 2, 2), {"workers": 1}
         )
