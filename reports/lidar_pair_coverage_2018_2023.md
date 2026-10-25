@@ -1,12 +1,12 @@
 # 2018 and 2023 LiDAR co-coverage (issue 15)
 
-Run: 2026-10-15. Owner: Rehaan. Coverage check only. It does not measure canopy
-change, and 2018 is not an admitted epoch (it has not passed the admission
-screen in `configs/lidar.yaml`).
+Run: 2026-10-15. Coverage analysis: Rehaan. Coverage check only. It does not
+measure canopy change, and 2018 is not an admitted epoch (it has not passed
+the admission screen in `configs/lidar.yaml`).
 
-Owner decision (2026-10-25): exclude this 6.7 km2 out-of-area overlap from the
-CanopyGuard study and ECHOSAT change evaluation. The coverage measurement below
-remains a record of why this candidate pair was assessed.
+Project owner decision (2026-10-25): exclude this 6.7 km2 out-of-area overlap
+from the CanopyGuard study and ECHOSAT change evaluation. The coverage
+measurement below remains a record of why this candidate pair was assessed.
 
 ## Answer
 
