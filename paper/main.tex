@@ -200,6 +200,56 @@ was worse than the median on the loss-on screen: $+0.012$ m
 ($[+0.001,+0.025]$). Eleven of 18 map-class fits touched a $k$
 or $c$ bound, so their shape parameters are not interpreted biologically.
 
+\subsection{Why the flexible curve did not help}
+The class-level diagnostic in Table~\ref{tab:curve-class} is for the
+retrospectively selected LiDAR-loss-on sensitivity (76,980 cells), not
+the primary loss-off comparison. Its curve has lower MAE than the
+median in eight of 18 map classes and higher MAE in ten. Four of the
+five classes with fewer than 1,000 cells have an absolute difference
+above 0.1 m; the other 13 classes differ by at most 0.034 m. These
+class contrasts are descriptive and have no separate uncertainty
+intervals. In the largest class, \emph{Quercus agrifolia}, the full fit
+put the shape parameter $c$ at its configured lower bound of 1.01.
+That boundary fit limits interpretation of the fitted shape; it does
+not establish a biological growth law. The stored per-class results
+and bound flags are in
+\texttt{reports/growth\_curve\_check\_2013-2022.json} under
+\texttt{per\_type}.
+
+\begin{table}[ht]
+\centering
+\footnotesize
+\caption{Loss-on sensitivity: per-class held-out curve minus median
+MAE (m). Negative values favor the curve. Names abbreviate the
+2013 Sonoma map classes; exact names and unrounded values are in
+\texttt{per\_type} of the stored G3 result.}
+\label{tab:curve-class}
+\begin{tabular}{lrr}
+\toprule
+Map class & Cells & Difference (m) \\
+\midrule
+\emph{Q. agrifolia} & 17,265 & $-0.010$ \\
+Mixed \emph{Quercus} & 10,875 & $+0.008$ \\
+\emph{Q. douglasii} & 8,343 & $+0.001$ \\
+\emph{Q. lobata} & 7,437 & $-0.013$ \\
+\emph{U. californica} & 7,096 & $+0.014$ \\
+\emph{Q. garryana} & 4,597 & $+0.021$ \\
+\emph{A. menziesii} & 4,512 & $+0.016$ \\
+\emph{Q. kelloggii} & 4,464 & $+0.033$ \\
+\emph{P. menziesii} & 3,322 & $-0.005$ \\
+\emph{Q. wislizeni} (tree) & 3,036 & $+0.034$ \\
+\emph{P. fremontii} & 1,433 & $-0.021$ \\
+\emph{S. sempervirens} & 1,217 & $-0.008$ \\
+\emph{Q. chrysolepis} & 1,111 & $+0.013$ \\
+\emph{H. sargentii} & 982 & $-0.415$ \\
+\emph{P. sabiniana/Q. durata} & 492 & $+0.445$ \\
+Mixed \emph{Eucalyptus} & 342 & $-0.147$ \\
+\emph{P. attenuata} & 285 & $+0.331$ \\
+\emph{A. macrophyllum} & 171 & $-0.003$ \\
+\bottomrule
+\end{tabular}
+\end{table}
+
 \subsection{Stage-two residual models}
 On the forest LiDAR-loss-off 2 km screen (125,888 cells), the matched
 stage-one MAE is 1.256 m. Ridge MAE is 1.336 m, a difference of
