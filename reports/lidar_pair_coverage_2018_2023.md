@@ -6,13 +6,6 @@ screen in `configs/lidar.yaml`).
 
 ## Answer
 
-Owner decision (2026-10-25): retain the 6.7 km2 area as a possible small,
-out-of-area exploratory ECHOSAT change check. Do not present it as validation
-inside the northern Sonoma study box or as a headline result. The 2018 epoch
-must pass its admission and label-quality checks before any change score is
-computed. The 4.8 km2 sensitivity at a 5 m canopy threshold and the terrain
-and height differences below must accompany any eventual result.
-
 - One number: **6.7 km2 of usable canopy** where both epochs hold returns. Usable
   means canopy of at least 2 m in both epochs (the repo canopy rule), no loss of
   more than 3 m between them, and outside every fire perimeter of 2018 to 2023.
