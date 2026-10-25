@@ -73,22 +73,28 @@ def validate_time_splits(config: dict[str, Any]) -> None:
 
 
 def load_region(name: str) -> dict[str, Any]:
-    """Bounding box and output-name suffix for a named region.
+    """Bounding box, label pair and output-name suffix for a named region.
 
     The original study area is region `study` and keeps its existing paths.
     """
+    primary = load_config("configs/lidar.yaml")["change"]["pairs"][0]
     if name == "study":
         box = load_config("configs/study_area.yaml")["study_area"]["bbox"]
-        suffix = ""
+        suffix, pair, reserved = "", list(primary), False
     else:
         regions = load_config("configs/regions.yaml")["regions"]
         if name not in regions:
             msg = f"Unknown region {name!r}; choose from {sorted(regions)}"
             raise KeyError(msg)
-        box = regions[name]["bbox"]
-        suffix = f"_{name}"
+        entry = regions[name]
+        box, suffix = entry["bbox"], f"_{name}"
+        pair = list(entry.get("pair", primary))
+        reserved = bool(entry.get("reserved", False))
     return {
         "name": name,
         "suffix": suffix,
+        "pair": pair,
+        "primary_end": str(primary[1]),
+        "reserved": reserved,
         "bbox": tuple(float(box[k]) for k in ("west", "south", "east", "north")),
     }

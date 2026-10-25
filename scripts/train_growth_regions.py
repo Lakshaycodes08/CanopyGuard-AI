@@ -13,11 +13,12 @@ from canopyguard.forecasting.region_transfer import (
     apply_screen,
     class_summary,
     far_from_other_regions,
+    load_region_tables,
     region_codes,
     stack_regions,
     utm_box,
 )
-from canopyguard.io import data_path, ensure_parent, project_root, with_region
+from canopyguard.io import data_path, ensure_parent, project_root
 from canopyguard.provenance import current_commit, file_sha256, write_provenance
 from canopyguard.utils import set_seeds
 
@@ -42,11 +43,7 @@ def main() -> int:
     base = data_path(config["table"]["output"])
     report: dict = {"git_commit": current_commit(), "seed": seed, "regions": names}
     for factor in settings["scales"]:
-        tables = {}
-        for name in names:
-            path = with_region(base, regions[name]["suffix"])
-            path = path.with_name(f"{path.stem}_x{factor}{path.suffix}")
-            tables[name] = pd.read_parquet(path).dropna(subset=["mean_change"])
+        tables = load_region_tables(config, names, factor, crs)
         stacked = stack_regions(tables).reset_index(drop=True)
         entry = report.setdefault(f"scale_x{factor}", {})
         for screen_name, rule in config["screens"].items():

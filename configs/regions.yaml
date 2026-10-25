@@ -9,3 +9,38 @@ regions:
   east:
     bbox: {west: -122.74, south: 38.475, east: -122.58, north: 38.82}
     note: 1195 candidate 500 m tiles; inland side, adjoins the study area edge
+  seam1:
+    bbox: {west: -122.829, south: 38.75, east: -122.711, north: 38.856}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 14 co-covered 500 m tiles
+  seam2:
+    bbox: {west: -122.656, south: 38.589, east: -122.614, north: 38.658}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 5 co-covered 500 m tiles
+  seam3:
+    bbox: {west: -122.714, south: 38.669, east: -122.619, north: 38.743}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 11 co-covered 500 m tiles
+  seam4:
+    bbox: {west: -122.53, south: 38.391, east: -122.459, north: 38.483}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 12 co-covered 500 m tiles
+  seam5:
+    bbox: {west: -122.634, south: 38.481, east: -122.522, north: 38.577}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 14 co-covered 500 m tiles
+  seam6:
+    bbox: {west: -122.398, south: 38.162, east: -122.344, north: 38.272}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 15 co-covered 500 m tiles
+  seam7:
+    bbox: {west: -122.461, south: 38.261, east: -122.378, north: 38.393}
+    pair: ["2013", "2023"]
+    reserved: true
+    note: 15 co-covered 500 m tiles

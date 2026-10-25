@@ -7,7 +7,7 @@ import shutil
 from pathlib import Path
 
 from canopyguard.config import load_config, load_region
-from canopyguard.io import data_path, ensure_parent, with_region
+from canopyguard.io import data_path, ensure_parent, regional_path
 from canopyguard.provenance import file_sha256, write_provenance
 
 
@@ -19,11 +19,11 @@ def main() -> int:
     region = load_region(args.region)
     config = load_config("configs/lidar.yaml")
     box_text = " ".join(map(str, region["bbox"]))
-    source = Path(args.build_dir) / "labels_2013-2022_unique.npz"
+    first, last = region["pair"]
+    source = Path(args.build_dir) / f"labels_{first}-{last}_unique.npz"
     target = ensure_parent(
-        with_region(
-            data_path(config["label_archive"]["unique"].removeprefix("data/")),
-            region["suffix"],
+        regional_path(
+            data_path(config["label_archive"]["unique"].removeprefix("data/")), region
         )
     )
     shutil.copyfile(source, target)

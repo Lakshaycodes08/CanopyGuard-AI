@@ -74,3 +74,16 @@ def with_region(path: str | Path, suffix: str) -> Path:
     """Insert a region suffix before the file extension, e.g. a.npz -> a_west.npz."""
     original = Path(path)
     return original.with_name(f"{original.stem}{suffix}{original.suffix}")
+
+
+def regional_path(path: str | Path, region: dict) -> Path:
+    """Region suffix plus the label-pair end year in the file name.
+
+    Files named for the primary pair (for example 2013-2022) keep their name
+    for the primary pair; a region on another pair gets its own end year.
+    """
+    named = with_region(path, region["suffix"])
+    end, primary = str(region["pair"][1]), str(region["primary_end"])
+    if end == primary:
+        return named
+    return named.with_name(named.name.replace(f"-{primary}", f"-{end}"))

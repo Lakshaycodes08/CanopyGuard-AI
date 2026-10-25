@@ -95,6 +95,10 @@ regions:
     1: [undisturbed]
   # Test rows closer than this to another region are not scored.
   buffer_m: 3000
+  # Tiles with LiDAR in both 2013 and 2023 are a reserved test zone. Rows within
+  # the buffer of any of them are dropped from every training and scoring run.
+  reserved_tiles: interim/reserved/seam2023_tiles.json
+  reserved_buffer_m: 3000
   block_size_m: 5000
   output: reports/growth_region_transfer.json
 
@@ -128,3 +132,9 @@ satellite_screen:
   # Rows with an ECHOSAT drop share at or above this count as abrupt loss.
   echosat_row_threshold: 0.10
   output: reports/screen_crosscheck.json
+
+reserved_test:
+  scale: 3
+  screens: [all, undisturbed, undisturbed_satellite]
+  block_size_m: 500
+  output: reports/reserved_test_2013-2023.json

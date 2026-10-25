@@ -22,6 +22,7 @@ from canopyguard.forecasting.hazard_model import (
 )
 from canopyguard.forecasting.region_transfer import (
     far_from_other_regions,
+    load_region_tables,
     region_codes,
     stack_regions,
     utm_box,
@@ -59,11 +60,7 @@ def main() -> int:
     regions = {n: load_region(n) for n in names}
     boxes = {n: utm_box(r["bbox"], crs) for n, r in regions.items()}
     base = data_path(config["table"]["output"])
-    tables = {}
-    for name in names:
-        path = with_region(base, regions[name]["suffix"])
-        path = path.with_name(f"{path.stem}_x{settings['scale']}{path.suffix}")
-        tables[name] = pd.read_parquet(path).dropna(subset=["mean_change"])
+    tables = load_region_tables(config, names, int(settings["scale"]), crs)
     table = stack_regions(tables).reset_index(drop=True)
     folds = region_codes(table, names)
     scored = far_from_other_regions(table, boxes, float(config["regions"]["buffer_m"]))

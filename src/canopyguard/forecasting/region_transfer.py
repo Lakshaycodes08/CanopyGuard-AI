@@ -124,3 +124,47 @@ def noise_columns(table: pd.DataFrame, columns: list[str], seed: int) -> pd.Data
         (len(table), len(columns))
     )
     return noisy
+
+
+def near_reserved_tiles(
+    table: pd.DataFrame,
+    tile_boxes_wgs84: list[list[float]],
+    crs: str,
+    buffer_m: float,
+) -> NDArray[np.bool_]:
+    """True where a row lies within `buffer_m` of any reserved test tile."""
+    easting = table["x"].to_numpy()
+    northing = table["y"].to_numpy()
+    near = np.zeros(len(table), dtype=bool)
+    for box in tile_boxes_wgs84:
+        near |= distance_to_box(easting, northing, utm_box(tuple(box), crs)) < buffer_m
+    return near
+
+
+def load_region_tables(
+    config: dict[str, Any], names: list[str], factor: int, crs: str
+) -> dict[str, pd.DataFrame]:
+    """Region tables for training and scoring, minus the reserved test zone.
+
+    Rows within the buffer of a reserved tile are dropped, so no later
+    LiDAR location is ever used to fit or to score a model.
+    """
+    import json
+
+    from canopyguard.config import load_region
+    from canopyguard.io import data_path, regional_path
+
+    reserved = json.loads(
+        data_path(config["regions"]["reserved_tiles"]).read_text("utf-8")
+    )["boxes"]
+    buffer_m = float(config["regions"]["reserved_buffer_m"])
+    base = data_path(config["table"]["output"])
+    tables = {}
+    for name in names:
+        path = regional_path(base, load_region(name))
+        path = path.with_name(f"{path.stem}_x{factor}{path.suffix}")
+        table = pd.read_parquet(path).dropna(subset=["mean_change"])
+        table = table.reset_index(drop=True)
+        drop = near_reserved_tiles(table, reserved, crs, buffer_m)
+        tables[name] = table[~drop].reset_index(drop=True)
+    return tables

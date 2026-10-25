@@ -16,7 +16,7 @@ from canopyguard.data.landsat_stac import (
     post_cutoff_window,
     study_grid,
 )
-from canopyguard.io import data_path, ensure_parent, with_region
+from canopyguard.io import data_path, ensure_parent, regional_path
 from canopyguard.provenance import file_sha256, write_provenance
 
 
@@ -26,6 +26,9 @@ def main() -> int:
     region = load_region(parser.parse_args().region)
     ingestion = load_config("configs/ingestion.yaml")
     config = {**ingestion["landsat"], **ingestion["landsat_screen"]}
+    # The screen window ends at the survey that closes the region's label pair.
+    config["window_end_epoch"] = region["pair"][1]
+    config["last_year"] = int(region["pair"][1])
     epochs = {e["name"]: e for e in load_config("configs/lidar.yaml")["epochs"]}
     last_start = date.fromisoformat(epochs[config["window_end_epoch"]]["start"])
     config["window_end"] = (last_start - timedelta(days=1)).isoformat()
@@ -50,7 +53,7 @@ def main() -> int:
     )
     left, top, width, height = grid
     output = ensure_parent(
-        with_region(data_path(config["output_composites"]), region["suffix"])
+        regional_path(data_path(config["output_composites"]), region)
     )
     np.savez_compressed(
         output,

@@ -12,7 +12,7 @@ from canopyguard.features.disturbance import nbr_drop, satellite_disturbed
 from canopyguard.features.fire import burned_raster, perimeters_in_window
 from canopyguard.features.landsat_history import history_features
 from canopyguard.forecasting.growth_table import labels_on_pixel_grid, table_at_scale
-from canopyguard.io import data_path, ensure_parent, with_region
+from canopyguard.io import data_path, ensure_parent, regional_path, with_region
 from canopyguard.provenance import file_sha256, write_provenance
 
 
@@ -48,7 +48,7 @@ def main() -> int:
         layers = np.load(with_region(data_path(source), suffix))
         features.update({name: layers[name] for name in layers.files})
     epochs = {e["name"]: e for e in load_config("configs/lidar.yaml")["epochs"]}
-    first, last = config["features"]["fire_window_epochs"]
+    first, last = region["pair"]
     perimeters = json.loads(
         with_region(data_path(config["features"]["fire_perimeters"]), suffix).read_text(
             "utf-8"
@@ -65,7 +65,7 @@ def main() -> int:
     )
     ingestion = load_config("configs/ingestion.yaml")
     screen = config["satellite_screen"]
-    post = np.load(with_region(data_path(screen["post_composites"]), suffix))
+    post = np.load(regional_path(data_path(screen["post_composites"]), region))
     drops = nbr_drop(composites["composites"], post["composites"], screen)
     features.update(drops)
     features["sat_disturbed"] = satellite_disturbed(
@@ -75,14 +75,14 @@ def main() -> int:
     features["echosat_drop_share"] = load_echosat_drop(
         ingestion, screen, suffix, (int(height), int(width))
     )
-    labels = np.load(with_region(data_path(config["labels"]["archive"]), suffix))
+    labels = np.load(regional_path(data_path(config["labels"]["archive"]), region))
     pixels = labels_on_pixel_grid(
         {name: labels[name] for name in labels.files},
         grid,
         int(config["labels"]["min_label_cells_per_pixel"]),
     )
     share = float(config["features"]["min_valid_pixel_share"])
-    output = ensure_parent(with_region(data_path(config["table"]["output"]), suffix))
+    output = ensure_parent(regional_path(data_path(config["table"]["output"]), region))
     for factor in config["table"]["scales"]:
         table = table_at_scale(pixels, features, int(factor), grid, share)
         table["scale_pixels"] = int(factor)

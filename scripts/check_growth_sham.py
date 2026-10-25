@@ -2,8 +2,6 @@ from __future__ import annotations
 
 import json
 
-import pandas as pd
-
 from canopyguard.config import load_config, load_region
 from canopyguard.forecasting.growth_model import (
     feature_columns,
@@ -13,13 +11,14 @@ from canopyguard.forecasting.growth_model import (
 from canopyguard.forecasting.region_transfer import (
     apply_screen,
     far_from_other_regions,
+    load_region_tables,
     noise_columns,
     region_codes,
     shuffle_within_region,
     stack_regions,
     utm_box,
 )
-from canopyguard.io import data_path, project_root, with_region
+from canopyguard.io import project_root
 from canopyguard.utils import set_seeds
 
 
@@ -32,12 +31,7 @@ def main() -> int:
     names = config["regions"]["names"]
     regions = {n: load_region(n) for n in names}
     boxes = {n: utm_box(r["bbox"], crs) for n, r in regions.items()}
-    base = data_path(config["table"]["output"])
-    tables = {}
-    for name in names:
-        path = with_region(base, regions[name]["suffix"])
-        path = path.with_name(f"{path.stem}_x{settings['scale']}{path.suffix}")
-        tables[name] = pd.read_parquet(path).dropna(subset=["mean_change"])
+    tables = load_region_tables(config, names, int(settings["scale"]), crs)
     stacked = stack_regions(tables).reset_index(drop=True)
     table = apply_screen(stacked, config["screens"][settings["screen"]])
     table = table.reset_index(drop=True)
