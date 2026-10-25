@@ -1,0 +1,1045 @@
+{
+  "question": "Retrospective ECHOSAT 2022 versus single-date 2022 airborne LiDAR",
+  "parameters": {
+    "echosat_alignment": {
+      "source_crs": "EPSG:32610",
+      "target_crs": "EPSG:6339",
+      "resolution_m": 10,
+      "resampling": "bilinear",
+      "operation_epsg": 9774,
+      "operation_accuracy_m": 2.0,
+      "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+      "offset_sensitivity_m": [
+        -2.0,
+        0.0,
+        2.0
+      ]
+    },
+    "echosat_benchmark": {
+      "year": 2022,
+      "reference": "airborne_lidar_p95_end",
+      "secondary_reference": "airborne_lidar_max_end",
+      "secondary_reference_scope": "zero_offset_10m_common_valid_cells",
+      "primary_population": "valid_2022_lidar_p95_after_overlap_and_wire_exclusions",
+      "aggregation_scales_m": [
+        30,
+        100
+      ],
+      "aggregation_scope": "zero_offset_paired_valid_10m_cells",
+      "aggregation_anchor": "southwest_outer_edge_of_full_10m_label_grid",
+      "aggregation_min_valid_fraction": 0.5,
+      "height_strata_reference": "airborne_lidar_p95_end",
+      "height_strata_scope": "zero_offset_10m_primary_population",
+      "height_strata_edges_m": [
+        0,
+        2,
+        5,
+        10,
+        20,
+        30
+      ],
+      "block_size_m": 2000,
+      "bootstrap_draws": 2000,
+      "seed": 42,
+      "minimum_blocks": 2,
+      "metrics": [
+        "mae_m",
+        "median_signed_error_m",
+        "mean_signed_error_m",
+        "rmse_m"
+      ],
+      "report_path": "reports/e8_echosat_benchmark_2022.md",
+      "metrics_path": "reports/e8_echosat_benchmark_2022.json"
+    }
+  },
+  "label_epochs": [
+    "2013",
+    "2022"
+  ],
+  "selected_band": 5,
+  "inputs": {
+    "git_revision": "c260642842e7fa68898569fa2b676e5ed72ce244",
+    "source_url": "https://echosat.uni-muenster.de/ECHOSAT_T10S.tif",
+    "raster_provenance": {
+      "bbox_wgs84": [
+        -122.9,
+        38.475,
+        -122.74,
+        38.82
+      ],
+      "config_sha256": "70dc2355e1dbef1981e9e34ac913d29997cbc5e1f7ebb650aa86572de975f823",
+      "crs": "EPSG:32610",
+      "fetch_utc": "2026-10-25T10:33:38.817098+00:00",
+      "git_commit": "d2e6624c4fd727aeb5527595ead92148fb2cba00",
+      "http_status": null,
+      "row_count": null,
+      "script_name": "scripts/check_echosat.py",
+      "sha256": "c8ba58c329b68cb38d51690db173f4b4c34c8ae99a3ac14b990c03581600c9ad",
+      "source_url": "https://echosat.uni-muenster.de/ECHOSAT_T10S.tif"
+    },
+    "sha256": {
+      "raster": "c8ba58c329b68cb38d51690db173f4b4c34c8ae99a3ac14b990c03581600c9ad",
+      "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
+      "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee",
+      "vegetation": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
+      "benchmark_config": "5f369c26be7ad77cfba728d433e9b7ca8332de417d94cba82c4436ade9a63a1c",
+      "ingestion_config": "70dc2355e1dbef1981e9e34ac913d29997cbc5e1f7ebb650aa86572de975f823",
+      "forecasting_config": "08bea713cd9feadd49a45436765bb5937379d137a3c71287e8881f9c8a2d64f5",
+      "study_area_config": "2e52e7212e23c8cceba910c0453447d99f9edcf6476ee885766d2eadb59ab512"
+    },
+    "band_order_source": "J. Pauls (corresponding author), personal communication, October 2026",
+    "vegetation_map_source_url": "https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query",
+    "band_years": [
+      2018,
+      2019,
+      2020,
+      2021,
+      2022,
+      2023,
+      2024
+    ],
+    "last_input_year": 2024,
+    "joint_prediction_informed_through_2024": true,
+    "allowed_as_forecast_feature": false
+  },
+  "exclusions": {
+    "label_cells": 1478103,
+    "disputed_overlap": 198,
+    "nonfinite_p95_after_overlap": 0,
+    "wire_excluded_after_overlap_and_p95": 33621,
+    "before_product_nodata": 1444284,
+    "product_nodata_zero_offset": 0
+  },
+  "primary": {
+    "cells": 1444284,
+    "blocks": 130,
+    "scores": {
+      "mae_m": 3.950595604920302,
+      "median_signed_error_m": 2.539060011933694,
+      "mean_signed_error_m": 2.4749765693979553,
+      "rmse_m": 5.150175149929311
+    },
+    "intervals_95": {
+      "mae_m": [
+        3.7239026717017545,
+        4.189237014966765
+      ],
+      "median_signed_error_m": [
+        2.152539620169097,
+        2.724201236275282
+      ],
+      "mean_signed_error_m": [
+        2.2734230552936543,
+        2.694880632322046
+      ],
+      "rmse_m": [
+        4.896533696180126,
+        5.4073106785989715
+      ]
+    }
+  },
+  "forest_map_class": {
+    "forest_groups": [
+      "conifer forest",
+      "hardwood forest"
+    ],
+    "pooled": {
+      "cells": 443479,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.9461203806653513,
+        "median_signed_error_m": 1.166220709733146,
+        "mean_signed_error_m": 1.1989527409908374,
+        "rmse_m": 5.315455455892541
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.732838692756191,
+          4.2001085024662
+        ],
+        "median_signed_error_m": [
+          0.8100442966302597,
+          1.5439250576177923
+        ],
+        "mean_signed_error_m": [
+          0.845708881121556,
+          1.5624495763762107
+        ],
+        "rmse_m": [
+          5.0439996155514715,
+          5.63373427626885
+        ]
+      }
+    },
+    "by_group": {
+      "conifer forest": {
+        "cells": 67405,
+        "blocks": 80,
+        "scores": {
+          "mae_m": 5.512027033199154,
+          "median_signed_error_m": 2.0341049207005866,
+          "mean_signed_error_m": 1.1292315283040963,
+          "rmse_m": 7.082849725579094
+        },
+        "intervals_95": {
+          "mae_m": [
+            5.149773161784826,
+            5.927784729861825
+          ],
+          "median_signed_error_m": [
+            0.7643943132978577,
+            3.000557030109215
+          ],
+          "mean_signed_error_m": [
+            0.16141463474712472,
+            1.9168125229689155
+          ],
+          "rmse_m": [
+            6.561977016712761,
+            7.665850793233727
+          ]
+        }
+      },
+      "hardwood forest": {
+        "cells": 376074,
+        "blocks": 130,
+        "scores": {
+          "mae_m": 3.665457697485868,
+          "median_signed_error_m": 1.067173836549836,
+          "mean_signed_error_m": 1.2114491069750581,
+          "rmse_m": 4.93219843492708
+        },
+        "intervals_95": {
+          "mae_m": [
+            3.471239832879186,
+            3.896853863731531
+          ],
+          "median_signed_error_m": [
+            0.7619866103386048,
+            1.3859232522042233
+          ],
+          "mean_signed_error_m": [
+            0.8911164279208953,
+            1.5476726215201102
+          ],
+          "rmse_m": [
+            4.691708270144376,
+            5.221333907727729
+          ]
+        }
+      }
+    },
+    "other_primary_cells": 1000805
+  },
+  "offset_sensitivity": {
+    "common_cells": 1444284,
+    "score_ranges_m": {
+      "mae_m": [
+        3.9421276720321505,
+        4.010661553255532
+      ],
+      "median_signed_error_m": [
+        2.539060011933694,
+        2.5553198810960343
+      ],
+      "mean_signed_error_m": [
+        2.4725218250267917,
+        2.476965931453375
+      ],
+      "rmse_m": [
+        5.128725745709069,
+        5.2150017003147076
+      ]
+    }
+  },
+  "offsets": [
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.9600606737113067,
+        "median_signed_error_m": 2.5485214626548514,
+        "mean_signed_error_m": 2.4725218250267917,
+        "rmse_m": 5.150888871140579
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.7343062731908914,
+          4.198971979292164
+        ],
+        "median_signed_error_m": [
+          2.168226705441525,
+          2.7340704780539635
+        ],
+        "mean_signed_error_m": [
+          2.269750787441722,
+          2.692729238436043
+        ],
+        "rmse_m": [
+          4.895443407539467,
+          5.410994438528437
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508678.0,
+          0.0,
+          -10.0,
+          4296418.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": -2.0,
+        "offset_north_m": -2.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.9421276720321505,
+        "median_signed_error_m": 2.545070941127461,
+        "mean_signed_error_m": 2.473670269764697,
+        "rmse_m": 5.128725745709069
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.715690937097115,
+          4.181159623649675
+        ],
+        "median_signed_error_m": [
+          2.163048415444117,
+          2.730218128719231
+        ],
+        "mean_signed_error_m": [
+          2.2724308175446013,
+          2.693391150635964
+        ],
+        "rmse_m": [
+          4.874799854641543,
+          5.38727152937193
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508678.0,
+          0.0,
+          -10.0,
+          4296420.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": -2.0,
+        "offset_north_m": 0.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.963025264472379,
+        "median_signed_error_m": 2.553302222855861,
+        "mean_signed_error_m": 2.474849204602116,
+        "rmse_m": 5.146824957781968
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.738998008766512,
+          4.198757160198787
+        ],
+        "median_signed_error_m": [
+          2.1734768319987086,
+          2.737653196043689
+        ],
+        "mean_signed_error_m": [
+          2.2735759690267465,
+          2.694557242001473
+        ],
+        "rmse_m": [
+          4.895375038451509,
+          5.405572654216637
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508678.0,
+          0.0,
+          -10.0,
+          4296422.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": -2.0,
+        "offset_north_m": 2.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.967742555682791,
+        "median_signed_error_m": 2.5425404548432544,
+        "mean_signed_error_m": 2.4738622631853078,
+        "rmse_m": 5.170178661599814
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.7412233234740535,
+          4.206912876557924
+        ],
+        "median_signed_error_m": [
+          2.1572521963899294,
+          2.7282255223838288
+        ],
+        "mean_signed_error_m": [
+          2.2716800288245103,
+          2.6942588590851457
+        ],
+        "rmse_m": [
+          4.914866445710157,
+          5.4293785773022805
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508680.0,
+          0.0,
+          -10.0,
+          4296418.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": 0.0,
+        "offset_north_m": -2.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.950595604920302,
+        "median_signed_error_m": 2.539060011933694,
+        "mean_signed_error_m": 2.4749765693979553,
+        "rmse_m": 5.150175149929311
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.7239026717017545,
+          4.189237014966765
+        ],
+        "median_signed_error_m": [
+          2.152539620169097,
+          2.724201236275282
+        ],
+        "mean_signed_error_m": [
+          2.2734230552936543,
+          2.694880632322046
+        ],
+        "rmse_m": [
+          4.896533696180126,
+          5.4073106785989715
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508680.0,
+          0.0,
+          -10.0,
+          4296420.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": 0.0,
+        "offset_north_m": 0.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.9715823589763177,
+        "median_signed_error_m": 2.548658955439007,
+        "mean_signed_error_m": 2.4761169443101654,
+        "rmse_m": 5.167806511939446
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.7468893770807776,
+          4.207606163094952
+        ],
+        "median_signed_error_m": [
+          2.164458473972396,
+          2.733324586168627
+        ],
+        "mean_signed_error_m": [
+          2.274443934089189,
+          2.6959799161787696
+        ],
+        "rmse_m": [
+          4.916576013573421,
+          5.424581319737634
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508680.0,
+          0.0,
+          -10.0,
+          4296422.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": 0.0,
+        "offset_north_m": 2.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 4.005893826705334,
+        "median_signed_error_m": 2.5516923117328556,
+        "mean_signed_error_m": 2.4747656070577797,
+        "rmse_m": 5.2150017003147076
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.7797921098166536,
+          4.24154059323102
+        ],
+        "median_signed_error_m": [
+          2.1684479592216017,
+          2.735234739372868
+        ],
+        "mean_signed_error_m": [
+          2.2732878049225036,
+          2.695640596882655
+        ],
+        "rmse_m": [
+          4.96076840717407,
+          5.471111747178741
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508682.0,
+          0.0,
+          -10.0,
+          4296418.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": 2.0,
+        "offset_north_m": -2.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.9901011734479557,
+        "median_signed_error_m": 2.5477682207643397,
+        "mean_signed_error_m": 2.475849402693728,
+        "rmse_m": 5.197052881920616
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.764695027749314,
+          4.226009789347143
+        ],
+        "median_signed_error_m": [
+          2.164427893984348,
+          2.7308497566642926
+        ],
+        "mean_signed_error_m": [
+          2.274414145586003,
+          2.6962518283006753
+        ],
+        "rmse_m": [
+          4.943488861632842,
+          5.451786522910234
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508682.0,
+          0.0,
+          -10.0,
+          4296420.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": 2.0,
+        "offset_north_m": 0.0
+      },
+      "nodata_cells_before_common_mask": 0
+    },
+    {
+      "cells": 1444284,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 4.010661553255532,
+        "median_signed_error_m": 2.5553198810960343,
+        "mean_signed_error_m": 2.476965931453375,
+        "rmse_m": 5.214703728680032
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.7874118831655976,
+          4.244529531893429
+        ],
+        "median_signed_error_m": [
+          2.176164457317589,
+          2.7386038235783805
+        ],
+        "mean_signed_error_m": [
+          2.2759010534654327,
+          2.697146285273059
+        ],
+        "rmse_m": [
+          4.963474327121302,
+          5.46888440295651
+        ]
+      },
+      "alignment": {
+        "source_crs": "EPSG:32610",
+        "target_crs": "EPSG:6339",
+        "cell_grid_checked": true,
+        "cell_count": 1478103,
+        "destination_transform": [
+          10.0,
+          0.0,
+          508682.0,
+          0.0,
+          -10.0,
+          4296422.0
+        ],
+        "operation": "Inverse of UTM zone 10N + Inverse of NAD83(2011) to WGS 84 (1) + UTM zone 10N",
+        "operation_epsg": 9774,
+        "operation_proj": "+proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84 +step +proj=utm +zone=10 +ellps=GRS80",
+        "operation_accuracy_m": 2.0,
+        "proj_version": "9.5.1",
+        "gdal_version": "3.10.3",
+        "resampling": "bilinear",
+        "offset_east_m": 2.0,
+        "offset_north_m": 2.0
+      },
+      "nodata_cells_before_common_mask": 0
+    }
+  ],
+  "resolution_sensitivity": {
+    "30": {
+      "cells": 163464,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.223383682516658,
+        "median_signed_error_m": 2.4719395064878333,
+        "mean_signed_error_m": 2.4889483666726377,
+        "rmse_m": 4.0112615394414135
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.0320580124877408,
+          3.4269131141822347
+        ],
+        "median_signed_error_m": [
+          2.1947455566282374,
+          2.674645895144474
+        ],
+        "mean_signed_error_m": [
+          2.287777469615907,
+          2.7078439545669917
+        ],
+        "rmse_m": [
+          3.8005112642519108,
+          4.2236526991424626
+        ]
+      },
+      "contributing_10m_cells": 1412495,
+      "occupancy_distribution": {
+        "5": 2520,
+        "6": 9713,
+        "7": 5284,
+        "8": 8894,
+        "9": 137053
+      }
+    },
+    "100": {
+      "cells": 15143,
+      "blocks": 126,
+      "scores": {
+        "mae_m": 2.7552757923842477,
+        "median_signed_error_m": 2.415663453864271,
+        "mean_signed_error_m": 2.4830096582789194,
+        "rmse_m": 3.269381135131404
+      },
+      "intervals_95": {
+        "mae_m": [
+          2.5682393543496267,
+          2.9431181035417358
+        ],
+        "median_signed_error_m": [
+          2.1741079338031337,
+          2.6216092614074347
+        ],
+        "mean_signed_error_m": [
+          2.269951684741054,
+          2.69595016323566
+        ],
+        "rmse_m": [
+          3.0621505164424323,
+          3.465999885958852
+        ]
+      },
+      "contributing_10m_cells": 1388317,
+      "occupancy_distribution": {
+        "50": 171,
+        "51": 19,
+        "52": 17,
+        "53": 16,
+        "54": 25,
+        "55": 25,
+        "56": 23,
+        "57": 21,
+        "58": 54,
+        "59": 81,
+        "60": 295,
+        "61": 36,
+        "62": 41,
+        "63": 45,
+        "64": 33,
+        "65": 41,
+        "66": 36,
+        "67": 40,
+        "68": 82,
+        "69": 67,
+        "70": 263,
+        "71": 63,
+        "72": 66,
+        "73": 67,
+        "74": 88,
+        "75": 116,
+        "76": 136,
+        "77": 152,
+        "78": 179,
+        "79": 231,
+        "80": 510,
+        "81": 83,
+        "82": 92,
+        "83": 108,
+        "84": 104,
+        "85": 127,
+        "86": 128,
+        "87": 149,
+        "88": 180,
+        "89": 190,
+        "90": 557,
+        "91": 205,
+        "92": 195,
+        "93": 222,
+        "94": 232,
+        "95": 269,
+        "96": 329,
+        "97": 441,
+        "98": 559,
+        "99": 909,
+        "100": 7025
+      }
+    }
+  },
+  "height_strata": {
+    "below_first_edge": 0,
+    "[0,2)": {
+      "cells": 563055,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 4.301518564807542,
+        "median_signed_error_m": 3.3999437165539614,
+        "mean_signed_error_m": 4.301518564807542,
+        "rmse_m": 5.362450301250541
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.898754094437901,
+          4.763497979167353
+        ],
+        "median_signed_error_m": [
+          2.8678382772245166,
+          4.066178189617753
+        ],
+        "mean_signed_error_m": [
+          3.898754094437901,
+          4.763497979167353
+        ],
+        "rmse_m": [
+          4.972532933995577,
+          5.7761715439004515
+        ]
+      }
+    },
+    "[2,5)": {
+      "cells": 176900,
+      "blocks": 129,
+      "scores": {
+        "mae_m": 4.558530632582095,
+        "median_signed_error_m": 3.9783222017943247,
+        "mean_signed_error_m": 4.523677499576125,
+        "rmse_m": 5.732643468361309
+      },
+      "intervals_95": {
+        "mae_m": [
+          4.183493866332612,
+          4.938326798771066
+        ],
+        "median_signed_error_m": [
+          3.4430354264142835,
+          4.414572399321808
+        ],
+        "mean_signed_error_m": [
+          4.1357323326405595,
+          4.9074418250159
+        ],
+        "rmse_m": [
+          5.415945446697614,
+          6.063915888857827
+        ]
+      }
+    },
+    "[5,10)": {
+      "cells": 200276,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.772642645026152,
+        "median_signed_error_m": 2.8610154073808314,
+        "mean_signed_error_m": 3.1974529771110425,
+        "rmse_m": 4.870470158286482
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.5317233133855397,
+          4.014494892035317
+        ],
+        "median_signed_error_m": [
+          2.54404347309672,
+          3.1586983467375678
+        ],
+        "mean_signed_error_m": [
+          2.873052842875743,
+          3.509655812633024
+        ],
+        "rmse_m": [
+          4.5866592214910415,
+          5.157876244111316
+        ]
+      }
+    },
+    "[10,20)": {
+      "cells": 409008,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 2.817320656518398,
+        "median_signed_error_m": 0.2365455934133509,
+        "mean_signed_error_m": 0.405105875419791,
+        "rmse_m": 3.7180403859979427
+      },
+      "intervals_95": {
+        "mae_m": [
+          2.6747310368490846,
+          2.9984623679289246
+        ],
+        "median_signed_error_m": [
+          -0.03806094173331083,
+          0.4817618258324451
+        ],
+        "mean_signed_error_m": [
+          0.10950992825305499,
+          0.690740639811918
+        ],
+        "rmse_m": [
+          3.501272510772515,
+          3.9895849256481575
+        ]
+      }
+    },
+    "[20,30)": {
+      "cells": 74567,
+      "blocks": 129,
+      "scores": {
+        "mae_m": 4.893386400744082,
+        "median_signed_error_m": -3.663217229380482,
+        "mean_signed_error_m": -3.437221929663766,
+        "rmse_m": 6.0197672656911365
+      },
+      "intervals_95": {
+        "mae_m": [
+          4.696901648137787,
+          5.11958692148851
+        ],
+        "median_signed_error_m": [
+          -4.147302845124319,
+          -3.1173352347184515
+        ],
+        "mean_signed_error_m": [
+          -4.004349594686339,
+          -2.868986745987408
+        ],
+        "rmse_m": [
+          5.788760281119319,
+          6.283341748683774
+        ]
+      }
+    },
+    "[30,inf)": {
+      "cells": 20478,
+      "blocks": 112,
+      "scores": {
+        "mae_m": 9.992421576541233,
+        "median_signed_error_m": -8.749306722486747,
+        "mean_signed_error_m": -9.64070389367719,
+        "rmse_m": 12.494676593117616
+      },
+      "intervals_95": {
+        "mae_m": [
+          9.159093967428015,
+          10.939036362469155
+        ],
+        "median_signed_error_m": [
+          -9.746603145465135,
+          -7.799247895538578
+        ],
+        "mean_signed_error_m": [
+          -10.700192188792121,
+          -8.652975604383354
+        ],
+        "rmse_m": [
+          11.516997746386682,
+          13.6080588280076
+        ]
+      }
+    }
+  },
+  "secondary_max_reference": {
+    "cells": 1444284,
+    "blocks": 130,
+    "scores": {
+      "mae_m": 3.6690810801631915,
+      "median_signed_error_m": 1.562298077417398,
+      "mean_signed_error_m": 1.4338988372446062,
+      "rmse_m": 4.909227548829683
+    },
+    "intervals_95": {
+      "mae_m": [
+        3.4694821161638476,
+        3.8791355117373487
+      ],
+      "median_signed_error_m": [
+        1.365575696278826,
+        1.8683253332998198
+      ],
+      "mean_signed_error_m": [
+        1.2642272416914344,
+        1.61427791095809
+      ],
+      "rmse_m": [
+        4.666251029680464,
+        5.153746184892789
+      ]
+    }
+  },
+  "secondary_common_mask_cells": 1444284
+}

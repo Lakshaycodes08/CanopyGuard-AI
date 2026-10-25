@@ -1,4 +1,18 @@
 stages:
+  echosat_box:
+    cmd: python scripts/check_echosat.py
+    deps:
+    - configs/ingestion.yaml
+    - configs/study_area.yaml
+    - scripts/check_echosat.py
+    - src/canopyguard/data/echosat.py
+    - src/canopyguard/data/echosat_fire.py
+    - src/canopyguard/viz/echosat.py
+    outs:
+    - data/interim/echosat/echosat_box.tif:
+        cache: false
+    - data/interim/echosat/echosat_box.tif.provenance.json:
+        cache: false
   sentinel2_manifest:
     cmd: python scripts/ingest_sentinel2.py
     deps:
@@ -190,4 +204,33 @@ stages:
     - data/interim/stage2_residual_oof_2013-2022.parquet:
         cache: false
     - data/interim/stage2_residual_oof_2013-2022.parquet.provenance.json:
+        cache: false
+  e8_echosat_benchmark_2022:
+    cmd: python scripts/run_e8_benchmark.py
+    deps:
+    - configs/product_benchmark.yaml
+    - configs/ingestion.yaml
+    - configs/forecasting.yaml
+    - configs/study_area.yaml
+    - reports/e8_benchmark_prereg.md
+    - reports/e8_alignment_protocol.md
+    - data/interim/echosat/echosat_box.tif
+    - data/interim/echosat/echosat_box.tif.provenance.json
+    - data/processed/labels_2013-2022_unique.npz
+    - data/processed/labels_2013-2022_unique.npz.provenance.json
+    - data/processed/labels_2013-2022_wire_flags.npz
+    - data/processed/labels_2013-2022_wire_flags.npz.provenance.json
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/clean_cells_2013_2022.parquet.provenance.json
+    - scripts/run_e8_benchmark.py
+    - src/canopyguard/evaluation/product_alignment.py
+    - src/canopyguard/evaluation/product_benchmark.py
+    - src/canopyguard/evaluation/product_metrics.py
+    - src/canopyguard/evaluation/product_population.py
+    - src/canopyguard/evaluation/product_report.py
+    metrics:
+    - reports/e8_echosat_benchmark_2022.json:
+        cache: false
+    outs:
+    - reports/e8_echosat_benchmark_2022.md:
         cache: false

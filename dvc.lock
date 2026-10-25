@@ -618,3 +618,131 @@ stages:
       hash: md5
       md5: 34f51984157c04045557ea2e60f36ab1
       size: 997
+  echosat_box:
+    cmd: python scripts/check_echosat.py
+    deps:
+    - path: configs/ingestion.yaml
+      hash: md5
+      md5: e30ef12ad4ccbbf8bd990426afd924f3
+      size: 2660
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: scripts/check_echosat.py
+      hash: md5
+      md5: ea281ab68de5e707858c054435635094
+      size: 2746
+    - path: src/canopyguard/data/echosat.py
+      hash: md5
+      md5: 5dac40e945ae0384f208b306fbc51168
+      size: 9320
+    - path: src/canopyguard/data/echosat_fire.py
+      hash: md5
+      md5: ab0bd9d1b27a2471b91948651f3378a6
+      size: 4474
+    - path: src/canopyguard/viz/echosat.py
+      hash: md5
+      md5: 5cb6fc6bcaa1c697dc633e06a9d59963
+      size: 2213
+    outs:
+    - path: data/interim/echosat/echosat_box.tif
+      hash: md5
+      md5: add4755c8d7a3cc1492460ef7ce0e428
+      size: 68070819
+    - path: data/interim/echosat/echosat_box.tif.provenance.json
+      hash: md5
+      md5: 82719d5df2a92324567460a2a55c76e1
+      size: 548
+  e8_echosat_benchmark_2022:
+    cmd: python scripts/run_e8_benchmark.py
+    deps:
+    - path: configs/forecasting.yaml
+      hash: md5
+      md5: ccce8cf58d17aee85d3e2b650ad24354
+      size: 9512
+    - path: configs/ingestion.yaml
+      hash: md5
+      md5: e30ef12ad4ccbbf8bd990426afd924f3
+      size: 2660
+    - path: configs/product_benchmark.yaml
+      hash: md5
+      md5: c9107e5fa5b7fb38ec0c04a5c9cf51fb
+      size: 1583
+    - path: configs/study_area.yaml
+      hash: md5
+      md5: 0c74940f8dd30f098203f2b537387511
+      size: 621
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/clean_cells_2013_2022.parquet.provenance.json
+      hash: md5
+      md5: 2ece3c64b305f1ad45c9c52f43e8d37d
+      size: 493
+    - path: data/interim/echosat/echosat_box.tif
+      hash: md5
+      md5: add4755c8d7a3cc1492460ef7ce0e428
+      size: 68070819
+    - path: data/interim/echosat/echosat_box.tif.provenance.json
+      hash: md5
+      md5: 82719d5df2a92324567460a2a55c76e1
+      size: 548
+    - path: data/processed/labels_2013-2022_unique.npz
+      hash: md5
+      md5: 449032f5fcb1db0e54c9e455fe1b2cdf
+      size: 111596240
+    - path: data/processed/labels_2013-2022_unique.npz.provenance.json
+      hash: md5
+      md5: a4bc05b768ec56bf96a9e8e3c252f2e8
+      size: 459
+    - path: data/processed/labels_2013-2022_wire_flags.npz
+      hash: md5
+      md5: 98d5ee04e0a7bc8b1dab61a8a4e31d9a
+      size: 7647531
+    - path: data/processed/labels_2013-2022_wire_flags.npz.provenance.json
+      hash: md5
+      md5: 84ee5df3ae9b13e3c49de1f3e8682591
+      size: 722
+    - path: reports/e8_alignment_protocol.md
+      hash: md5
+      md5: 256e2e6ada2d4e5828489f2cd8eae32b
+      size: 3957
+    - path: reports/e8_benchmark_prereg.md
+      hash: md5
+      md5: 82f4411ce711c2b4e18bce4a52ee963d
+      size: 6565
+    - path: scripts/run_e8_benchmark.py
+      hash: md5
+      md5: 01290fccb3409490931df95463d0309a
+      size: 570
+    - path: src/canopyguard/evaluation/product_alignment.py
+      hash: md5
+      md5: 17e161060dc34c4fa79865fdaf81c167
+      size: 5020
+    - path: src/canopyguard/evaluation/product_benchmark.py
+      hash: md5
+      md5: 4c2dcc77adf350aa3454342f7f50a2f9
+      size: 7761
+    - path: src/canopyguard/evaluation/product_metrics.py
+      hash: md5
+      md5: bc7c01aed5d8f1c4b63233d714c92434
+      size: 8988
+    - path: src/canopyguard/evaluation/product_population.py
+      hash: md5
+      md5: 95960d91a7fe2ce72ce27fb832f8d8cc
+      size: 2127
+    - path: src/canopyguard/evaluation/product_report.py
+      hash: md5
+      md5: 234b6c25d6d96e9353f17bee039cd2cd
+      size: 8246
+    outs:
+    - path: reports/e8_echosat_benchmark_2022.json
+      hash: md5
+      md5: 5ad79e7bd78fedbfb8aca6f6dd2bbae3
+      size: 29340
+    - path: reports/e8_echosat_benchmark_2022.md
+      hash: md5
+      md5: 792e3e9ead5cc0ef3c7dd56d19bcbd07
+      size: 9763
