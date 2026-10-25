@@ -5,8 +5,13 @@ measure canopy change, and 2018 is not an admitted epoch (it has not passed
 the admission screen in `configs/lidar.yaml`).
 
 Project owner decision (2026-10-25): exclude this 6.7 km2 out-of-area overlap
-from the CanopyGuard study and ECHOSAT change evaluation. The coverage
-measurement below remains a record of why this candidate pair was assessed.
+from the CanopyGuard study and ECHOSAT change evaluation. The nearest shared
+patch is 42.9 km from the study box and has shorter, more open canopy. E8's
+reference-height strata show that cross-product disagreement varies strongly
+with canopy height, so a change result from this patch cannot be assumed to
+transfer to the study area. The 2018 survey is not an admitted epoch. No
+2018-2023 change score was run; this coverage check remains a documented
+feasibility finding.
 
 ## Answer
 
