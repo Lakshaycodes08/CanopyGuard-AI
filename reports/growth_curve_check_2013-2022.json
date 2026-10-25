@@ -1,7 +1,7 @@
 {
   "issue": 8,
-  "generated_utc": "2026-10-15T10:56:34.402692+00:00",
-  "git_base_revision": "000d95e1ba24cc4c6cee2d2517b609c0ea5c3052",
+  "generated_utc": "2026-10-19T14:46:27.838334+00:00",
+  "git_base_revision": "cb76a428d60204b2c52c79b82f8832b5997544fa",
   "baseline_years": 8.958247775496236,
   "decision": "PASS",
   "settings": {

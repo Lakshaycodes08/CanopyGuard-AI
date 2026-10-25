@@ -45,9 +45,9 @@ pixel-centre grid test, and the offset in each E8 output sidecar and report.
 PR [#17](https://github.com/Lakshaycodes08/CanopyGuard-AI/pull/17) records
 Rehaan's account of an email from corresponding author Jan Pauls confirming
 bands 1 to 7 as 2018 to 2024. The underlying email is held by Rehaan outside
-the repository. The record is still unmerged, so year-specific E8 scoring
-remains blocked until PR #17 lands on main. The same reported communication
-says that all years are predicted jointly from imagery through 2024. When E8
+the repository. Status update (2026-10-20): PR #17 merged on 2026-10-17;
+the author record no longer blocks year-specific E8 scoring. The same
+reported communication says that all years are predicted jointly from imagery through 2024. When E8
 scores the 2022 band against a single-date 2022 LiDAR survey, label it as a
 retrospective joint prediction with access to later imagery. Keep
 `echosat.allowed_as_feature: false` regardless of the band-order confirmation.

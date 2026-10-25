@@ -25,7 +25,7 @@ def write_stage2_report(result: dict) -> None:
         f"Run: {result['generated_utc']}. "
         f"Base revision: `{result['git_base_revision']}`.",
         "",
-        "## Preregistered decision",
+        "## Pre-specified decision",
         "",
         "Each E4 ridge and E5 LightGBM model passes only if the 95% whole-block "
         "interval for its MAE minus the matched training-fold stage-one median "
@@ -118,13 +118,13 @@ def write_stage2_report(result: dict) -> None:
             "## Interpretation limit",
             "",
             "The positive LiDAR-loss-ON sensitivity does not rescue either "
-            "model's failing preregistered loss-OFF result. Its screen uses "
+            "model's failing pre-specified loss-OFF result. Its screen uses "
             "target-epoch LiDAR loss and is an optimistic upper bound.",
             "",
             "A PASS applies to this screened, spatially blocked comparison and "
             "does not establish future-year forecast skill, causal terrain "
             "effects, species-pure growth, or engineering clearance. A FAIL is "
-            "retained as the preregistered result. Scientific review of the G3 "
+            "retained as the pre-specified result. Scientific review of the G3 "
             "prior remains pending in issue #19.",
             "",
         ]

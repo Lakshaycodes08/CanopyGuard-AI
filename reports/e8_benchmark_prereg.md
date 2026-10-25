@@ -7,6 +7,8 @@ score. No E8 height score has run. This file and
 Year-specific scoring also waits until PR #17, which records the author-confirmed
 band order and joint-prediction design, merges into main.
 
+Status update (2026-10-20): PRs #17 and #18 merged on 2026-10-17; the pre-score plan below is unchanged.
+
 ## Question and estimand
 
 Describe agreement between the ECHOSAT 2022 canopy-height map and a

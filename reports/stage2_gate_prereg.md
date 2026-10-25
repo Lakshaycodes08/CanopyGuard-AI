@@ -1,6 +1,6 @@
-# Stage-two residual gate: preregistration
+# Stage-two residual gate: pre-specified plan
 
-Status: frozen before any E4 or E5 fit. Date: 2026-10-15. This record must be committed before fitting. The G3 results in `reports/growth_curve_check_2013-2022.md` are prior evidence, not stage-two results.
+Status: pre-specified and committed locally before any E4 or E5 fit on 2026-10-15; not independently timestamped before fitting. The G3 results in `reports/growth_curve_check_2013-2022.md` are prior evidence, not stage-two results.
 
 ## Target and comparison
 
@@ -24,4 +24,8 @@ For reproducible execution, LightGBM uses deterministic and column-wise modes wi
 
 For each model separately, PASS requires the 95% whole-block interval for (model MAE minus stage-one prior MAE) to lie entirely below zero on the forest LiDAR-loss-OFF 2 km screen. An interval touching or crossing zero is FAIL. The forest LiDAR-loss-ON comparison is reported as a retrospective upper bound. Declared sensitivities are 1 km and 5 km blocks, and forest-only versus all admissible map classes, using the same fixed settings and showing the matched stage-one baseline. A null or negative result is a reportable finding. It is not grounds to change the gate, settings, blocks, features, or screens.
 
-Scientific interpretation remains subject to human review tracked in issue #19. This preregistration does not record scientific sign-off or change `growth_curve.human_review`.
+Scientific interpretation remains subject to human review tracked in issue #19. This plan does not record scientific sign-off or change `growth_curve.human_review`.
+
+## Edits before fitting (reconciled 2026-10-20)
+
+Commit `45d9006` joined terrain to the existing 10 m LiDAR label grid; the earlier 100 m setting was never implemented. Commit `c6b342f` fixed LightGBM execution controls (`deterministic: true`, `force_col_wise: true`, and `n_jobs: 4`) and added the `models` extra to `environment.yml`. Both edits were committed locally before fitting. The stage-two plan first reached GitHub together with the results in `4e7e604`; the branch was created on 2026-10-15T13:08Z. Thus the local commit sequence records pre-specification, but there was no independent server timestamp for the stage-two plan before fitting.

@@ -2,7 +2,7 @@
 
 **Post hoc empirical height ceiling by map class.** The original literature-only A preflight exceeded 0.5% in nine classes. The Chapman-Richards sensitivity uses the maximum of the literature typical-upper value and the 99.5th percentile of max(2013 p95, 2022 p95), calculated within each spatial training fold. The 2022 heights in a held-out fold never set that fold's A. This A is an empirical map-class cutoff, not a biological maximum or a species asymptote. The rule was selected after seeing exceedances and must not be presented as predeclared. Promoting the median increment and treating both forest screens as co-primary were also decisions made after inspecting the earlier curve results.
 
-Run: 2026-10-15T10:56:34.402692+00:00. Issue #8. Base revision: 000d95e1ba24cc4c6cee2d2517b609c0ea5c3052.
+Run: 2026-10-19T14:46:27.838334+00:00. Issue #8. Base revision: cb76a428d60204b2c52c79b82f8832b5997544fa.
 
 ## Gate G3: co-primary forest median-increment prior
 

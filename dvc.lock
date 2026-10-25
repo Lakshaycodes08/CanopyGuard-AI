@@ -451,8 +451,8 @@ stages:
     deps:
     - path: configs/forecasting.yaml
       hash: md5
-      md5: 2cf33fe6830eeadfcf1eaf2f60d22b5e
-      size: 9267
+      md5: ccce8cf58d17aee85d3e2b650ad24354
+      size: 9512
     - path: configs/study_area.yaml
       hash: md5
       md5: 0c74940f8dd30f098203f2b537387511
@@ -491,12 +491,12 @@ stages:
     deps:
     - path: configs/forecasting.yaml
       hash: md5
-      md5: 2cf33fe6830eeadfcf1eaf2f60d22b5e
-      size: 9267
+      md5: ccce8cf58d17aee85d3e2b650ad24354
+      size: 9512
     - path: configs/lidar.yaml
       hash: md5
-      md5: 86a977c4e78e589810da8694eabe89e0
-      size: 11895
+      md5: e7bad2452fc06596718aa2ef2d00f964
+      size: 13498
     - path: configs/study_area.yaml
       hash: md5
       md5: 0c74940f8dd30f098203f2b537387511
@@ -571,11 +571,11 @@ stages:
       size: 7647531
     - path: reports/stage2_gate_prereg.md
       hash: md5
-      md5: 1a6a22ca172be6389c2c0a46b2b355a4
-      size: 4385
+      md5: e5bde3deaa90a948e7db59058f47902b
+      size: 5057
     - path: scripts/run_stage2_residual_check.py
       hash: md5
-      md5: df781b232a5e6e24abe46a68958d7f21
+      md5: 2d0a21faff4938435ffc67c97622489c
       size: 627
     - path: src/canopyguard/evaluation/blocks.py
       hash: md5
@@ -603,7 +603,7 @@ stages:
       size: 2792
     - path: src/canopyguard/forecasting/stage2_report.py
       hash: md5
-      md5: d5a9d6711b1b5734c2497793cce045bf
+      md5: 6eefa4d2027d36b1dc24535b1db39cd5
       size: 6105
     - path: src/canopyguard/forecasting/stage2_residual.py
       hash: md5

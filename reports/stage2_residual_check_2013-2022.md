@@ -2,9 +2,9 @@
 
 Run: 2026-10-15T13:02:48.068794+00:00. Base revision: `c6b342fe96950c7e3986b131733d49438ccab387`.
 
-The model-fitting and scoring implementation used in this run was committed unchanged after execution at `12296cf5712af4d1da009881f13396447d128f78`; the run base revision above contains the frozen preregistration. Its source and data hashes are recorded in `dvc.lock` and the output provenance sidecar. Report wording was clarified after the run without changing scores.
+The model-fitting and scoring implementation used in this run was committed unchanged after execution at `12296cf5712af4d1da009881f13396447d128f78`; the run base revision above contains the pre-specified plan. Its source and data hashes are recorded in `dvc.lock` and the output provenance sidecar. Report wording was clarified after the run without changing scores.
 
-## Preregistered decision
+## Pre-specified decision
 
 Each E4 ridge and E5 LightGBM model passes only if the 95% whole-block interval for its MAE minus the matched training-fold stage-one median MAE lies entirely below zero on the forest LiDAR-loss-OFF 2 km screen. The LiDAR-loss-ON screen is a retrospectively selected upper bound. The loss-OFF screen also uses retrospective fire and Hansen screens; neither is a fully prospective 2013 evaluation. This rule, feature set, settings, and sensitivities were frozen in `reports/stage2_gate_prereg.md` before E4 or E5 fitting.
 
@@ -73,6 +73,6 @@ Ridge coefficients are means across folds after training-fold standardization of
 
 ## Interpretation limit
 
-The positive LiDAR-loss-ON sensitivity does not rescue either model's failing preregistered loss-OFF result. Its screen uses target-epoch LiDAR loss and is an optimistic upper bound.
+The positive LiDAR-loss-ON sensitivity does not rescue either model's failing pre-specified loss-OFF result. Its screen uses target-epoch LiDAR loss and is an optimistic upper bound.
 
-A PASS applies to this screened, spatially blocked comparison and does not establish future-year forecast skill, causal terrain effects, species-pure growth, or engineering clearance. A FAIL is retained as the preregistered result. Scientific review of the G3 prior remains pending in issue #19.
+A PASS applies to this screened, spatially blocked comparison and does not establish future-year forecast skill, causal terrain effects, species-pure growth, or engineering clearance. A FAIL is retained as the pre-specified result. Scientific review of the G3 prior remains pending in issue #19.

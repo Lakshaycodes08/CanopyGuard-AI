@@ -241,6 +241,7 @@ def write_growth_report(metrics: dict, forecast: dict) -> None:
         "max/p95 wire rule. Each A then uses training-fold rows only. The "
         f"{forecast['clean_screen']['near_line_m']:g} m buffer covers "
         "transmission lines only.",
+        "",
         "The post hoc empirical A is fixed within each training fold before "
         "fitting k and c. In this curve sensitivity, cells starting at or "
         "above A are forced to no growth. "
