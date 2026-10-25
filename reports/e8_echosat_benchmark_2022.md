@@ -25,6 +25,49 @@ disputed overlaps, nonfinite p95 labels, PR #13 max/p95 wire exclusions,
 and product nodata. LiDAR p95 and modeled product height are related but
 different height summaries.
 
+## 2013 forest-map-class stratum
+
+This descriptive subset uses broad forest groups derived from the
+2013 Sonoma vegetation map and joined by cell ID. It keeps the
+primary E8 quality and product mask, including burned and other loss
+cells. No 2013 canopy or line-distance screen is applied. It does
+not replace the primary population or use E8 errors to select cells.
+Source: https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query
+Other primary cells: 1,000,805.
+
+### Pooled forest map classes
+
+Cells: 443,479; 2 km blocks: 130.
+
+| Metric (m) | Estimate | 95% whole-block interval |
+| --- | ---: | ---: |
+| Mean absolute error | 3.946 | [3.733, 4.200] |
+| Median signed error | 1.166 | [0.810, 1.544] |
+| Mean signed error | 1.199 | [0.846, 1.562] |
+| Root mean squared error | 5.315 | [5.044, 5.634] |
+
+### Conifer Forest map group
+
+Cells: 67,405; 2 km blocks: 80.
+
+| Metric (m) | Estimate | 95% whole-block interval |
+| --- | ---: | ---: |
+| Mean absolute error | 5.512 | [5.150, 5.928] |
+| Median signed error | 2.034 | [0.764, 3.001] |
+| Mean signed error | 1.129 | [0.161, 1.917] |
+| Root mean squared error | 7.083 | [6.562, 7.666] |
+
+### Hardwood Forest map group
+
+Cells: 376,074; 2 km blocks: 130.
+
+| Metric (m) | Estimate | 95% whole-block interval |
+| --- | ---: | ---: |
+| Mean absolute error | 3.665 | [3.471, 3.897] |
+| Median signed error | 1.067 | [0.762, 1.386] |
+| Mean signed error | 1.211 | [0.891, 1.548] |
+| Root mean squared error | 4.932 | [4.692, 5.221] |
+
 ## Exclusions
 
 | Step | Cells |
@@ -187,7 +230,7 @@ This checks sensitivity to the LiDAR height summary, not absolute bias.
 
 ## Reproducibility and scope
 
-Git revision: `d2e6624c4fd727aeb5527595ead92148fb2cba00`.
+Git revision: `c260642842e7fa68898569fa2b676e5ed72ce244`.
 Source: https://echosat.uni-muenster.de/ECHOSAT_T10S.tif
 Band order: J. Pauls (corresponding author), personal communication, October 2026.
 Intervals use 2,000 whole 2 km block draws with seed 42.
@@ -200,6 +243,7 @@ records the original tile URL and download time.
 | raster | `c8ba58c329b68cb38d51690db173f4b4c34c8ae99a3ac14b990c03581600c9ad` |
 | labels | `f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9` |
 | wire_flags | `26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee` |
+| vegetation | `0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642` |
 | benchmark_config | `5f369c26be7ad77cfba728d433e9b7ca8332de417d94cba82c4436ade9a63a1c` |
 | ingestion_config | `70dc2355e1dbef1981e9e34ac913d29997cbc5e1f7ebb650aa86572de975f823` |
 | forecasting_config | `08bea713cd9feadd49a45436765bb5937379d137a3c71287e8881f9c8a2d64f5` |

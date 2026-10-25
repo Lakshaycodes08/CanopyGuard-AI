@@ -220,6 +220,8 @@ stages:
     - data/processed/labels_2013-2022_unique.npz.provenance.json
     - data/processed/labels_2013-2022_wire_flags.npz
     - data/processed/labels_2013-2022_wire_flags.npz.provenance.json
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/clean_cells_2013_2022.parquet.provenance.json
     - scripts/run_e8_benchmark.py
     - src/canopyguard/evaluation/product_alignment.py
     - src/canopyguard/evaluation/product_benchmark.py

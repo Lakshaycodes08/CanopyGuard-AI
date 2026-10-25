@@ -1,18 +1,20 @@
 """E8 masking and uncertainty tests use tiny local arrays only."""
 
 import numpy as np
+import pandas as pd
 import pytest
 
 from canopyguard.evaluation.product_metrics import (
     _bootstrap_medians,
     aggregate_pairs,
     bootstrap_intervals,
+    forest_map_stratum,
     height_strata,
     resolution_results,
     score_offsets,
     scores,
 )
-from canopyguard.evaluation.product_population import quality_mask
+from canopyguard.evaluation.product_population import join_vegetation, quality_mask
 from canopyguard.evaluation.product_report import render_report
 
 
@@ -37,6 +39,46 @@ def test_quality_mask_keeps_fire_and_loss_independent():
     }
     with pytest.raises(ValueError, match="wire flag"):
         quality_mask(labels, {key: values[:-1] for key, values in flags.items()})
+
+
+def test_2013_forest_classes_join_by_id_and_only_subset_primary_pairs():
+    vegetation = pd.DataFrame(
+        {
+            "cell_id": [30, 10, 40, 20],
+            "vegetation_type": ["shrub class", "oak class", "other", "pine class"],
+            "broader_group": ["shrub", "hardwood forest", "other", "conifer forest"],
+        }
+    )
+    joined = join_vegetation(np.array([10, 20, 30, 40]), vegetation)
+    assert joined["broader_group"].tolist() == [
+        "hardwood forest",
+        "conifer forest",
+        "shrub",
+        "other",
+    ]
+    labels = {
+        "p95_end": np.array([1.0, 2.0, 3.0, 4.0]),
+        "x": np.array([5.0, 15.0, 25.0, 35.0]),
+        "y": np.full(4, 5.0),
+    }
+    result = forest_map_stratum(
+        np.array([3.0, 5.0, 100.0, 4.0]),
+        labels,
+        np.array([True, True, True, False]),
+        joined["broader_group"],
+        ["conifer forest", "hardwood forest"],
+        {"block_size_m": 10, "bootstrap_draws": 40, "seed": 42},
+        (0, 0),
+    )
+    assert result["pooled"]["cells"] == 2
+    assert result["pooled"]["scores"]["mae_m"] == 2.5
+    assert result["other_primary_cells"] == 1
+    assert {name: row["cells"] for name, row in result["by_group"].items()} == {
+        "conifer forest": 1,
+        "hardwood forest": 1,
+    }
+    with pytest.raises(ValueError, match="cover every LiDAR cell"):
+        join_vegetation(np.array([10, 20, 30, 50]), vegetation)
 
 
 def test_four_scores_and_exact_block_weighted_median():
@@ -176,6 +218,7 @@ def test_report_keeps_retrospective_interpretation_and_provenance():
             "band_order_source": "author email",
             "last_input_year": 2024,
             "sha256": {"raster": "a" * 64},
+            "vegetation_map_source_url": "https://example.org/vegetation",
         },
         "parameters": {
             "echosat_benchmark": {
@@ -191,6 +234,11 @@ def test_report_keeps_retrospective_interpretation_and_provenance():
         },
         "label_epochs": ["2013", "2022"],
         "primary": summary,
+        "forest_map_class": {
+            "pooled": summary,
+            "by_group": {"conifer forest": summary},
+            "other_primary_cells": 0,
+        },
         "exclusions": {"disputed_overlap": 1},
         "offset_sensitivity": {
             "common_cells": 2,
@@ -215,3 +263,4 @@ def test_report_keeps_retrospective_interpretation_and_provenance():
     assert "not a forecast" in report
     assert "9774" in report
     assert "2,000 whole 2 km block draws" in report
+    assert "Pooled forest map classes" in report

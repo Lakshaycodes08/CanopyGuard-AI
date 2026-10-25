@@ -66,11 +66,24 @@ def render_report(result: dict) -> str:
         "and product nodata. LiDAR p95 and modeled product height are related but",
         "different height summaries.",
         "",
-        "## Exclusions",
+        "## 2013 forest-map-class stratum",
         "",
-        "| Step | Cells |",
-        "| --- | ---: |",
+        "This descriptive subset uses broad forest groups derived from the",
+        "2013 Sonoma vegetation map and joined by cell ID. It keeps the",
+        "primary E8 quality and product mask, including burned and other loss",
+        "cells. No 2013 canopy or line-distance screen is applied. It does",
+        "not replace the primary population or use E8 errors to select cells.",
+        f"Source: {inputs['vegetation_map_source_url']}",
+        f"Other primary cells: {result['forest_map_class']['other_primary_cells']:,}.",
+        "",
+        "### Pooled forest map classes",
+        "",
+        *_summary_table(result["forest_map_class"]["pooled"], block_size_m),
     ]
+    for group, row in result["forest_map_class"]["by_group"].items():
+        lines += [f"### {group.title()} map group", ""]
+        lines += _summary_table(row, block_size_m)
+    lines += ["## Exclusions", "", "| Step | Cells |", "| --- | ---: |"]
     lines += [
         f"| {key.replace('_', ' ')} | {count:,} |"
         for key, count in result["exclusions"].items()

@@ -58,7 +58,7 @@
   ],
   "selected_band": 5,
   "inputs": {
-    "git_revision": "d2e6624c4fd727aeb5527595ead92148fb2cba00",
+    "git_revision": "c260642842e7fa68898569fa2b676e5ed72ce244",
     "source_url": "https://echosat.uni-muenster.de/ECHOSAT_T10S.tif",
     "raster_provenance": {
       "bbox_wgs84": [
@@ -81,12 +81,14 @@
       "raster": "c8ba58c329b68cb38d51690db173f4b4c34c8ae99a3ac14b990c03581600c9ad",
       "labels": "f54aac5817cf9825d28649e0bbb96f8ae14ac653d1601ef8e2b4a2f26c6aabe9",
       "wire_flags": "26f6672d2c10240da6fb62a0e508e2e018b8bc43d95342d6de798e8d23566bee",
+      "vegetation": "0d9b6418ea492a6ed0cce91b6ad88d09b07965a7a3c61f03c7c6e79a3da0c642",
       "benchmark_config": "5f369c26be7ad77cfba728d433e9b7ca8332de417d94cba82c4436ade9a63a1c",
       "ingestion_config": "70dc2355e1dbef1981e9e34ac913d29997cbc5e1f7ebb650aa86572de975f823",
       "forecasting_config": "08bea713cd9feadd49a45436765bb5937379d137a3c71287e8881f9c8a2d64f5",
       "study_area_config": "2e52e7212e23c8cceba910c0453447d99f9edcf6476ee885766d2eadb59ab512"
     },
     "band_order_source": "J. Pauls (corresponding author), personal communication, October 2026",
+    "vegetation_map_source_url": "https://socogis.sonomacounty.ca.gov/map/rest/services/OWTSPublic/Sonoma_Veg_Map_Vegetation_and_Habitat/MapServer/0/query",
     "band_years": [
       2018,
       2019,
@@ -135,6 +137,99 @@
         5.4073106785989715
       ]
     }
+  },
+  "forest_map_class": {
+    "forest_groups": [
+      "conifer forest",
+      "hardwood forest"
+    ],
+    "pooled": {
+      "cells": 443479,
+      "blocks": 130,
+      "scores": {
+        "mae_m": 3.9461203806653513,
+        "median_signed_error_m": 1.166220709733146,
+        "mean_signed_error_m": 1.1989527409908374,
+        "rmse_m": 5.315455455892541
+      },
+      "intervals_95": {
+        "mae_m": [
+          3.732838692756191,
+          4.2001085024662
+        ],
+        "median_signed_error_m": [
+          0.8100442966302597,
+          1.5439250576177923
+        ],
+        "mean_signed_error_m": [
+          0.845708881121556,
+          1.5624495763762107
+        ],
+        "rmse_m": [
+          5.0439996155514715,
+          5.63373427626885
+        ]
+      }
+    },
+    "by_group": {
+      "conifer forest": {
+        "cells": 67405,
+        "blocks": 80,
+        "scores": {
+          "mae_m": 5.512027033199154,
+          "median_signed_error_m": 2.0341049207005866,
+          "mean_signed_error_m": 1.1292315283040963,
+          "rmse_m": 7.082849725579094
+        },
+        "intervals_95": {
+          "mae_m": [
+            5.149773161784826,
+            5.927784729861825
+          ],
+          "median_signed_error_m": [
+            0.7643943132978577,
+            3.000557030109215
+          ],
+          "mean_signed_error_m": [
+            0.16141463474712472,
+            1.9168125229689155
+          ],
+          "rmse_m": [
+            6.561977016712761,
+            7.665850793233727
+          ]
+        }
+      },
+      "hardwood forest": {
+        "cells": 376074,
+        "blocks": 130,
+        "scores": {
+          "mae_m": 3.665457697485868,
+          "median_signed_error_m": 1.067173836549836,
+          "mean_signed_error_m": 1.2114491069750581,
+          "rmse_m": 4.93219843492708
+        },
+        "intervals_95": {
+          "mae_m": [
+            3.471239832879186,
+            3.896853863731531
+          ],
+          "median_signed_error_m": [
+            0.7619866103386048,
+            1.3859232522042233
+          ],
+          "mean_signed_error_m": [
+            0.8911164279208953,
+            1.5476726215201102
+          ],
+          "rmse_m": [
+            4.691708270144376,
+            5.221333907727729
+          ]
+        }
+      }
+    },
+    "other_primary_cells": 1000805
   },
   "offset_sensitivity": {
     "common_cells": 1444284,

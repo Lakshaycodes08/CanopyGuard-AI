@@ -198,3 +198,35 @@ def height_strata(product, labels, mask, settings, origin) -> dict:
                 "intervals_95": None,
             }
     return result
+
+
+def forest_map_stratum(product, labels, mask, groups, forest_groups, settings, origin):
+    """Describe the primary E8 pairs in 2013 forest map groups."""
+    by_group = {}
+    for group in forest_groups:
+        use = mask & (groups == group)
+        if not use.any():
+            raise ValueError(f"No E8 primary cells in 2013 map group: {group}")
+        by_group[group] = summarize(
+            product[use],
+            labels["p95_end"][use],
+            labels["x"][use],
+            labels["y"][use],
+            settings,
+            origin,
+        )
+    forest = mask & np.isin(groups, forest_groups)
+    pooled = summarize(
+        product[forest],
+        labels["p95_end"][forest],
+        labels["x"][forest],
+        labels["y"][forest],
+        settings,
+        origin,
+    )
+    return {
+        "forest_groups": list(forest_groups),
+        "pooled": pooled,
+        "by_group": by_group,
+        "other_primary_cells": int((mask & ~forest).sum()),
+    }

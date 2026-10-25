@@ -32,3 +32,20 @@ def quality_mask(labels: dict, flags: dict) -> tuple[np.ndarray, dict]:
         "before_product_nodata": int(mask.sum()),
     }
     return mask, counts
+
+
+def join_vegetation(cell_ids: np.ndarray, vegetation) -> dict[str, np.ndarray]:
+    """Join 2013 map classes to every LiDAR cell by unique cell ID."""
+    map_ids = vegetation["cell_id"].to_numpy()
+    if len(np.unique(map_ids)) != len(map_ids):
+        raise ValueError("2013 vegetation table contains duplicate cell IDs")
+    order = np.argsort(map_ids)
+    if len(map_ids) != len(cell_ids) or not np.array_equal(
+        map_ids[order], np.sort(cell_ids)
+    ):
+        raise ValueError("2013 vegetation table must cover every LiDAR cell")
+    positions = np.searchsorted(map_ids[order], cell_ids)
+    return {
+        name: vegetation[name].to_numpy()[order][positions]
+        for name in ("vegetation_type", "broader_group")
+    }

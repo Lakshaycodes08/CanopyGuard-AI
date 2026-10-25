@@ -7,18 +7,20 @@ import subprocess
 from pathlib import Path
 
 import numpy as np
+import pandas as pd
 import rasterio
 
 from canopyguard.config import load_config
 from canopyguard.data.echosat import validate_raster
 from canopyguard.evaluation.product_alignment import align_echosat_band
 from canopyguard.evaluation.product_metrics import (
+    forest_map_stratum,
     height_strata,
     resolution_results,
     score_offsets,
     summarize,
 )
-from canopyguard.evaluation.product_population import quality_mask
+from canopyguard.evaluation.product_population import join_vegetation, quality_mask
 from canopyguard.evaluation.product_report import render_report
 from canopyguard.io import ensure_parent, project_root
 from canopyguard.provenance import file_sha256, read_provenance, study_area_box
@@ -41,7 +43,9 @@ def _revision(root: Path) -> str:
     return result.stdout.strip()
 
 
-def _input_record(root: Path, paths: dict[str, Path], source: dict) -> dict:
+def _input_record(
+    root: Path, paths: dict[str, Path], source: dict, forecast: dict
+) -> dict:
     raster_provenance = read_provenance(paths["raster"])
     if raster_provenance["source_url"] != source["tile_url"]:
         raise ValueError("ECHOSAT box copy came from a different source URL")
@@ -51,6 +55,9 @@ def _input_record(root: Path, paths: dict[str, Path], source: dict) -> dict:
         "raster_provenance": raster_provenance,
         "sha256": {name: file_sha256(path) for name, path in paths.items()},
         "band_order_source": source["band_order_source"],
+        "vegetation_map_source_url": forecast["stage1_growth_model"]["vegetation_join"][
+            "source_url"
+        ],
         "band_years": source["band_years"],
         "last_input_year": source["last_input_year"],
         "joint_prediction_informed_through_2024": True,
@@ -87,6 +94,8 @@ def _input_paths(root: Path, source: dict, forecast: dict) -> dict[str, Path]:
         "labels": root / forecast["stage1_growth_model"]["labels_path"],
         "wire_flags": root
         / forecast["stage1_growth_model"]["clean_screen"]["wire_flags_path"],
+        "vegetation": root
+        / forecast["stage1_growth_model"]["clean_screen"]["output_path"],
         "benchmark_config": root / "configs/product_benchmark.yaml",
         "ingestion_config": root / "configs/ingestion.yaml",
         "forecasting_config": root / "configs/forecasting.yaml",
@@ -96,9 +105,15 @@ def _input_paths(root: Path, source: dict, forecast: dict) -> dict[str, Path]:
 
 def _evaluate(root, cfg, source, study, forecast) -> dict:
     paths = _input_paths(root, source, forecast)
-    inputs = _input_record(root, paths, source)
+    inputs = _input_record(root, paths, source, forecast)
     labels = _read_archive(paths["labels"])
     flags = _read_archive(paths["wire_flags"])
+    read_provenance(paths["vegetation"])
+    vegetation = pd.read_parquet(
+        paths["vegetation"],
+        columns=["cell_id", "vegetation_type", "broader_group"],
+    )
+    map_classes = join_vegetation(labels["cell_id"], vegetation)
     base, exclusions = quality_mask(labels, flags)
     settings = cfg["echosat_benchmark"]
     if source["allowed_as_feature"] or settings["year"] not in source["band_years"]:
@@ -144,6 +159,15 @@ def _evaluate(root, cfg, source, study, forecast) -> dict:
         "inputs": inputs,
         "exclusions": exclusions,
         "primary": primary,
+        "forest_map_class": forest_map_stratum(
+            zero,
+            labels,
+            primary_mask,
+            map_classes["broader_group"],
+            forecast["stage1_growth_model"]["growth_curve"]["forest_groups"],
+            settings,
+            origin,
+        ),
         "offset_sensitivity": sensitivity,
         "offsets": offsets,
         "resolution_sensitivity": resolution_results(

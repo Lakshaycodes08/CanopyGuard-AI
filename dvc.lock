@@ -673,6 +673,14 @@ stages:
       hash: md5
       md5: 0c74940f8dd30f098203f2b537387511
       size: 621
+    - path: data/interim/clean_cells_2013_2022.parquet
+      hash: md5
+      md5: bf98854999761eaa2a0887507a6cebed
+      size: 9714050
+    - path: data/interim/clean_cells_2013_2022.parquet.provenance.json
+      hash: md5
+      md5: 2ece3c64b305f1ad45c9c52f43e8d37d
+      size: 493
     - path: data/interim/echosat/echosat_box.tif
       hash: md5
       md5: add4755c8d7a3cc1492460ef7ce0e428
@@ -715,26 +723,26 @@ stages:
       size: 5020
     - path: src/canopyguard/evaluation/product_benchmark.py
       hash: md5
-      md5: 71d87023e2a0f4321294abea1e66c859
-      size: 6917
+      md5: 4c2dcc77adf350aa3454342f7f50a2f9
+      size: 7761
     - path: src/canopyguard/evaluation/product_metrics.py
       hash: md5
-      md5: dc867cb29bd5eb99631e58e7d5a58ba9
-      size: 8011
+      md5: bc7c01aed5d8f1c4b63233d714c92434
+      size: 8988
     - path: src/canopyguard/evaluation/product_population.py
       hash: md5
-      md5: 21902032debab3d0f2a039f858deb01f
-      size: 1388
+      md5: 95960d91a7fe2ce72ce27fb832f8d8cc
+      size: 2127
     - path: src/canopyguard/evaluation/product_report.py
       hash: md5
-      md5: eef7f2a13e3eac846640d682c7a0ad66
-      size: 7355
+      md5: 234b6c25d6d96e9353f17bee039cd2cd
+      size: 8246
     outs:
     - path: reports/e8_echosat_benchmark_2022.json
       hash: md5
-      md5: 0b50cc2e7122dc63e97e15f56af43d84
-      size: 26660
+      md5: 5ad79e7bd78fedbfb8aca6f6dd2bbae3
+      size: 29340
     - path: reports/e8_echosat_benchmark_2022.md
       hash: md5
-      md5: 01aa0ee52d78d22007d72719f38a8010
-      size: 8089
+      md5: 792e3e9ead5cc0ef3c7dd56d19bcbd07
+      size: 9763
