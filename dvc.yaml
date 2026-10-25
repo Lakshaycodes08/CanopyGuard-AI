@@ -37,4 +37,157 @@ stages:
     outs:
       - data/processed/labels_2013-2022_wire_flags.npz
       - data/processed/wire_flags_summary.json
-
+  sonoma_veg_2013:
+    cmd: python scripts/join_sonoma_veg.py
+    deps:
+    - configs/forecasting.yaml
+    - configs/study_area.yaml
+    - data/processed/labels_2013-2022_unique.npz
+    - scripts/join_sonoma_veg.py
+    - src/canopyguard/config.py
+    - src/canopyguard/data/sonoma_veg.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    outs:
+    - data/interim/veg_type_2013.parquet:
+        cache: false
+    - data/interim/veg_type_2013.parquet.provenance.json:
+        cache: false
+    - data/interim/veg_type_2013.provenance.json:
+        cache: false
+    - data/raw/sonoma_veg_2013.geojson:
+        cache: false
+        persist: true
+    - data/raw/sonoma_veg_2013.geojson.provenance.json:
+        cache: false
+  clean_growth_2013_2022:
+    cmd: python scripts/build_clean_cells.py
+    deps:
+    - configs/forecasting.yaml
+    - configs/study_area.yaml
+    - data/interim/veg_type_2013.parquet
+    - data/processed/labels_2013-2022_unique.npz
+    - scripts/build_clean_cells.py
+    - src/canopyguard/config.py
+    - src/canopyguard/data/fire_perimeters.py
+    - src/canopyguard/data/hansen.py
+    - src/canopyguard/evaluation/clean_cells.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    - src/canopyguard/utils.py
+    outs:
+    - data/interim/cec/cec_lines_study_box.geojson:
+        cache: false
+        persist: true
+    - data/interim/cec/cec_lines_study_box.geojson.provenance.json:
+        cache: false
+    - data/interim/clean_cells_2013_2022.parquet:
+        cache: false
+    - data/interim/clean_cells_2013_2022.parquet.provenance.json:
+        cache: false
+    - data/interim/clean_cells_2013_2022.provenance.json:
+        cache: false
+    - data/raw/frap_fire_perimeters_2014-2022_2026-10-14.geojson:
+        cache: false
+        persist: true
+    - data/raw/frap_fire_perimeters_2014-2022_2026-10-14.geojson.provenance.json:
+        cache: false
+    - data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif:
+        cache: false
+        persist: true
+    - data/raw/hansen_gfc2024_lossyear_40N_130W_2026-10-14.tif.provenance.json:
+        cache: false
+    - data/raw/mtbs_fire_perimeters_2014-2022_2026-10-14.geojson:
+        cache: false
+        persist: true
+    - data/raw/mtbs_fire_perimeters_2014-2022_2026-10-14.geojson.provenance.json:
+        cache: false
+  growth_curve_gate_2013_2022:
+    cmd: python scripts/run_growth_curve_check.py
+    deps:
+    - configs/forecasting.yaml
+    - data/interim/change_2013-2022.json
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/clean_cells_2013_2022.provenance.json
+    - data/interim/veg_type_2013.parquet
+    - data/processed/labels_2013-2022_unique.npz
+    - data/processed/labels_2013-2022_wire_flags.npz
+    - scripts/run_growth_curve_check.py
+    - src/canopyguard/config.py
+    - src/canopyguard/data/fire_perimeters.py
+    - src/canopyguard/evaluation/blocks.py
+    - src/canopyguard/evaluation/growth_gate.py
+    - src/canopyguard/evaluation/growth_outputs.py
+    - src/canopyguard/evaluation/growth_screen.py
+    - src/canopyguard/forecasting/growth_curve.py
+    - src/canopyguard/forecasting/growth_plot.py
+    - src/canopyguard/forecasting/growth_prior.py
+    - src/canopyguard/forecasting/growth_report.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    - src/canopyguard/utils.py
+    outs:
+    - data/interim/growth_curve_oof_2013-2022.parquet:
+        cache: false
+    - data/interim/growth_curve_oof_2013-2022.parquet.provenance.json:
+        cache: false
+  terrain_dem_2012:
+    cmd: python scripts/fetch_terrain_dem.py
+    deps:
+    - configs/forecasting.yaml
+    - configs/study_area.yaml
+    - scripts/fetch_terrain_dem.py
+    - src/canopyguard/config.py
+    - src/canopyguard/data/terrain_dem.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    outs:
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif:
+        cache: false
+        persist: true
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json:
+        cache: false
+        persist: true
+  terrain_features_10m:
+    cmd: python scripts/build_terrain.py
+    deps:
+    - configs/forecasting.yaml
+    - configs/lidar.yaml
+    - configs/study_area.yaml
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/clean_cells_2013_2022.parquet.provenance.json
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif
+    - data/raw/usgs_3dep_13_n39w123_20120801.tif.provenance.json
+    - scripts/build_terrain.py
+    - src/canopyguard/config.py
+    - src/canopyguard/features/terrain.py
+    - src/canopyguard/io.py
+    - src/canopyguard/provenance.py
+    outs:
+    - data/interim/terrain_10m.parquet:
+        cache: false
+    - data/interim/terrain_10m.parquet.provenance.json:
+        cache: false
+  stage2_residual_gate_2013_2022:
+    cmd: python scripts/run_stage2_residual_check.py
+    deps:
+    - configs/forecasting.yaml
+    - reports/stage2_gate_prereg.md
+    - data/interim/clean_cells_2013_2022.parquet
+    - data/interim/terrain_10m.parquet
+    - data/processed/labels_2013-2022_unique.npz
+    - data/processed/labels_2013-2022_wire_flags.npz
+    - scripts/run_stage2_residual_check.py
+    - src/canopyguard/evaluation/stage2_gate.py
+    - src/canopyguard/forecasting/stage2_residual.py
+    - src/canopyguard/forecasting/stage2_report.py
+    - src/canopyguard/evaluation/blocks.py
+    - src/canopyguard/evaluation/growth_gate.py
+    - src/canopyguard/evaluation/growth_screen.py
+    - src/canopyguard/forecasting/growth_prior.py
+    - src/canopyguard/forecasting/growth_curve.py
+    outs:
+    - data/interim/stage2_residual_oof_2013-2022.parquet:
+        cache: false
+    - data/interim/stage2_residual_oof_2013-2022.parquet.provenance.json:
+        cache: false

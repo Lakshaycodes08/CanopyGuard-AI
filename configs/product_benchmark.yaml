@@ -1,0 +1,38 @@
+# E8 is a retrospective product benchmark, never a 2013 forecast predictor.
+echosat_alignment:
+  source_crs: EPSG:32610
+  target_crs: EPSG:6339
+  resolution_m: 10
+  resampling: bilinear
+  # Inverse of EPSG:9774, NAD83(2011) to WGS 84 (1).
+  # EPSG gives 2 m operation accuracy, not a measured 2 m pixel shift.
+  operation_epsg: 9774
+  operation_accuracy_m: 2.0
+  operation_proj: >-
+    +proj=pipeline +step +inv +proj=utm +zone=10 +ellps=WGS84
+    +step +proj=utm +zone=10 +ellps=GRS80
+  # Report all nine offsets as a positional uncertainty sensitivity.
+  # Do not select the best offset using LiDAR truth.
+  offset_sensitivity_m: [-2.0, 0.0, 2.0]
+
+echosat_benchmark:
+  year: 2022
+  reference: airborne_lidar_p95_end
+  secondary_reference: airborne_lidar_max_end
+  secondary_reference_scope: zero_offset_10m_common_valid_cells
+  primary_population: valid_2022_lidar_p95_after_overlap_and_wire_exclusions
+  # E8-only sensitivities; these do not change the G3/stage-two 10 m unit.
+  aggregation_scales_m: [30, 100]
+  aggregation_scope: zero_offset_paired_valid_10m_cells
+  aggregation_anchor: southwest_outer_edge_of_full_10m_label_grid
+  aggregation_min_valid_fraction: 0.5
+  height_strata_reference: airborne_lidar_p95_end
+  height_strata_scope: zero_offset_10m_primary_population
+  height_strata_edges_m: [0, 2, 5, 10, 20, 30]
+  block_size_m: 2000
+  bootstrap_draws: 2000
+  seed: 42
+  minimum_blocks: 2
+  metrics: [mae_m, median_signed_error_m, mean_signed_error_m, rmse_m]
+  report_path: reports/e8_echosat_benchmark_2022.md
+  metrics_path: reports/e8_echosat_benchmark_2022.json

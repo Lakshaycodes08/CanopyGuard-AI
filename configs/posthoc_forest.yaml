@@ -1,0 +1,3 @@
+# Analyses designed after G3 and stage-two results; never used for a gate.
+metrics_path: reports/g3_posthoc_forest_sensitivity.json
+report_path: reports/g3_posthoc_forest_sensitivity.md
