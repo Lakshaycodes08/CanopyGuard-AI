@@ -65,6 +65,9 @@ bootstrap:
   pairs:
     - [landsat, zero]
     - [landsat_terrain_eco, zero]
+    - [landsat_terrain_eco, eco_class_median]
+    - [landsat, eco_class_median]
+    - [eco_class_median, zero]
     - [landsat_site_eco, zero]
     - [landsat_terrain_eco, survey_height_x_eco_median]
     - [landsat_site_eco, survey_height_x_eco_median]
