@@ -4,6 +4,10 @@ Run: 2026-10-15. Owner: Rehaan. Coverage check only. It does not measure canopy
 change, and 2018 is not an admitted epoch (it has not passed the admission
 screen in `configs/lidar.yaml`).
 
+Owner decision (2026-10-25): exclude this 6.7 km2 out-of-area overlap from the
+CanopyGuard study and ECHOSAT change evaluation. The coverage measurement below
+remains a record of why this candidate pair was assessed.
+
 ## Answer
 
 - One number: **6.7 km2 of usable canopy** where both epochs hold returns. Usable
@@ -13,7 +17,7 @@ screen in `configs/lidar.yaml`).
 - Against the issue rule (under about 5 km2, drop the ECHOSAT change test), 6.7
   km2 does not trigger the drop. It is close to the line: 4.8 km2 if only trees
   of at least 5 m count. Without the fire exclusion the 2 m figure is 7.6 km2.
-  See Sensitivity. The call belongs to the project owner.
+  See Sensitivity. The owner excluded this out-of-area overlap on 2026-10-25.
 - **None of the shared ground is inside the study box.** The nearest shared patch
   is 42.9 km east of it, and no shared ground lies within 25 km. The shared
   ground is shorter and more open than the box (see Is it similar terrain).
